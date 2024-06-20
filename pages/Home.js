@@ -1,10 +1,20 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const todayQbox = require("../assets/todayQbox.png");
 const homebellImage = require("../assets/homebell.png");
 
 const Home = () => {
+  const navigation = useNavigation();
+
+  const handleDiaryPress = () => {
+    navigation.navigate("Diary");
+  };
+  const handleRecordPress = () => {
+    navigation.navigate("Record");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.todayQbox}>
@@ -17,18 +27,18 @@ const Home = () => {
         <Image source={todayQbox} style={styles.todayQboxImg} />
       </View>
       <View style={styles.secondboxContainer}>
-        <View style={styles.dirayBox}>
+        <TouchableOpacity style={styles.dirayBox} onPress={handleDiaryPress}>
           <Text style={styles.BoxText1}>육아일기</Text>
           <Text style={styles.BoxText2}>
             자녀를 위한 일기를 {"\n"} 작성해 주세요
           </Text>
-        </View>
-        <View style={styles.recordBox}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.recordBox} onPress={handleRecordPress}>
           <Text style={styles.BoxText1}>음성녹음</Text>
           <Text style={styles.BoxText2}>
             부모님의 목소리를 {"\n"} 녹음해 주세요
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
       <View style={styles.whyRecord}>
         <Image style={styles.whyRecordImg} source={homebellImage} />
