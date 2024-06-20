@@ -9,6 +9,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Record from "./pages/Record";
 import Diary from "./pages/Diary";
+import TodayQuestion from "./pages/TodayQuestion";
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,7 @@ export default function App() {
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Record" component={Record} />
               <Stack.Screen name="Diary" component={Diary} />
+              <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
             </Stack.Navigator>
           </View>
           <Footer />
