@@ -8,6 +8,10 @@ const homebellImage = require("../assets/homebell.png");
 const Home = () => {
   const navigation = useNavigation();
 
+  const handleTodayQuestion = () => {
+    navigation.navigate("TodayQuestion");
+  };
+
   const handleDiaryPress = () => {
     navigation.navigate("Diary");
   };
@@ -20,7 +24,10 @@ const Home = () => {
       <View style={styles.todayQbox}>
         <Text style={styles.todayQboxTitle}>매일 다른 오늘의 질문</Text>
         <Text style={styles.todayQboxSecondTitle}>머라고 ~~ !!</Text>
-        <TouchableOpacity style={styles.todayQboxBtn} onPress={() => {}}>
+        <TouchableOpacity
+          style={styles.todayQboxBtn}
+          onPress={handleTodayQuestion}
+        >
           <Text style={styles.todayQboxBtnText}>답변하러 가기</Text>
         </TouchableOpacity>
 
