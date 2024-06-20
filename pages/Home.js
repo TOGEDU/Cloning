@@ -1,7 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import homebellImage from "../assets/homebell.png";
-import todayQbox from "../assets/todayQbox.png";
+
+const todayQbox = require("../assets/todayQbox.png");
+const homebellImage = require("../assets/homebell.png");
+
 const Home = () => {
   return (
     <View style={styles.container}>

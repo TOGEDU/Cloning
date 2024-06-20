@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, Image } from "react-native";
+const logoImg = require("../assets/logo.png");
 
 const Header = () => {
   return (
     <View style={styles.header}>
-      <Image source={require("../assets/logo.png")} style={styles.logo} />
+      <Image source={logoImg} style={styles.logo} />
       <Text style={styles.logotext}>CLONING</Text>
     </View>
   );
