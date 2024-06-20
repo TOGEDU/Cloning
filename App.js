@@ -7,6 +7,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
+import Record from "./pages/Record";
+import Diary from "./pages/Diary";
 
 const Stack = createStackNavigator();
 
@@ -19,6 +21,8 @@ export default function App() {
           <View style={styles.content}>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Home" component={Home} />
+              <Stack.Screen name="Record" component={Record} />
+              <Stack.Screen name="Diary" component={Diary} />
             </Stack.Navigator>
           </View>
           <Footer />
