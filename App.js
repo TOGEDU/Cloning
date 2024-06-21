@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -16,11 +16,18 @@ import TodayQuestionList from "./pages/TodayQuestionList";
 const Stack = createStackNavigator();
 
 export default function App() {
+  const [currentRoute, setCurrentRoute] = useState("");
+
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer
+        onStateChange={(state) => {
+          const route = state.routes[state.index];
+          setCurrentRoute(route.name);
+        }}
+      >
         <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-          <Header />
+          <HeaderWrapper currentRoute={currentRoute} />
           <View style={styles.content}>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Home" component={Home} />
@@ -40,6 +47,18 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+const HeaderWrapper = ({ currentRoute }) => {
+  let backgroundColor = "#fff";
+  if (currentRoute === "TodayQuestion") {
+    backgroundColor = "#ABB0FE";
+  } else if (currentRoute === "DiaryList") {
+    backgroundColor = "#858AE8";
+  }
+
+  return <Header backgroundColor={backgroundColor} />;
+};
+
 
 const styles = StyleSheet.create({
   safeArea: {
