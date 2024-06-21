@@ -10,6 +10,8 @@ import Home from "./pages/Home";
 import Record from "./pages/Record";
 import Diary from "./pages/Diary";
 import TodayQuestion from "./pages/TodayQuestion";
+import DiaryList from "./pages/DiaryList";
+import TodayQuestionList from "./pages/TodayQuestionList";
 
 const Stack = createStackNavigator();
 
@@ -25,6 +27,11 @@ export default function App() {
               <Stack.Screen name="Record" component={Record} />
               <Stack.Screen name="Diary" component={Diary} />
               <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
+              <Stack.Screen
+                name="TodayQuestionList"
+                component={TodayQuestionList}
+              />
+              <Stack.Screen name="DiaryList" component={DiaryList} />
             </Stack.Navigator>
           </View>
           <Footer />
