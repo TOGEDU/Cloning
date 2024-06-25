@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, Image } from "react-native";
 const logoImg = require("../assets/logo.png");
 
-const Header = () => {
+const Header = ({backgroundColor}) => {
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor }]}>
       <Image source={logoImg} style={styles.logo} />
       <Text style={styles.logotext}>CLONING</Text>
     </View>
@@ -11,6 +11,10 @@ const Header = () => {
 };
 
 export default Header;
+
+
+
+
 
 const styles = StyleSheet.create({
   header: {
