@@ -5,10 +5,9 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 const RecordingScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { item } = route.params;
+  const { item, onRecordComplete } = route.params;
 
   const handleComplete = () => {
-    const onRecordComplete = route.params?.onRecordComplete;
     if (onRecordComplete) {
       onRecordComplete(item);
       navigation.goBack();
@@ -52,8 +51,6 @@ export default RecordingScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //justifyContent: "center",
-    //alignItems: "center",
     backgroundColor: "white",
     paddingTop: 50,
   },

@@ -13,7 +13,7 @@ const Record = () => {
   const [progress, setProgress] = useState(45);
   const [pendingRecordings, setPendingRecordings] = useState([
     "제 말을 믿으셔도 됩니다.",
-    "나 지금 약간 배고픈 상태에 있는 중이야. ",
+    "나 지금 약간 배고픈 상태에 있는 중이야.",
     "나는 웃음을 멈출 수가 없었어.",
     "중국 음식을 먹고 싶은데, 넌 어때?",
     "저녁 메뉴 뭐 먹을지 고민",
@@ -26,13 +26,18 @@ const Record = () => {
     setCompletedRecordings([...completedRecordings, item]);
     setPendingRecordings(pendingRecordings.filter((record) => record !== item));
     setProgress((prevProgress) =>
-      Math.min(100, prevProgress + 100 / pendingRecordings.length)
+      Math.min(
+        100,
+        Math.floor(prevProgress + 100 / (pendingRecordings.length || 1))
+      )
     );
   };
 
   const handleRecordingPress = (item) => {
-    navigation.navigate("RecordingScreen", { item });
-    navigation.setParams({ onRecordComplete: handleRecordComplete });
+    navigation.navigate("RecordingScreen", {
+      item,
+      onRecordComplete: handleRecordComplete,
+    });
   };
 
   return (
@@ -87,9 +92,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    //paddingTop: 27,
-    //backgroundColor: "#F7F8FF",
-    //flex: 1,
     marginBottom: 75,
   },
   titleprogressContainer: {
@@ -127,16 +129,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Noto Sans",
   },
-
   recordingItem: {
     padding: 10,
     marginHorizontal: 20,
     marginBottom: 13,
     backgroundColor: "#FFF",
     borderRadius: 20,
-    shadowOffset: { width: 0, height: 2 }, // 그림자 위치 (수평, 수직)
-    shadowOpacity: 0.25, // 그림자 투명도
-    //shadowRadius: 4, // 그림자 반경
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
   },
   recordingText: {
     fontSize: 15,
