@@ -4,7 +4,7 @@ import { Text, View, StyleSheet } from "react-native";
 const Diary = () => {
   return (
     <View style={styles.container}>
-      <Text>여긴 육아일기 페이지</Text>
+      <Text>여기서 일기 작성 페이지로 바로 넘어가야함</Text>
     </View>
   );
 };
