@@ -8,6 +8,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Record from "./pages/Record";
+import RecordingScreen from "./pages/RecordingScreen";
 import Diary from "./pages/Diary";
 import TodayQuestion from "./pages/TodayQuestion";
 import DiaryList from "./pages/DiaryList";
@@ -39,6 +40,10 @@ export default function App() {
                 component={TodayQuestionList}
               />
               <Stack.Screen name="DiaryList" component={DiaryList} />
+              <Stack.Screen
+                name="RecordingScreen"
+                component={RecordingScreen}
+              />
             </Stack.Navigator>
           </View>
           <Footer />
