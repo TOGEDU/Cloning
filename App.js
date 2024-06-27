@@ -54,7 +54,7 @@ const HeaderWrapper = ({ currentRoute }) => {
     backgroundColor = "#ABB0FE";
   } else if (currentRoute === "DiaryList") {
     backgroundColor = "#858AE8";
-  }
+  } 
 
   return <Header backgroundColor={backgroundColor} />;
 };
