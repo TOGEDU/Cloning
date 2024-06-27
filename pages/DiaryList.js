@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { useNavigation } from "@react-navigation/native";
 
 const diaryImg = require("../assets/diaryListImg.png");
 
 const DiaryList = () => {
   const [selectedDate, setSelectedDate] = useState("");
+  const navigation = useNavigation();
 
   const getMarkedDates = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -46,7 +48,7 @@ const DiaryList = () => {
           }}
           onDayPress={(day) => {
             setSelectedDate(day.dateString);
-            console.log(day);
+            navigation.navigate("Diary", { date: day.dateString });
           }}
           hideExtraDays={true}
           monthFormat={"M월"}

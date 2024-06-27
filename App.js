@@ -9,9 +9,9 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Record from "./pages/Record";
 import RecordingScreen from "./pages/RecordingScreen";
-import Diary from "./pages/Diary";
 import TodayQuestion from "./pages/TodayQuestion";
 import DiaryList from "./pages/DiaryList";
+import Diary from "./pages/Diary";
 import TodayQuestionList from "./pages/TodayQuestionList";
 
 const Stack = createStackNavigator();
@@ -33,13 +33,14 @@ export default function App() {
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Record" component={Record} />
-              <Stack.Screen name="Diary" component={Diary} />
               <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
               <Stack.Screen
                 name="TodayQuestionList"
                 component={TodayQuestionList}
               />
               <Stack.Screen name="DiaryList" component={DiaryList} />
+              <Stack.Screen name="Diary" component={Diary} />
+
               <Stack.Screen
                 name="RecordingScreen"
                 component={RecordingScreen}
