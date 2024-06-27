@@ -54,11 +54,12 @@ const HeaderWrapper = ({ currentRoute }) => {
     backgroundColor = "#ABB0FE";
   } else if (currentRoute === "DiaryList") {
     backgroundColor = "#858AE8";
-  } 
+  } else if (currentRoute === "Record") {
+    backgroundColor = "#F7F8FF";
+  }
 
   return <Header backgroundColor={backgroundColor} />;
 };
-
 
 const styles = StyleSheet.create({
   safeArea: {
