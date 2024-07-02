@@ -35,15 +35,12 @@ const Login = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>로그인</Text>
       </TouchableOpacity>
-      <Text style={styles.signupText}>
-        아직 계정이 없다면?{" "}
-        <Text
-          style={styles.signupLink}
-          onPress={() => navigation.navigate("SignupStart")}
-        >
-          회원가입
-        </Text>
-      </Text>
+      <View style={styles.signupTextContainer}>
+        <Text style={styles.signupText}>아직 계정이 없다면? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate("SignupStart")}>
+          <Text style={styles.signupLink}>회원가입</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -86,14 +83,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
   },
+  signupTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+  },
   signupText: {
     color: "#888",
     fontSize: 11,
+    fontWeight: "500",
+    marginRight: 4,
   },
   signupLink: {
     color: "#858AE8",
     textDecorationLine: "none",
     fontSize: 16,
+    fontWeight: "500",
   },
 });
 
