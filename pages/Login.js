@@ -36,7 +36,13 @@ const Login = ({ navigation }) => {
         <Text style={styles.buttonText}>로그인</Text>
       </TouchableOpacity>
       <Text style={styles.signupText}>
-        아직 계정이 없다면? <Text style={styles.signupLink}>회원가입</Text>
+        아직 계정이 없다면?{" "}
+        <Text
+          style={styles.signupLink}
+          onPress={() => navigation.navigate("SignupStart")}
+        >
+          회원가입
+        </Text>
       </Text>
     </View>
   );
