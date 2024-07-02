@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -29,7 +35,9 @@ const Login = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>로그인</Text>
       </TouchableOpacity>
-      <Text style={styles.signupText}>아직 계정이 없다면? <Text style={styles.signupLink}>회원가입</Text></Text>
+      <Text style={styles.signupText}>
+        아직 계정이 없다면? <Text style={styles.signupLink}>회원가입</Text>
+      </Text>
     </View>
   );
 };
@@ -42,39 +50,44 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   logo: {
-    fontSize: 36,
+    fontSize: 44,
     fontWeight: "bold",
     color: "#858AE8",
-    marginBottom: 40,
+    marginBottom: 80,
   },
   input: {
     width: "80%",
     height: 50,
-    borderColor: "#ddd",
+    backgroundColor: "#F6F6F6",
+    borderColor: "#E8E8E8",
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 20,
     paddingHorizontal: 10,
   },
   button: {
-    width: "80%",
+    width: "60%",
     height: 50,
     backgroundColor: "#858AE8",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 5,
+    borderRadius: 100,
     marginBottom: 20,
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
     fontSize: 18,
+    fontWeight: "600",
   },
   signupText: {
     color: "#888",
+    fontSize: 11,
   },
   signupLink: {
     color: "#858AE8",
-    textDecorationLine: "underline",
+    textDecorationLine: "none",
+    fontSize: 16,
   },
 });
 
