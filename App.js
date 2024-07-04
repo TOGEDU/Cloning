@@ -21,6 +21,7 @@ import ParentSearchCode from "./pages/Signup/Parent/ParentSearchCode";
 import ParentIdPw from "./pages/Signup/Parent/ParentIdPw";
 import ParentPush from "./pages/Signup/Parent/ParentPush";
 import ParentChildInfo from "./pages/Signup/Parent/ParentChildInfo";
+import SignupFinish from "./pages/Signup/SignupFinish";
 
 const Stack = createStackNavigator();
 
@@ -45,7 +46,8 @@ export default function App() {
         <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
           {currentRoute !== "Splash" &&
             currentRoute !== "Login" &&
-            currentRoute !== "SignupStart" && (
+            currentRoute !== "SignupStart" &&
+            currentRoute !== "SignupFinish" && (
               <HeaderWrapper currentRoute={currentRoute} />
             )}
           <View style={styles.content}>
@@ -67,6 +69,7 @@ export default function App() {
                 name="ParentChildInfo"
                 component={ParentChildInfo}
               />
+              <Stack.Screen name="SignupFinish" component={SignupFinish} />
 
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Record" component={Record} />
@@ -89,7 +92,9 @@ export default function App() {
             currentRoute !== "ParentSignup" &&
             currentRoute !== "ParentSearchCode" &&
             currentRoute !== "ParentIdPw" &&
-            currentRoute !== "ParentPush" && <Footer />}
+            currentRoute !== "ParentPush" &&
+            currentRoute !== "ParentChildInfo" &&
+            currentRoute !== "SignupFinish" && <Footer />}
         </SafeAreaView>
       </NavigationContainer>
     </SafeAreaProvider>
@@ -98,16 +103,17 @@ export default function App() {
 
 const HeaderWrapper = ({ currentRoute }) => {
   let backgroundColor = "#fff";
-  if (currentRoute === "TodayQuestion") {
+  if (currentRoute === "TodayQuestion" || currentRoute === "SignupFinish") {
     backgroundColor = "#ABB0FE";
   } else if (currentRoute === "DiaryList") {
     backgroundColor = "#858AE8";
   } else if (
     currentRoute === "TodayQuestionList" ||
     currentRoute === "Record"
-  ) {
+  )
+  {
     backgroundColor = "#F7F8FF";
-  }
+  } 
 
   return <Header backgroundColor={backgroundColor} />;
 };
