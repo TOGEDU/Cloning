@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -13,14 +13,24 @@ import TodayQuestion from "./pages/TodayQuestion";
 import DiaryList from "./pages/DiaryList";
 import Diary from "./pages/Diary";
 import TodayQuestionList from "./pages/TodayQuestionList";
+import Splash from "./pages/Splash";
+import Login from "./pages/Login";
+import SignupStart from "./pages/Signup/SignupStart";
 
 const Stack = createStackNavigator();
 
 export default function App() {
-  const [currentRoute, setCurrentRoute] = useState("");
+  const [currentRoute, setCurrentRoute] = useState("Splash");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentRoute("Splash");
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <SafeAreaProvider>
+    
       <NavigationContainer
         onStateChange={(state) => {
           const route = state.routes[state.index];
@@ -28,9 +38,17 @@ export default function App() {
         }}
       >
         <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-          <HeaderWrapper currentRoute={currentRoute} />
+          {currentRoute !== "Splash" && currentRoute !== "Login" && currentRoute !== "SignupStart" && (
+            <HeaderWrapper currentRoute={currentRoute} />
+          )}
           <View style={styles.content}>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Navigator
+              screenOptions={{ headerShown: false }}
+              initialRouteName="Splash"
+            >
+              <Stack.Screen name="Splash" component={Splash} />
+              <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="SignupStart" component={SignupStart} />
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Record" component={Record} />
               <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
@@ -40,17 +58,16 @@ export default function App() {
               />
               <Stack.Screen name="DiaryList" component={DiaryList} />
               <Stack.Screen name="Diary" component={Diary} />
-
               <Stack.Screen
                 name="RecordingScreen"
                 component={RecordingScreen}
               />
             </Stack.Navigator>
           </View>
-          <Footer />
+          {currentRoute !== "Splash" && currentRoute !== "Login" && currentRoute !== "SignupStart" && <Footer />}
         </SafeAreaView>
       </NavigationContainer>
-    </SafeAreaProvider>
+    
   );
 }
 
@@ -60,9 +77,7 @@ const HeaderWrapper = ({ currentRoute }) => {
     backgroundColor = "#ABB0FE";
   } else if (currentRoute === "DiaryList") {
     backgroundColor = "#858AE8";
-  } else if (currentRoute === "TodayQuestionList") {
-    backgroundColor = "#F7F8FF";
-  } else if (currentRoute === "Record") {
+  } else if (currentRoute === "TodayQuestionList" || currentRoute === "Record") {
     backgroundColor = "#F7F8FF";
   }
 
