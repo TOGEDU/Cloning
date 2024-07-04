@@ -220,13 +220,12 @@ export default ParentSignup;
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
+    paddingTop: 70,
     alignItems: "center",
     backgroundColor: "#fff",
     flex: 1,
   },
   title: {
-    marginTop: 20,
     fontSize: 30,
     fontWeight: "bold",
   },
@@ -297,7 +296,7 @@ const styles = StyleSheet.create({
   nextBtnText: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
   },
   modalContainer: {
     flex: 1,

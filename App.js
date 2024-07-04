@@ -17,6 +17,10 @@ import Splash from "./pages/Splash";
 import Login from "./pages/Login";
 import SignupStart from "./pages/Signup/SignupStart";
 import ParentSignup from "./pages/Signup/Parent/ParentSignup";
+import ParentSearchCode from "./pages/Signup/Parent/ParentSearchCode";
+import ParentIdPw from "./pages/Signup/Parent/ParentIdPw";
+import ParentPush from "./pages/Signup/Parent/ParentPush";
+import ParentChildInfo from "./pages/Signup/Parent/ParentChildInfo";
 
 const Stack = createStackNavigator();
 
@@ -53,6 +57,17 @@ export default function App() {
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="SignupStart" component={SignupStart} />
               <Stack.Screen name="ParentSignup" component={ParentSignup} />
+              <Stack.Screen
+                name="ParentSearchCode"
+                component={ParentSearchCode}
+              />
+              <Stack.Screen name="ParentIdPw" component={ParentIdPw} />
+              <Stack.Screen name="ParentPush" component={ParentPush} />
+              <Stack.Screen
+                name="ParentChildInfo"
+                component={ParentChildInfo}
+              />
+
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Record" component={Record} />
               <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
@@ -71,7 +86,8 @@ export default function App() {
           {currentRoute !== "Splash" &&
             currentRoute !== "Login" &&
             currentRoute !== "SignupStart" &&
-            currentRoute !== "ParentSignup" && <Footer />}
+            currentRoute !== "ParentSignup" &&
+            currentRoute !== "ParentSearchCode" && <Footer />}
         </SafeAreaView>
       </NavigationContainer>
     </SafeAreaProvider>

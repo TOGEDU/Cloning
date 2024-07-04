@@ -5,8 +5,9 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
-import { GlobalStyles } from "../../../constants/styles";
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
@@ -30,7 +31,7 @@ const ParentSearchCode = () => {
   };
 
   return (
-    <View style={styles.outerContainer}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <Text style={styles.title}>코드를 입력해 주세요.</Text>
         <Text style={styles.subtitle}>
@@ -44,29 +45,6 @@ const ParentSearchCode = () => {
           <View style={styles.line}></View>
         </View>
         <View style={styles.inputContainer}>
-          <Svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="30"
-            height="30"
-            viewBox="0 0 30 30"
-            fill="none"
-            style={styles.inputIconLeft}
-          >
-            <Path
-              d="M25 26.25V23.75C25 22.4239 24.4732 21.1521 23.5355 20.2145C22.5978 19.2768 21.3261 18.75 20 18.75H10C8.67392 18.75 7.40215 19.2768 6.46447 20.2145C5.52678 21.1521 5 22.4239 5 23.75V26.25"
-              stroke="black"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Path
-              d="M15 13.75C17.7614 13.75 20 11.5114 20 8.75C20 5.98858 17.7614 3.75 15 3.75C12.2386 3.75 10 5.98858 10 8.75C10 11.5114 12.2386 13.75 15 13.75Z"
-              stroke="black"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
           <TextInput
             style={styles.input}
             placeholder="고유 코드"
@@ -137,24 +115,20 @@ const ParentSearchCode = () => {
           <Text style={styles.nextBtnText}>다음</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
+export default ParentSearchCode;
+
 const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-    backgroundColor: GlobalStyles.colors.primary100,
-  },
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
+    paddingTop: 70,
     alignItems: "center",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: "#fff",
+    flex: 1,
   },
   title: {
-    marginTop: 70,
     fontSize: 30,
     marginLeft: 33,
     fontWeight: "bold",
@@ -173,48 +147,45 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   lineColor: {
-    width: 68,
+    width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: GlobalStyles.colors.primary100,
+    backgroundColor: "#6369D4",
   },
   line: {
-    width: 68,
+    width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: GlobalStyles.colors.primary300,
+    backgroundColor: "#DADBF5",
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 44,
-    backgroundColor: "#E3E3E3",
+    backgroundColor: "#F6F6F6",
     borderRadius: 15,
     width: 350,
     height: 54,
     position: "relative",
+    paddingHorizontal: 16,
   },
   input: {
     flex: 1,
-    height: "100%",
-    paddingLeft: 10,
-    paddingRight: 10,
     fontSize: 16,
     fontWeight: "bold",
   },
-  inputIconLeft: {
-    marginLeft: 10,
-  },
+
   inputIconRight: {
-    marginRight: 10,
+    opacity: 0.5,
   },
   backBtn: {
-    backgroundColor: GlobalStyles.colors.primary300,
-    width: 350,
-    height: 59,
-    borderRadius: 16,
+    backgroundColor: "#ABB0FE",
+    width: 245,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
@@ -223,23 +194,24 @@ const styles = StyleSheet.create({
   backBtnText: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
   },
   validContainer: {
     flexDirection: "row",
     position: "absolute",
     right: 30,
-    bottom: 415,
+    bottom: 386,
   },
   validText: {
     marginRight: 5,
     fontSize: 16,
   },
   nextBtn: {
-    backgroundColor: GlobalStyles.colors.primary200,
-    width: 350,
-    height: 59,
-    borderRadius: 16,
+    backgroundColor: "#6369D4",
+    width: 245,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
@@ -248,8 +220,6 @@ const styles = StyleSheet.create({
   nextBtnText: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
   },
 });
-
-export default ParentSearchCode;
