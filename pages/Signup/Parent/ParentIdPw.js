@@ -20,16 +20,19 @@ const ParentIdPw = () => {
   const [passwordConfirmError, setPasswordConfirmError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [emailCheckMessage, setEmailCheckMessage] = useState("");
 
   const navigation = useNavigation();
 
   const handleBack = () => {
     navigation.goBack();
   };
+
   const handleNext = () => {
     setEmailError("");
     setPasswordError("");
     setPasswordConfirmError("");
+    setEmailCheckMessage("");
 
     let valid = true;
 
@@ -59,6 +62,42 @@ const ParentIdPw = () => {
     }
   };
 
+  const handleEmailCheck = async () => {
+    setEmailCheckMessage("");
+    setEmailError("");
+
+    if (email === "") {
+      setEmailError("이메일을 입력해 주세요.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("올바른 이메일 형식이 아닙니다.");
+      return;
+    }
+
+    try {
+      // 이메일 중복 확인 API 요청 추가
+      const response = await fetch("https://api.example.com/check-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+
+      if (data.exists) {
+        setEmailError("이미 사용 중인 이메일입니다.");
+      } else {
+        setEmailCheckMessage("사용 가능한 이메일입니다.");
+      }
+    } catch (error) {
+      setEmailError("이메일 확인 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -85,8 +124,17 @@ const ParentIdPw = () => {
             value={email}
             onChangeText={setEmail}
           />
+          <TouchableOpacity
+            onPress={handleEmailCheck}
+            style={styles.emailCheckButton}
+          >
+            <Text style={styles.emailCheckButtonText}>중복 확인</Text>
+          </TouchableOpacity>
         </View>
         {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+        {emailCheckMessage ? (
+          <Text style={styles.successText}>{emailCheckMessage}</Text>
+        ) : null}
         <View
           style={[
             styles.inputContainer,
@@ -262,7 +310,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-
+  emailCheckButton: {
+    backgroundColor: "#ABB0FE",
+    borderRadius: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  emailCheckButtonText: {
+    fontSize: 14,
+    color: "#000",
+    fontWeight: "bold",
+    opacity: 0.5,
+  },
   inputIconRight: {
     opacity: 0.5,
   },
@@ -300,6 +359,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "red",
+    marginBottom: 25,
+    alignSelf: "flex-start",
+    marginLeft: 33,
+  },
+  successText: {
+    color: "green",
     marginBottom: 25,
     alignSelf: "flex-start",
     marginLeft: 33,
