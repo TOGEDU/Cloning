@@ -1,9 +1,19 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const happy = require("../../assets/happyparent.png");
 
-const SignupStart = ({ navigation }) => {
+const SignupStart = () => {
+  const navigation = useNavigation();
+
+  const navigateToParentSignup = () => {
+    navigation.navigate("ParentSignup");
+  };
+  const navigateToChildSignup = () => {
+    navigation.navigate("ChildSignup");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>환영합니다. 회원님</Text>
@@ -11,7 +21,7 @@ const SignupStart = ({ navigation }) => {
       <Image source={happy} style={styles.img} />
       <TouchableOpacity
         style={styles.signupOption}
-        onPress={() => navigation.navigate("SignupParent")}
+        onPress={navigateToParentSignup}
       >
         <Text style={styles.optionTitle}>부모로 가입하기</Text>
         <Text style={styles.optionDescription}>
@@ -21,7 +31,7 @@ const SignupStart = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.signupOption}
-        onPress={() => navigation.navigate("SignupChild")}
+        onPress={navigateToChildSignup}
       >
         <Text style={styles.optionTitle}>자식으로 가입하기</Text>
         <Text style={styles.optionDescription}>
@@ -39,6 +49,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#6B73FF",
     padding: 20,
+    
   },
   welcomeText: {
     fontSize: 32,
