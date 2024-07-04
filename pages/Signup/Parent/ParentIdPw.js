@@ -29,35 +29,7 @@ const ParentIdPw = () => {
   };
 
   const handleNext = () => {
-    setEmailError("");
-    setPasswordError("");
-    setPasswordConfirmError("");
-    setEmailCheckMessage("");
-
-    let valid = true;
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError("올바른 이메일 형식이 아닙니다.");
-      valid = false;
-    }
-
-    const passwordRegex =
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
-    if (password.length < 6) {
-      setPasswordError("비밀번호는 6자리 이상이어야 합니다.");
-      valid = false;
-    } else if (!passwordRegex.test(password)) {
-      setPasswordError("비밀번호는 영어, 특수문자, 숫자가 섞여 있어야 합니다.");
-      valid = false;
-    }
-
-    if (password !== passwordConfirm) {
-      setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
-      valid = false;
-    }
-
-    if (valid) {
+    if (validateAll()) {
       navigation.navigate("ParentChildInfo");
     }
   };
@@ -98,6 +70,46 @@ const ParentIdPw = () => {
     }
   };
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("올바른 이메일 형식이 아닙니다.");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+    if (password.length < 6) {
+      setPasswordError("비밀번호는 6자리 이상이어야 합니다.");
+      return false;
+    } else if (!passwordRegex.test(password)) {
+      setPasswordError("비밀번호는 영어, 특수문자, 숫자가 섞여 있어야 합니다.");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
+  const validatePasswordConfirm = (password, passwordConfirm) => {
+    if (password !== passwordConfirm) {
+      setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
+      return false;
+    }
+    setPasswordConfirmError("");
+    return true;
+  };
+
+  const validateAll = () => {
+    const emailValid = validateEmail(email);
+    const passwordValid = validatePassword(password);
+    const passwordConfirmValid = validatePasswordConfirm(password, passwordConfirm);
+
+    return emailValid && passwordValid && passwordConfirmValid;
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -122,7 +134,10 @@ const ParentIdPw = () => {
             style={styles.input}
             placeholder="이메일"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => {
+              setEmail(text);
+              validateEmail(text);
+            }}
           />
           <TouchableOpacity
             onPress={handleEmailCheck}
@@ -148,6 +163,7 @@ const ParentIdPw = () => {
             secureTextEntry={!showPassword}
             onChangeText={(text) => {
               setPassword(text);
+              validatePassword(text);
             }}
           />
 
@@ -192,7 +208,10 @@ const ParentIdPw = () => {
             style={styles.input}
             placeholder="비밀번호 확인"
             value={passwordConfirm}
-            onChangeText={(text) => setPasswordConfirm(text)}
+            onChangeText={(text) => {
+              setPasswordConfirm(text);
+              validatePasswordConfirm(password, text);
+            }}
             secureTextEntry={!showPasswordConfirm}
           />
 
