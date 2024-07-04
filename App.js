@@ -87,7 +87,8 @@ export default function App() {
             currentRoute !== "Login" &&
             currentRoute !== "SignupStart" &&
             currentRoute !== "ParentSignup" &&
-            currentRoute !== "ParentSearchCode" && <Footer />}
+            currentRoute !== "ParentSearchCode" &&
+            currentRoute !== "ParentIdPw" && <Footer />}
         </SafeAreaView>
       </NavigationContainer>
     </SafeAreaProvider>

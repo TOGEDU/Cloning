@@ -60,18 +60,18 @@ const ParentSignup = () => {
         <View style={styles.line}></View>
       </View>
       <TouchableOpacity onPress={handleCheck} style={styles.agree}>
-          <Svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
+        <Svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="25"
+          height="25"
+          viewBox="0 0 25 25"
+          fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
+        >
+          <Path
+            d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
             fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
-          >
-            <Path
-              d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
-            />
-          </Svg>
+          />
+        </Svg>
         <Text style={styles.agreeText}>
           약관 전체 동의하기 (선택 동의 포함)
         </Text>
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   lineContainer: {
-    marginTop: 47,
+    marginTop: 50,
     flexDirection: "row",
   },
   lineColor: {

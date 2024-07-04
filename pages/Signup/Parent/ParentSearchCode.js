@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     marginLeft: 33,
   },
   lineContainer: {
-    marginTop: 23,
+    marginTop: 50,
     flexDirection: "row",
   },
   lineColor: {
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     position: "absolute",
     right: 30,
-    bottom: 386,
+    bottom: 360,
   },
   validText: {
     marginRight: 5,

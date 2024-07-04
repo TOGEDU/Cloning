@@ -1,218 +1,193 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
 const ParentIdPw = () => {
-  const [isChecked, setIsChecked] = useState(false);
-  const [termsChecked, setTermsChecked] = useState({
-    serviceTerms: false,
-    privacyPolicy: false,
-    marketingConsent: false,
-    additionalTerms: false,
-  });
-  const [isVisible, setIsVisible] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-
-  const handleDetailPress = (title) => {
-    setModalTitle(title);
-    setIsVisible(true);
-  };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordConfirmError, setPasswordConfirmError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   const navigation = useNavigation();
 
-  const handleCheck = () => {
-    setIsChecked(!isChecked);
-    setTermsChecked({
-      serviceTerms: !isChecked,
-      privacyPolicy: !isChecked,
-      marketingConsent: !isChecked,
-      additionalTerms: !isChecked,
-    });
+  const handleBack = () => {
+    navigation.goBack();
   };
-
-  const handleTermsClick = (term) => {
-    setTermsChecked((prevTermsChecked) => ({
-      ...prevTermsChecked,
-      [term]: !prevTermsChecked[term],
-    }));
-  };
-  const allTermsAgreed = Object.values(termsChecked).every(Boolean);
-
   const handleNext = () => {
-    navigation.navigate("ParentSearchCode");
-  };
+    setEmailError("");
+    setPasswordError("");
+    setPasswordConfirmError("");
 
-  const handleCloseModal = () => {
-    setIsVisible(false);
+    let valid = true;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("올바른 이메일 형식이 아닙니다.");
+      valid = false;
+    }
+
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+    if (password.length < 6) {
+      setPasswordError("비밀번호는 6자리 이상이어야 합니다.");
+      valid = false;
+    } else if (!passwordRegex.test(password)) {
+      setPasswordError("비밀번호는 영어, 특수문자, 숫자가 섞여 있어야 합니다.");
+      valid = false;
+    }
+
+    if (password !== passwordConfirm) {
+      setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
+      valid = false;
+    }
+
+    if (valid) {
+      navigation.navigate("ParentChildInfo");
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        환영합니다!{"\n"}TOGEDU에 가입하시려면{"\n"}약관에 동의해 주세요.
-      </Text>
-      <View style={styles.lineContainer}>
-        <View style={styles.lineColor}></View>
-        <View style={styles.line}></View>
-        <View style={styles.line}></View>
-        <View style={styles.line}></View>
-        <View style={styles.line}></View>
-      </View>
-      <TouchableOpacity onPress={handleCheck} style={styles.agree}>
-          <Svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
-          >
-            <Path
-              d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
-            />
-          </Svg>
-        <Text style={styles.agreeText}>
-          약관 전체 동의하기 (선택 동의 포함)
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text style={styles.title}>OOO님 반갑습니다!</Text>
+        <Text style={styles.subtitle}>
+          TOGEDU에 로그인할 때 사용할 {"\n"}이메일과 비밀번호를 입력해 주세요.
         </Text>
-      </TouchableOpacity>
-      <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("privacyPolicy")}>
-          <Svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
-          >
-            <Path
-              d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
-            />
-          </Svg>
-        </TouchableOpacity>
-        <Text style={styles.text}>
-          [필수] CLONING 이용 약관
-          <TouchableOpacity
-            onPress={() => handleDetailPress("TOGEDU 이용 약관")}
-          >
-            <Text style={styles.detailText}>자세히</Text>
-          </TouchableOpacity>
-        </Text>
-      </View>
-      <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("marketingConsent")}>
-          <Svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill={termsChecked.marketingConsent ? "#6369D4" : "#7D7C7C"}
-          >
-            <Path
-              d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.marketingConsent ? "#6369D4" : "#7D7C7C"}
-            />
-          </Svg>
-        </TouchableOpacity>
-
-        <Text style={styles.text}>
-          [필수] 개인정보 수집 및 이용 동의
-          <TouchableOpacity
-            onPress={() => handleDetailPress("개인정보 수집 및 이용 동의")}
-          >
-            <Text style={styles.detailText}>자세히</Text>
-          </TouchableOpacity>
-        </Text>
-      </View>
-      <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("additionalTerms")}>
-          <Svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill={termsChecked.additionalTerms ? "#6369D4" : "#7D7C7C"}
-          >
-            <Path
-              d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.additionalTerms ? "#6369D4" : "#7D7C7C"}
-            />
-          </Svg>
-        </TouchableOpacity>
-        <Text style={styles.text}>[선택] 광고성 정보 수신 동의 </Text>
-      </View>
-      <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("serviceTerms")}>
-          <Svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill={termsChecked.serviceTerms ? "#6369D4" : "#7D7C7C"}
-          >
-            <Path
-              d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.serviceTerms ? "#6369D4" : "#7D7C7C"}
-            />
-          </Svg>
-        </TouchableOpacity>
-        <Text style={styles.text}>
-          [선택] 개인정보 수집 및 이용 동의
-          <TouchableOpacity
-            onPress={() => handleDetailPress("개인정보 수집 및 이용 동의")}
-          >
-            <Text style={styles.detailText}>자세히</Text>
-          </TouchableOpacity>
-        </Text>
-      </View>
-      <TouchableOpacity
-        onPress={() => {
-          if (allTermsAgreed) {
-            handleNext();
-          }
-        }}
-        style={[
-          styles.nextBtn,
-          !allTermsAgreed && { backgroundColor: "#E3E3E3" },
-        ]}
-        disabled={!allTermsAgreed}
-      >
-        <Text style={styles.nextBtnText}>다음</Text>
-      </TouchableOpacity>
-
-      <Modal
-        visible={isVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={handleCloseModal}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalTitle}>
-              <Text style={styles.modalTitleText}>{modalTitle}</Text>
-              <TouchableOpacity
-                onPress={handleCloseModal}
-                style={styles.modalIcon}
-              >
-                <Svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="17"
-                  height="17"
-                  viewBox="0 0 17 17"
-                  fill="none"
-                >
-                  <Path
-                    d="M16.6418 14.9244C16.8699 15.1524 16.998 15.4617 16.998 15.7841C16.998 16.1066 16.8699 16.4159 16.6418 16.6439C16.4138 16.8719 16.1045 17 15.782 17C15.4595 17 15.1503 16.8719 14.9222 16.6439L8.5 10.22L2.07575 16.6419C1.84772 16.8699 1.53843 16.998 1.21595 16.998C0.893457 16.998 0.584177 16.8699 0.356142 16.6419C0.128108 16.4138 3.39797e-09 16.1046 0 15.7821C-3.39797e-09 15.4596 0.128108 15.1504 0.356142 14.9224L6.78039 8.50051L0.358165 2.07664C0.130131 1.84862 0.00202311 1.53935 0.00202311 1.21688C0.00202312 0.894415 0.130131 0.585153 0.358165 0.357133C0.586199 0.129112 0.89548 0.00101131 1.21797 0.0010113C1.54046 0.0010113 1.84974 0.129112 2.07777 0.357133L8.5 6.781L14.9242 0.356121C15.1523 0.1281 15.4616 -5.37235e-09 15.7841 0C16.1065 5.37235e-09 16.4158 0.1281 16.6439 0.356121C16.8719 0.584141 17 0.893404 17 1.21587C17 1.53834 16.8719 1.84761 16.6439 2.07563L10.2196 8.50051L16.6418 14.9244Z"
-                    fill="#545454"
-                  />
-                </Svg>
-              </TouchableOpacity>
-            </View>
-          </View>
+        <View style={styles.lineContainer}>
+          <View style={styles.lineColor}></View>
+          <View style={styles.lineColor}></View>
+          <View style={styles.lineColor}></View>
+          <View style={styles.line}></View>
+          <View style={styles.line}></View>
         </View>
-      </Modal>
-    </View>
+        <View
+          style={[
+            styles.emailInputContainer,
+            emailError ? styles.inputError : null,
+          ]}
+        >
+          <TextInput
+            style={styles.input}
+            placeholder="이메일"
+            value={email}
+            onChangeText={setEmail}
+          />
+        </View>
+        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+        <View
+          style={[
+            styles.inputContainer,
+            passwordError ? styles.inputError : null,
+          ]}
+        >
+          <TextInput
+            style={styles.input}
+            placeholder="비밀번호"
+            value={password}
+            secureTextEntry={!showPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+            }}
+          />
+
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.inputIconRight}
+          >
+            <Svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <Path
+                d="M11.7666 11.7667C11.5377 12.0123 11.2617 12.2093 10.955 12.3459C10.6484 12.4826 10.3173 12.556 9.98166 12.562C9.64598 12.5679 9.31255 12.5061 9.00126 12.3804C8.68997 12.2547 8.40719 12.0675 8.16979 11.8301C7.93239 11.5927 7.74525 11.31 7.61951 10.9987C7.49377 10.6874 7.43202 10.3539 7.43795 10.0183C7.44387 9.68258 7.51734 9.35154 7.65398 9.04487C7.79062 8.73821 7.98763 8.46221 8.23325 8.23333M14.9499 14.95C13.5254 16.0358 11.7908 16.6374 9.99992 16.6667C4.16658 16.6667 0.833252 10 0.833252 10C1.86983 8.06825 3.30753 6.38051 5.04992 5.05L14.9499 14.95ZM8.24992 3.53333C8.82353 3.39907 9.4108 3.33195 9.99992 3.33333C15.8333 3.33333 19.1666 10 19.1666 10C18.6607 10.9463 18.0575 11.8373 17.3666 12.6583L8.24992 3.53333Z"
+                stroke="black"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Path
+                d="M0.833252 0.833313L19.1666 19.1666"
+                stroke="black"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </TouchableOpacity>
+        </View>
+        {passwordError ? (
+          <Text style={styles.errorText}>{passwordError}</Text>
+        ) : null}
+        <View
+          style={[
+            styles.inputContainer,
+            passwordConfirmError ? styles.inputError : null,
+          ]}
+        >
+          <TextInput
+            style={styles.input}
+            placeholder="비밀번호 확인"
+            value={passwordConfirm}
+            onChangeText={(text) => setPasswordConfirm(text)}
+            secureTextEntry={!showPasswordConfirm}
+          />
+
+          <TouchableOpacity
+            onPress={() => setShowPasswordConfirm(!showPasswordConfirm)}
+            style={styles.inputIconRight}
+          >
+            <Svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <Path
+                d="M11.7666 11.7667C11.5377 12.0123 11.2617 12.2093 10.955 12.3459C10.6484 12.4826 10.3173 12.556 9.98166 12.562C9.64598 12.5679 9.31255 12.5061 9.00126 12.3804C8.68997 12.2547 8.40719 12.0675 8.16979 11.8301C7.93239 11.5927 7.74525 11.31 7.61951 10.9987C7.49377 10.6874 7.43202 10.3539 7.43795 10.0183C7.44387 9.68258 7.51734 9.35154 7.65398 9.04487C7.79062 8.73821 7.98763 8.46221 8.23325 8.23333M14.9499 14.95C13.5254 16.0358 11.7908 16.6374 9.99992 16.6667C4.16658 16.6667 0.833252 10 0.833252 10C1.86983 8.06825 3.30753 6.38051 5.04992 5.05L14.9499 14.95ZM8.24992 3.53333C8.82353 3.39907 9.4108 3.33195 9.99992 3.33333C15.8333 3.33333 19.1666 10 19.1666 10C18.6607 10.9463 18.0575 11.8373 17.3666 12.6583L8.24992 3.53333Z"
+                stroke="black"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Path
+                d="M0.833252 0.833313L19.1666 19.1666"
+                stroke="black"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </TouchableOpacity>
+        </View>
+        {passwordConfirmError ? (
+          <Text style={styles.errorText}>{passwordConfirmError}</Text>
+        ) : null}
+
+        <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
+          <Text style={styles.backBtnText}>이전</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleNext} style={styles.nextBtn}>
+          <Text style={styles.nextBtnText}>다음</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -220,19 +195,29 @@ export default ParentIdPw;
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
+    paddingTop: 70,
     alignItems: "center",
     backgroundColor: "#fff",
     flex: 1,
   },
   title: {
-    marginTop: 20,
     fontSize: 30,
+    marginLeft: 33,
     fontWeight: "bold",
+    alignSelf: "flex-start",
+  },
+  subtitle: {
+    fontSize: 20,
+    marginTop: 23,
+    textAlign: "center",
+    alignSelf: "flex-start",
+    textAlign: "left",
+    marginLeft: 33,
   },
   lineContainer: {
-    marginTop: 47,
+    marginTop: 50,
     flexDirection: "row",
+    marginBottom: 50,
   },
   lineColor: {
     width: 55,
@@ -242,46 +227,60 @@ const styles = StyleSheet.create({
     backgroundColor: "#6369D4",
   },
   line: {
-    width: 68,
+    width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
     backgroundColor: "#DADBF5",
   },
-  agree: {
+  emailInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 42,
-    marginBottom: 28,
+    backgroundColor: "#F6F6F6",
+    borderRadius: 15,
+    width: 350,
+    height: 54,
+    marginBottom: 13,
+    paddingHorizontal: 16,
   },
-  radioButton: {
-    width: 35,
-    height: 35,
-    borderRadius: 35 / 2,
-    borderWidth: 2,
-    borderColor: "#6369D4",
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F6F6F6",
+    borderRadius: 15,
+    width: 350,
+    height: 54,
+    marginBottom: 13,
+    paddingHorizontal: 16,
+  },
+
+  input: {
+    flex: 1,
+    height: "100%",
+    paddingLeft: 10,
+    paddingRight: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  inputIconRight: {
+    opacity: 0.5,
+  },
+  backBtn: {
+    backgroundColor: "#ABB0FE",
+    width: 245,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
+    position: "absolute",
+    bottom: 109,
   },
-  agreeText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 9,
-  },
-  textContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    marginBottom: 16,
-    marginLeft: 40,
-  },
-  text: {
+  backBtnText: {
     fontSize: 15,
-    marginLeft: 11,
-  },
-  detailText: {
-    textDecorationLine: "underline",
-    marginLeft: 5,
+    fontWeight: "bold",
+    color: "#fff",
   },
   nextBtn: {
     backgroundColor: "#6369D4",
@@ -297,37 +296,16 @@ const styles = StyleSheet.create({
   nextBtnText: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  errorText: {
+    color: "red",
+    marginBottom: 25,
+    alignSelf: "flex-start",
+    marginLeft: 33,
   },
-  modalContent: {
-    width: 350,
-    height: 600,
-    backgroundColor: "#fff",
-    alignItems: "center",
-  },
-  modalTitle: {
-    width: 350,
-    height: 80,
-    backgroundColor: "#6369D4",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  modalTitleText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  modalIcon: {
-    position: "absolute",
-    right: 24,
+  inputError: {
+    borderColor: "red",
+    borderWidth: 2,
   },
 });
