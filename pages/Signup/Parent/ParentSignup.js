@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#6369D4",
   },
   line: {
-    width: 68,
+    width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,

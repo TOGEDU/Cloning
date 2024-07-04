@@ -30,7 +30,7 @@ const ParentIdPw = () => {
 
   const handleNext = () => {
     if (validateAll()) {
-      navigation.navigate("ParentChildInfo");
+      navigation.navigate("ParentPush");
     }
   };
 
