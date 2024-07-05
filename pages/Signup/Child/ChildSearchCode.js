@@ -144,6 +144,8 @@ const styles = StyleSheet.create({
   lineContainer: {
     marginTop: 50,
     flexDirection: "row",
+    marginBottom: 50,
+
   },
   lineColor: {
     width: 68,
@@ -162,7 +164,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 44,
     backgroundColor: "#F6F6F6",
     borderRadius: 15,
     width: 350,

@@ -107,6 +107,8 @@ const styles = StyleSheet.create({
   lineContainer: {
     marginTop: 85,
     flexDirection: "row",
+    marginBottom: 50,
+
   },
   lineColor: {
     width: 68,
@@ -129,7 +131,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     width: 350,
     height: 54,
-    marginTop: 44,
     marginBottom: 13,
     paddingHorizontal: 16,
   },

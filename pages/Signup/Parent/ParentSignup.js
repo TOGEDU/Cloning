@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
   lineContainer: {
     marginTop: 50,
     flexDirection: "row",
+    marginBottom: 50,
   },
   lineColor: {
     width: 55,
@@ -250,7 +251,6 @@ const styles = StyleSheet.create({
   agree: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 42,
     marginBottom: 28,
   },
   radioButton: {

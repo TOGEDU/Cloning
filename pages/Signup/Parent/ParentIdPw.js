@@ -251,7 +251,7 @@ const ParentIdPw = () => {
           <Text style={styles.backBtnText}>이전</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleNext} style={styles.nextBtn}>
-          <Text style={styles.nextBtnText}>다음</Text>
+          <Text style={styles.nextBtnText}>완료</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
