@@ -125,8 +125,7 @@ const ChildIdPw = () => {
           <View style={styles.lineColor}></View>
           <View style={styles.lineColor}></View>
           <View style={styles.lineColor}></View>
-          <View style={styles.line}></View>
-          <View style={styles.line}></View>
+          <View style={styles.lineColor}></View>
         </View>
         <View
           style={[
@@ -288,17 +287,16 @@ const styles = StyleSheet.create({
   lineContainer: {
     marginTop: 50,
     flexDirection: "row",
-    marginBottom: 50,
   },
   lineColor: {
-    width: 55,
+    width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
     backgroundColor: "#6369D4",
   },
   line: {
-    width: 55,
+    width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
@@ -311,6 +309,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     width: 350,
     height: 54,
+    marginTop: 44,
     marginBottom: 13,
     paddingHorizontal: 16,
   },

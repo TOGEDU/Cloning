@@ -25,8 +25,6 @@ const ChildInfo = () => {
     navigation.navigate("ChildIdPw");
   };
 
-
-
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -78,7 +76,6 @@ const ChildInfo = () => {
             </Svg>
           </TouchableOpacity>
         </View>
-        
 
         <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
           <Text style={styles.backBtnText}>이전</Text>
@@ -108,9 +105,8 @@ const styles = StyleSheet.create({
   },
 
   lineContainer: {
-    marginTop: 50,
+    marginTop: 85,
     flexDirection: "row",
-    marginBottom: 50,
   },
   lineColor: {
     width: 68,
@@ -133,7 +129,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     width: 350,
     height: 54,
-    marginBottom: 40,
+    marginTop: 44,
+    marginBottom: 13,
     paddingHorizontal: 16,
   },
   inputContainer: {
