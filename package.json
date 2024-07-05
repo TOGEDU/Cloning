@@ -11,6 +11,7 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-native-fontawesome": "^0.3.2",
+    "@react-native-community/datetimepicker": "^8.1.1",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/stack": "^6.3.29",
@@ -20,6 +21,7 @@
     "react-native": "0.74.2",
     "react-native-calendars": "^1.1305.0",
     "react-native-circular-progress": "^1.4.0",
+    "react-native-datepicker": "^1.7.2",
     "react-native-elements": "^3.4.3",
     "react-native-image-picker": "^7.1.2",
     "react-native-modal-dropdown": "^1.0.2",

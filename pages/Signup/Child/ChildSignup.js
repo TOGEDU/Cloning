@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
-const ParentSignup = () => {
+const ChildSignup = () => {
   const [isChecked, setIsChecked] = useState(false);
   const [termsChecked, setTermsChecked] = useState({
     serviceTerms: false,
@@ -40,7 +40,7 @@ const ParentSignup = () => {
   const allTermsAgreed = Object.values(termsChecked).every(Boolean);
 
   const handleNext = () => {
-    navigation.navigate("ParentSearchCode");
+    navigation.navigate("ChildSearchCode");
   };
 
   const handleCloseModal = () => {
@@ -54,7 +54,6 @@ const ParentSignup = () => {
       </Text>
       <View style={styles.lineContainer}>
         <View style={styles.lineColor}></View>
-        <View style={styles.line}></View>
         <View style={styles.line}></View>
         <View style={styles.line}></View>
         <View style={styles.line}></View>
@@ -216,7 +215,7 @@ const ParentSignup = () => {
   );
 };
 
-export default ParentSignup;
+export default ChildSignup;
 
 const styles = StyleSheet.create({
   container: {
@@ -233,16 +232,18 @@ const styles = StyleSheet.create({
     marginTop: 50,
     flexDirection: "row",
     marginBottom: 50,
+
+
   },
   lineColor: {
-    width: 55,
+    width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
     backgroundColor: "#6369D4",
   },
   line: {
-    width: 55,
+    width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,

@@ -11,7 +11,7 @@ import {
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
-const ParentIdPw = () => {
+const ChildIdPw = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -30,7 +30,7 @@ const ParentIdPw = () => {
 
   const handleNext = () => {
     if (validateAll()) {
-      navigation.navigate("ParentPush");
+      navigation.navigate("SignupFinish");
     }
   };
 
@@ -81,7 +81,8 @@ const ParentIdPw = () => {
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
     if (password.length < 6) {
       setPasswordError("비밀번호는 6자리 이상이어야 합니다.");
       return false;
@@ -105,7 +106,10 @@ const ParentIdPw = () => {
   const validateAll = () => {
     const emailValid = validateEmail(email);
     const passwordValid = validatePassword(password);
-    const passwordConfirmValid = validatePasswordConfirm(password, passwordConfirm);
+    const passwordConfirmValid = validatePasswordConfirm(
+      password,
+      passwordConfirm
+    );
 
     return emailValid && passwordValid && passwordConfirmValid;
   };
@@ -121,8 +125,7 @@ const ParentIdPw = () => {
           <View style={styles.lineColor}></View>
           <View style={styles.lineColor}></View>
           <View style={styles.lineColor}></View>
-          <View style={styles.line}></View>
-          <View style={styles.line}></View>
+          <View style={styles.lineColor}></View>
         </View>
         <View
           style={[
@@ -251,14 +254,14 @@ const ParentIdPw = () => {
           <Text style={styles.backBtnText}>이전</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleNext} style={styles.nextBtn}>
-          <Text style={styles.nextBtnText}>완료</Text>
+          <Text style={styles.nextBtnText}>다음</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
   );
 };
 
-export default ParentIdPw;
+export default ChildIdPw;
 
 const styles = StyleSheet.create({
   container: {
@@ -285,16 +288,17 @@ const styles = StyleSheet.create({
     marginTop: 50,
     flexDirection: "row",
     marginBottom: 50,
+
   },
   lineColor: {
-    width: 55,
+    width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
     backgroundColor: "#6369D4",
   },
   line: {
-    width: 55,
+    width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
