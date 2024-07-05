@@ -23,7 +23,7 @@ import ParentPush from "./pages/Signup/Parent/ParentPush";
 import ParentChildInfo from "./pages/Signup/Parent/ParentChildInfo";
 import ChildSignup from "./pages/Signup/Child/ChildSignup";
 import ChildSearchCode from "./pages/Signup/Child/ChildSearchCode";
-import ChildIdPw from "./pages/Signup/Child/ChildInfo";
+import ChildIdPw from "./pages/Signup/Child/ChildIdPw";
 import ChildInfo from "./pages/Signup/Child/ChildInfo";
 
 import SignupFinish from "./pages/Signup/SignupFinish";

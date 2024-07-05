@@ -42,7 +42,6 @@ const ChildSearchCode = () => {
           <View style={styles.lineColor}></View>
           <View style={styles.line}></View>
           <View style={styles.line}></View>
-          <View style={styles.line}></View>
         </View>
         <View style={styles.inputContainer}>
           <TextInput
@@ -147,14 +146,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   lineColor: {
-    width: 55,
+    width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
     backgroundColor: "#6369D4",
   },
   line: {
-    width: 55,
+    width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
