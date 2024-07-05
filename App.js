@@ -21,6 +21,11 @@ import ParentSearchCode from "./pages/Signup/Parent/ParentSearchCode";
 import ParentIdPw from "./pages/Signup/Parent/ParentIdPw";
 import ParentPush from "./pages/Signup/Parent/ParentPush";
 import ParentChildInfo from "./pages/Signup/Parent/ParentChildInfo";
+import ChildSignup from "./pages/Signup/Child/ChildSignup";
+import ChildSearchCode from "./pages/Signup/Child/ChildSearchCode";
+import ChildIdPw from "./pages/Signup/Child/ChildInfo";
+import ChildInfo from "./pages/Signup/Child/ChildInfo";
+
 import SignupFinish from "./pages/Signup/SignupFinish";
 
 const Stack = createStackNavigator();
@@ -69,6 +74,14 @@ export default function App() {
                 name="ParentChildInfo"
                 component={ParentChildInfo}
               />
+              <Stack.Screen name="ChildSignup" component={ChildSignup} />
+              <Stack.Screen
+                name="ChildSearchCode"
+                component={ChildSearchCode}
+              />
+              <Stack.Screen name="ChildInfo" component={ChildInfo} />
+              <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
+
               <Stack.Screen name="SignupFinish" component={SignupFinish} />
 
               <Stack.Screen name="Home" component={Home} />
@@ -94,6 +107,10 @@ export default function App() {
             currentRoute !== "ParentIdPw" &&
             currentRoute !== "ParentPush" &&
             currentRoute !== "ParentChildInfo" &&
+            currentRoute !== "ChildSignup" &&
+            currentRoute !== "ChildSearchCode" &&
+            currentRoute !== "ChildInfo" &&
+            currentRoute !== "ChildIdPw" &&
             currentRoute !== "SignupFinish" && <Footer />}
         </SafeAreaView>
       </NavigationContainer>
@@ -110,10 +127,9 @@ const HeaderWrapper = ({ currentRoute }) => {
   } else if (
     currentRoute === "TodayQuestionList" ||
     currentRoute === "Record"
-  )
-  {
+  ) {
     backgroundColor = "#F7F8FF";
-  } 
+  }
 
   return <Header backgroundColor={backgroundColor} />;
 };
