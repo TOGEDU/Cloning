@@ -10,6 +10,7 @@ const Splash = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.text}>그리운 부모님과 대화를 이어가다</Text>
       <Text style={styles.logo}>CLONING</Text>
     </View>
   );
@@ -20,12 +21,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#858AE8",
+  },
+  text: {
+    fontSize: 18,
+    color: "#fff",
   },
   logo: {
-    fontSize: 36,
+    fontSize: 66,
     fontWeight: "bold",
-    color: "#858AE8",
+    color: "#fff",
   },
 });
 

@@ -49,14 +49,74 @@ export default function App() {
           setCurrentRoute(route.name);
         }}
       >
-        <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-          {currentRoute !== "Splash" &&
-            currentRoute !== "Login" &&
-            currentRoute !== "SignupStart" &&
-            currentRoute !== "SignupFinish" && (
-              <HeaderWrapper currentRoute={currentRoute} />
-            )}
-          <View style={styles.content}>
+        {currentRoute !== "Splash" ? (
+          <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+            {currentRoute !== "Splash" &&
+              currentRoute !== "Login" &&
+              currentRoute !== "SignupStart" &&
+              currentRoute !== "SignupFinish" && (
+                <HeaderWrapper currentRoute={currentRoute} />
+              )}
+            <View style={styles.content}>
+              <Stack.Navigator
+                screenOptions={{ headerShown: false }}
+                initialRouteName="Splash"
+              >
+                <Stack.Screen name="Splash" component={Splash} />
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="SignupStart" component={SignupStart} />
+                <Stack.Screen name="ParentSignup" component={ParentSignup} />
+                <Stack.Screen
+                  name="ParentSearchCode"
+                  component={ParentSearchCode}
+                />
+                <Stack.Screen name="ParentIdPw" component={ParentIdPw} />
+                <Stack.Screen name="ParentPush" component={ParentPush} />
+                <Stack.Screen
+                  name="ParentChildInfo"
+                  component={ParentChildInfo}
+                />
+                <Stack.Screen name="ChildSignup" component={ChildSignup} />
+                <Stack.Screen
+                  name="ChildSearchCode"
+                  component={ChildSearchCode}
+                />
+                <Stack.Screen name="ChildInfo" component={ChildInfo} />
+                <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
+
+                <Stack.Screen name="SignupFinish" component={SignupFinish} />
+
+                <Stack.Screen name="Home" component={Home} />
+                <Stack.Screen name="Record" component={Record} />
+                <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
+                <Stack.Screen
+                  name="TodayQuestionList"
+                  component={TodayQuestionList}
+                />
+                <Stack.Screen name="DiaryList" component={DiaryList} />
+                <Stack.Screen name="Diary" component={Diary} />
+                <Stack.Screen
+                  name="RecordingScreen"
+                  component={RecordingScreen}
+                />
+              </Stack.Navigator>
+            </View>
+            {currentRoute !== "Splash" &&
+              currentRoute !== "Login" &&
+              currentRoute !== "SignupStart" &&
+              currentRoute !== "ParentSignup" &&
+              currentRoute !== "ParentSearchCode" &&
+              currentRoute !== "ParentIdPw" &&
+              currentRoute !== "ParentPush" &&
+              currentRoute !== "ParentChildInfo" &&
+              currentRoute !== "ChildSignup" &&
+              currentRoute !== "ChildSearchCode" &&
+              currentRoute !== "ChildInfo" &&
+              currentRoute !== "ChildIdPw" &&
+              currentRoute !== "SignupFinish" && <Footer />}
+          </SafeAreaView>
+        ) : (
+          <View style={styles.safeArea}>
             <Stack.Navigator
               screenOptions={{ headerShown: false }}
               initialRouteName="Splash"
@@ -71,15 +131,9 @@ export default function App() {
               />
               <Stack.Screen name="ParentIdPw" component={ParentIdPw} />
               <Stack.Screen name="ParentPush" component={ParentPush} />
-              <Stack.Screen
-                name="ParentChildInfo"
-                component={ParentChildInfo}
-              />
+              <Stack.Screen name="ParentChildInfo" component={ParentChildInfo} />
               <Stack.Screen name="ChildSignup" component={ChildSignup} />
-              <Stack.Screen
-                name="ChildSearchCode"
-                component={ChildSearchCode}
-              />
+              <Stack.Screen name="ChildSearchCode" component={ChildSearchCode} />
               <Stack.Screen name="ChildInfo" component={ChildInfo} />
               <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
 
@@ -94,27 +148,18 @@ export default function App() {
               />
               <Stack.Screen name="DiaryList" component={DiaryList} />
               <Stack.Screen name="Diary" component={Diary} />
+
               <Stack.Screen
                 name="RecordingScreen"
                 component={RecordingScreen}
               />
               <Stack.Screen name="MyPage" component={MyPage} />
+
+              <Stack.Screen name="RecordingScreen" component={RecordingScreen} />
+
             </Stack.Navigator>
           </View>
-          {currentRoute !== "Splash" &&
-            currentRoute !== "Login" &&
-            currentRoute !== "SignupStart" &&
-            currentRoute !== "ParentSignup" &&
-            currentRoute !== "ParentSearchCode" &&
-            currentRoute !== "ParentIdPw" &&
-            currentRoute !== "ParentPush" &&
-            currentRoute !== "ParentChildInfo" &&
-            currentRoute !== "ChildSignup" &&
-            currentRoute !== "ChildSearchCode" &&
-            currentRoute !== "ChildInfo" &&
-            currentRoute !== "ChildIdPw" &&
-            currentRoute !== "SignupFinish" && <Footer />}
-        </SafeAreaView>
+        )}
       </NavigationContainer>
     </SafeAreaProvider>
   );

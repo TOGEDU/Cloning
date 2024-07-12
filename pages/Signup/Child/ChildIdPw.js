@@ -254,7 +254,7 @@ const ChildIdPw = () => {
           <Text style={styles.backBtnText}>이전</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleNext} style={styles.nextBtn}>
-          <Text style={styles.nextBtnText}>다음</Text>
+          <Text style={styles.nextBtnText}>완료</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -288,7 +288,6 @@ const styles = StyleSheet.create({
     marginTop: 50,
     flexDirection: "row",
     marginBottom: 50,
-
   },
   lineColor: {
     width: 68,
