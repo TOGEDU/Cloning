@@ -27,6 +27,7 @@ import ChildIdPw from "./pages/Signup/Child/ChildIdPw";
 import ChildInfo from "./pages/Signup/Child/ChildInfo";
 
 import SignupFinish from "./pages/Signup/SignupFinish";
+import MyPage from "./pages/MyPage";
 
 const Stack = createStackNavigator();
 
@@ -97,6 +98,7 @@ export default function App() {
                 name="RecordingScreen"
                 component={RecordingScreen}
               />
+              <Stack.Screen name="MyPage" component={MyPage} />
             </Stack.Navigator>
           </View>
           {currentRoute !== "Splash" &&
