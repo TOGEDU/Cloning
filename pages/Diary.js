@@ -10,11 +10,14 @@ import {
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import * as ImagePicker from "react-native-image-picker";
-import Svg, { Path } from "react-native-svg"; 
+import Svg, { Path } from "react-native-svg";
+import { useNavigation } from "@react-navigation/native";
 
 // 날짜 가져올거면 route로 가져올 수 있음!
 
-const Diary = ({ navigation }) => {
+const Diary = () => {
+  const navigation = useNavigation();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState(null);
@@ -22,8 +25,7 @@ const Diary = ({ navigation }) => {
 
   const handleSave = () => {
     // 일기 저장 로직 추가하기
-    console.log(`일기 저장: ${date}, ${title}, ${content}`);
-    navigation.goBack();
+    navigation.replace("WriteFinish");
   };
 
   const handleImagePicker = () => {
@@ -96,7 +98,7 @@ const Diary = ({ navigation }) => {
           <Text style={styles.imagePickerText}>+ 사진 추가</Text>
         )}
       </TouchableOpacity>
-      <TouchableOpacity style={styles.btn}>
+      <TouchableOpacity style={styles.btn} onPress={handleSave}>
         <Text style={styles.btnText}>기록하기</Text>
       </TouchableOpacity>
     </View>
@@ -112,14 +114,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     flex: 1,
-    
   },
   closeButton: {
     position: "absolute",
     top: 0,
     right: 20,
     zIndex: 1,
-
   },
   picker: {
     marginLeft: 28,
@@ -131,7 +131,6 @@ const styles = StyleSheet.create({
     borderColor: "#CCCCCC",
     borderRadius: 20,
     paddingHorizontal: 15,
-    
   },
   title: {
     fontSize: 24,
@@ -175,7 +174,7 @@ const styles = StyleSheet.create({
   },
   imagePickerText: {
     color: "#838383",
-    fontSize:12,
+    fontSize: 12,
   },
   image: {
     width: "100%",

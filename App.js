@@ -27,6 +27,7 @@ import ChildIdPw from "./pages/Signup/Child/ChildIdPw";
 import ChildInfo from "./pages/Signup/Child/ChildInfo";
 
 import SignupFinish from "./pages/Signup/SignupFinish";
+import WriteFinish from "./pages/WriteFinish";
 
 const Stack = createStackNavigator();
 
@@ -48,7 +49,7 @@ export default function App() {
           setCurrentRoute(route.name);
         }}
       >
-        {currentRoute !== "Splash" ? (
+        {currentRoute !== "Splash" && currentRoute !== "WriteFinish" ? (
           <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
             {currentRoute !== "Splash" &&
               currentRoute !== "Login" &&
@@ -92,6 +93,8 @@ export default function App() {
                   name="TodayQuestionList"
                   component={TodayQuestionList}
                 />
+                <Stack.Screen name="WriteFinish" component={WriteFinish} />
+
                 <Stack.Screen name="DiaryList" component={DiaryList} />
                 <Stack.Screen name="Diary" component={Diary} />
                 <Stack.Screen
@@ -112,7 +115,8 @@ export default function App() {
               currentRoute !== "ChildSearchCode" &&
               currentRoute !== "ChildInfo" &&
               currentRoute !== "ChildIdPw" &&
-              currentRoute !== "SignupFinish" && <Footer />}
+              currentRoute !== "SignupFinish" &&
+              currentRoute !== "WrivteFinish" && <Footer />}
           </SafeAreaView>
         ) : (
           <View style={styles.safeArea}>
@@ -130,9 +134,15 @@ export default function App() {
               />
               <Stack.Screen name="ParentIdPw" component={ParentIdPw} />
               <Stack.Screen name="ParentPush" component={ParentPush} />
-              <Stack.Screen name="ParentChildInfo" component={ParentChildInfo} />
+              <Stack.Screen
+                name="ParentChildInfo"
+                component={ParentChildInfo}
+              />
               <Stack.Screen name="ChildSignup" component={ChildSignup} />
-              <Stack.Screen name="ChildSearchCode" component={ChildSearchCode} />
+              <Stack.Screen
+                name="ChildSearchCode"
+                component={ChildSearchCode}
+              />
               <Stack.Screen name="ChildInfo" component={ChildInfo} />
               <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
 
@@ -145,9 +155,13 @@ export default function App() {
                 name="TodayQuestionList"
                 component={TodayQuestionList}
               />
+              <Stack.Screen name="WriteFinish" component={WriteFinish} />
               <Stack.Screen name="DiaryList" component={DiaryList} />
               <Stack.Screen name="Diary" component={Diary} />
-              <Stack.Screen name="RecordingScreen" component={RecordingScreen} />
+              <Stack.Screen
+                name="RecordingScreen"
+                component={RecordingScreen}
+              />
             </Stack.Navigator>
           </View>
         )}
