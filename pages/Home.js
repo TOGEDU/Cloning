@@ -33,7 +33,9 @@ const Home = () => {
     <View style={styles.container}>
       <View style={styles.todayQbox}>
         <Text style={styles.todayQboxTitle}>매일 다른 오늘의 질문</Text>
-        <Text style={styles.todayQboxSecondTitle}>머라고 ~~ !!</Text>
+        <Text style={styles.todayQboxSecondTitle}>
+          질문에 답하여 부모님의 사랑을 AI에 새겨보세요
+        </Text>
         <TouchableOpacity
           style={styles.todayQboxBtn}
           onPress={handleTodayQuestion}
@@ -159,12 +161,12 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "900",
     marginTop: 40,
-    marginBottom: 5,
+    marginBottom: 9,
   },
   todayQboxSecondTitle: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 14,
+    fontSize: 11,
   },
   todayQboxBtn: {
     width: 97,
@@ -174,7 +176,7 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 29,
+    marginTop: 25,
   },
   todayQboxBtnText: {
     color: "#6369D4",
