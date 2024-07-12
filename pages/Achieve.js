@@ -2,7 +2,6 @@ import React from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
-// 각 요일에 해당하는 이미지 불러오기
 const images = {
   월: require("../assets/mon.png"),
   화: require("../assets/tue.png"),
@@ -16,8 +15,8 @@ const images = {
 const days = ["월", "화", "수", "목", "금", "토", "일"];
 
 const Achieve = () => {
-  // 예제 데이터: 각 요일별로 육아일기와 오늘의 질문을 작성했는지 여부
   const data = {
+    // 임시 데이터
     월: { diary: true, question: true },
     화: { diary: false, question: true },
     수: { diary: true, question: false },
