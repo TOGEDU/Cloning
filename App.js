@@ -62,6 +62,7 @@ export default function App() {
                 screenOptions={{ headerShown: false }}
                 initialRouteName="Splash"
               >
+                <Stack.Screen name="MyPage" component={MyPage} />
                 <Stack.Screen name="Splash" component={Splash} />
                 <Stack.Screen name="Login" component={Login} />
                 <Stack.Screen name="SignupStart" component={SignupStart} />
@@ -131,9 +132,15 @@ export default function App() {
               />
               <Stack.Screen name="ParentIdPw" component={ParentIdPw} />
               <Stack.Screen name="ParentPush" component={ParentPush} />
-              <Stack.Screen name="ParentChildInfo" component={ParentChildInfo} />
+              <Stack.Screen
+                name="ParentChildInfo"
+                component={ParentChildInfo}
+              />
               <Stack.Screen name="ChildSignup" component={ChildSignup} />
-              <Stack.Screen name="ChildSearchCode" component={ChildSearchCode} />
+              <Stack.Screen
+                name="ChildSearchCode"
+                component={ChildSearchCode}
+              />
               <Stack.Screen name="ChildInfo" component={ChildInfo} />
               <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
 
@@ -148,15 +155,6 @@ export default function App() {
               />
               <Stack.Screen name="DiaryList" component={DiaryList} />
               <Stack.Screen name="Diary" component={Diary} />
-
-              <Stack.Screen
-                name="RecordingScreen"
-                component={RecordingScreen}
-              />
-              <Stack.Screen name="MyPage" component={MyPage} />
-
-              <Stack.Screen name="RecordingScreen" component={RecordingScreen} />
-
             </Stack.Navigator>
           </View>
         )}
