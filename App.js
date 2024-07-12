@@ -29,6 +29,7 @@ import ChildInfo from "./pages/Signup/Child/ChildInfo";
 import MyPage from "./pages/MyPage";
 import SignupFinish from "./pages/Signup/SignupFinish";
 import WriteFinish from "./pages/WriteFinish";
+import Achieve from "./pages/Achieve";
 
 const Stack = createStackNavigator();
 
@@ -89,7 +90,7 @@ export default function App() {
                 <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
 
                 <Stack.Screen name="SignupFinish" component={SignupFinish} />
-
+                <Stack.Screen name="Achieve" component={Achieve} />
                 <Stack.Screen name="Home" component={Home} />
                 <Stack.Screen name="Record" component={Record} />
                 <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
