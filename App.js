@@ -15,6 +15,7 @@ import Diary from "./pages/Diary";
 import TodayQuestionList from "./pages/TodayQuestionList";
 import Splash from "./pages/Splash";
 import Login from "./pages/Login";
+import ChildChat from "./pages/ChildChat";
 import SignupStart from "./pages/Signup/SignupStart";
 import ParentSignup from "./pages/Signup/Parent/ParentSignup";
 import ParentSearchCode from "./pages/Signup/Parent/ParentSearchCode";
@@ -65,6 +66,8 @@ export default function App() {
               >
                 <Stack.Screen name="Splash" component={Splash} />
                 <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="ChildChat" component={ChildChat} />
+
                 <Stack.Screen name="SignupStart" component={SignupStart} />
                 <Stack.Screen name="ParentSignup" component={ParentSignup} />
                 <Stack.Screen
