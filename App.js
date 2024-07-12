@@ -27,6 +27,7 @@ import ChildIdPw from "./pages/Signup/Child/ChildIdPw";
 import ChildInfo from "./pages/Signup/Child/ChildInfo";
 
 import SignupFinish from "./pages/Signup/SignupFinish";
+import MyPage from "./pages/MyPage";
 
 const Stack = createStackNavigator();
 
@@ -147,7 +148,15 @@ export default function App() {
               />
               <Stack.Screen name="DiaryList" component={DiaryList} />
               <Stack.Screen name="Diary" component={Diary} />
+
+              <Stack.Screen
+                name="RecordingScreen"
+                component={RecordingScreen}
+              />
+              <Stack.Screen name="MyPage" component={MyPage} />
+
               <Stack.Screen name="RecordingScreen" component={RecordingScreen} />
+
             </Stack.Navigator>
           </View>
         )}
