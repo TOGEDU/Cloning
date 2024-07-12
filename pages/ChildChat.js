@@ -1,8 +1,20 @@
+import { Text, View, StyleSheet } from "react-native";
 
 const ChildChat = () => {
   return (
-    <div>ChildChat</div>
-  )
-}
+    <View style={styles.container}>
+      <Text>ChildChat</Text>
+    </View>
+  );
+};
 
-export default ChildChat
+export default ChildChat;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingTop: 27,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+});
