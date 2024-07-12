@@ -81,7 +81,7 @@ const MyPage = () => {
     <View style={styles.container}>
       <View style={styles.profilecontainer}>
         <View>
-          <Text style={styles.nameText}>김은영</Text>
+          <Text style={styles.nameText}>박은영</Text>
           <Text style={styles.emailText}>cloning@gmail.com</Text>
         </View>
         <Image source={profileimg} style={styles.profileImage} />
