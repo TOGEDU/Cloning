@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
 
   infocontainer: {
     flex: 4.5,
+    //height: 1000,
     backgroundColor: "#858AE8",
     borderRadius: 30,
     paddingTop: 30,
