@@ -1,8 +1,15 @@
+// App.js
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import messaging from "@react-native-firebase/messaging";
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+
+// Firebase 초기화
+import { app, analytics } from "./firebaseConfig";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -33,6 +40,41 @@ import Achieve from "./pages/Achieve";
 
 const Stack = createStackNavigator();
 
+async function postToApi(endpoint, data) {
+  try {
+    const response = await fetch(`${apiUrl}${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const responseData = await response.json();
+    return responseData;
+  } catch (error) {
+    console.error("Error posting token to API:", error);
+  }
+}
+
+async function onAppBootstrap() {
+  try {
+    const defaultAppMessaging = messaging(); // 기본 앱의 Messaging 서비스 얻기
+
+    // Get the token
+    const token = await defaultAppMessaging.getToken();
+
+    // Save the token
+    await postToApi("/api/sign/sign-in", { token });
+  } catch (error) {
+    console.error("Error getting FCM token:", error);
+  }
+}
+
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState("Splash");
 
@@ -41,6 +83,10 @@ export default function App() {
       setCurrentRoute("Splash");
     }, 0);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    onAppBootstrap(); // FCM 토큰 초기화 함수 호출
   }, []);
 
   return (
