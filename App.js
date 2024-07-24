@@ -1,15 +1,9 @@
-// App.js
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import messaging from "@react-native-firebase/messaging";
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-
-// Firebase 초기화
-import { app, analytics } from "./firebaseConfig";
+import { messaging } from "./firebase";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -65,10 +59,8 @@ async function postToApi(endpoint, data) {
 
 async function onAppBootstrap() {
   try {
-    const defaultAppMessaging = messaging(); // 기본 앱의 Messaging 서비스 얻기
-
     // Get the token
-    const token = await defaultAppMessaging.getToken();
+    const token = await messaging.getToken();
 
     // Save the token
     await postToApi("/api/sign/sign-in", { token });
