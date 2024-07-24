@@ -3,7 +3,6 @@ import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { messaging } from "./firebase";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -36,39 +35,6 @@ import ChildMyPage from "./pages/ChildMyPage"; // 경로를 적절히 변경하�
 
 const Stack = createStackNavigator();
 
-async function postToApi(endpoint, data) {
-  try {
-    const response = await fetch(`${apiUrl}${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    const responseData = await response.json();
-    return responseData;
-  } catch (error) {
-    console.error("Error posting token to API:", error);
-  }
-}
-
-async function onAppBootstrap() {
-  try {
-    // Get the token
-    const token = await messaging.getToken();
-
-    // Save the token
-    await postToApi("/api/sign/sign-in", { token });
-  } catch (error) {
-    console.error("Error getting FCM token:", error);
-  }
-}
-
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState("Splash");
 
@@ -77,10 +43,6 @@ export default function App() {
       setCurrentRoute("Splash");
     }, 0);
     return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    onAppBootstrap(); // FCM 토큰 초기화 함수 호출
   }, []);
 
   return (
