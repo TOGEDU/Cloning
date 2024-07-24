@@ -42,6 +42,8 @@ const SignupStart = () => {
   );
 };
 
+export default SignupStart;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -49,7 +51,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#6B73FF",
     padding: 20,
-    
   },
   welcomeText: {
     fontSize: 32,
@@ -91,5 +92,3 @@ const styles = StyleSheet.create({
     color: "#9B9B9B",
   },
 });
-
-export default SignupStart;
