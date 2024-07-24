@@ -30,6 +30,8 @@ import MyPage from "./pages/MyPage";
 import SignupFinish from "./pages/Signup/SignupFinish";
 import WriteFinish from "./pages/WriteFinish";
 import Achieve from "./pages/Achieve";
+import ChatList from "./pages/ChatList"; // 경로를 적절히 변경하세요
+import ChildMyPage from "./pages/ChildMyPage"; // 경로를 적절히 변경하세요
 
 const Stack = createStackNavigator();
 
@@ -57,7 +59,10 @@ export default function App() {
               currentRoute !== "Login" &&
               currentRoute !== "SignupStart" &&
               currentRoute !== "SignupFinish" &&
-              currentRoute !== "WriteFinish" && (
+              currentRoute !== "WriteFinish" &&
+              currentRoute !== "ChildChat" &&
+              currentRoute !== "ChatList" &&
+              currentRoute !== "ChildMyPage" && (
                 <HeaderWrapper currentRoute={currentRoute} />
               )}
             <View style={styles.content}>
@@ -106,6 +111,8 @@ export default function App() {
                   component={RecordingScreen}
                 />
                 <Stack.Screen name="WriteFinish" component={WriteFinish} />
+                <Stack.Screen name="ChatList" component={ChatList} />
+                <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
               </Stack.Navigator>
             </View>
             {currentRoute !== "Splash" &&
@@ -121,7 +128,10 @@ export default function App() {
               currentRoute !== "ChildInfo" &&
               currentRoute !== "ChildIdPw" &&
               currentRoute !== "SignupFinish" &&
-              currentRoute !== "WriteFinish" && <Footer />}
+              currentRoute !== "WriteFinish" &&
+              currentRoute !== "ChildChat" &&
+              currentRoute !== "ChatList" &&
+              currentRoute !== "ChildMyPage" && <Footer />}
           </SafeAreaView>
         ) : (
           <View style={styles.safeArea}>
@@ -150,9 +160,7 @@ export default function App() {
               />
               <Stack.Screen name="ChildInfo" component={ChildInfo} />
               <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
-
               <Stack.Screen name="SignupFinish" component={SignupFinish} />
-
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Record" component={Record} />
               <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
@@ -167,6 +175,8 @@ export default function App() {
                 name="RecordingScreen"
                 component={RecordingScreen}
               />
+              <Stack.Screen name="ChatList" component={ChatList} />
+              <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
             </Stack.Navigator>
           </View>
         )}
