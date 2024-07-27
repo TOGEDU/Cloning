@@ -8,24 +8,42 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import axios from "axios";
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
 const ParentSearchCode = () => {
-  const [text, onChangeText] = useState("");
+  const [text, setText] = useState("");
   const [isValidCode, setIsValidCode] = useState(false);
   const navigation = useNavigation();
 
   const handleBack = () => {
     navigation.goBack();
   };
+
+  const handleChangeText = (inputText) => {
+    setText(inputText);
+    setIsValidCode(null);
+  };
   const handleNext = () => {
     navigation.navigate("ParentIdPw");
   };
-  const handleSearch = () => {
-    if (text === "1234") {
-      setIsValidCode(true);
-    } else {
+  const handleSearch = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/sign/parent/verification",
+        {
+          parentCode: text,
+        }
+      );
+      const data = response.data;
+      if (data.success) {
+        setIsValidCode(true);
+      } else {
+        setIsValidCode(false);
+      }
+    } catch (error) {
+      console.error("Error fetching parent verification data:", error);
       setIsValidCode(false);
     }
   };
@@ -49,7 +67,7 @@ const ParentSearchCode = () => {
             style={styles.input}
             placeholder="고유 코드"
             value={text}
-            onChangeText={onChangeText}
+            onChangeText={handleChangeText}
           />
           <TouchableOpacity onPress={handleSearch}>
             <Svg
