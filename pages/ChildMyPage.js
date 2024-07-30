@@ -7,9 +7,9 @@ import {
   Image,
   ScrollView,
   Switch,
+  Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
 import back from "../assets/back.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
@@ -24,6 +24,7 @@ const ChildMyPage = () => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState("오전 9:00");
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
 
@@ -43,6 +44,16 @@ const ChildMyPage = () => {
 
   const handleAlbumPress = () => {
     navigation.navigate("Album");
+  };
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("탈퇴하기");
+    setModalVisible(false);
+    // 탈퇴 로직 추가
   };
 
   const timeOptions = [
@@ -142,12 +153,42 @@ const ChildMyPage = () => {
               <Text style={styles.logoutButtonText}>로그아웃</Text>
             </TouchableOpacity>
             <View style={styles.separator} />
-            <TouchableOpacity style={styles.logoutButton}>
+            <TouchableOpacity onPress={toggleModal} style={styles.logoutButton}>
               <Text style={styles.logoutButtonText}>탈퇴하기</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </View>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={isModalVisible}
+        onRequestClose={toggleModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>정말 탈퇴하시겠습니까?</Text>
+            <Text style={styles.modalSubText}>
+              탈퇴하기 버튼을 누르시면 CLONING의 모든 정보가 즉시 삭제되며
+              복구할 수 없습니다.
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                onPress={handleConfirmDelete}
+                style={styles.modalButton}
+              >
+                <Text style={styles.modalButtonText}>탈퇴하기</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={toggleModal}
+                style={styles.modalButton}
+              >
+                <Text style={styles.modalButtonText}>취소하기</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -284,6 +325,44 @@ const styles = StyleSheet.create({
     height: 24,
     backgroundColor: "#FFF",
     marginHorizontal: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalSubText: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalButton: {
+    marginHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "#858AE8",
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: "white",
+    fontSize: 16,
   },
 });
 
