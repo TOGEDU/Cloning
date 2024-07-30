@@ -41,6 +41,10 @@ const ChildMyPage = () => {
     navigation.navigate("Login");
   };
 
+  const handleAlbumPress = () => {
+    navigation.navigate("Album");
+  };
+
   const timeOptions = [
     "오전 9:00",
     "오전 10:00",
@@ -79,7 +83,10 @@ const ChildMyPage = () => {
       <View style={styles.infocontainer}>
         <ScrollView style={styles.scrollview}>
           <View style={styles.childinfo}>
-            <TouchableOpacity style={styles.piccontainer}>
+            <TouchableOpacity
+              style={styles.piccontainer}
+              onPress={handleAlbumPress}
+            >
               <Text style={styles.notificationText}>사진첩</Text>
               <Text style={styles.notificationSubText}>
                 부모님이 남기신 사진들을 확인해보세요

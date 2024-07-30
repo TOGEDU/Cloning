@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { enableScreens } from "react-native-screens";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -32,6 +33,10 @@ import WriteFinish from "./pages/WriteFinish";
 import Achieve from "./pages/Achieve";
 import ChatList from "./pages/ChatList"; // 경로를 적절히 변경하세요
 import ChildMyPage from "./pages/ChildMyPage"; // 경로를 적절히 변경하세요
+import Album from "./pages/Album";
+import ImageView from "./pages/ImageView";
+
+enableScreens();
 
 const Stack = createStackNavigator();
 
@@ -62,7 +67,9 @@ export default function App() {
               currentRoute !== "WriteFinish" &&
               currentRoute !== "ChildChat" &&
               currentRoute !== "ChatList" &&
-              currentRoute !== "ChildMyPage" && (
+              currentRoute !== "ChildMyPage" &&
+              currentRoute !== "Album" &&
+              currentRoute !== "ImageView" && (
                 <HeaderWrapper currentRoute={currentRoute} />
               )}
             <View style={styles.content}>
@@ -113,6 +120,8 @@ export default function App() {
                 <Stack.Screen name="WriteFinish" component={WriteFinish} />
                 <Stack.Screen name="ChatList" component={ChatList} />
                 <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
+                <Stack.Screen name="Album" component={Album} />
+                <Stack.Screen name="ImageView" component={ImageView} />
               </Stack.Navigator>
             </View>
             {currentRoute !== "Splash" &&
@@ -131,7 +140,9 @@ export default function App() {
               currentRoute !== "WriteFinish" &&
               currentRoute !== "ChildChat" &&
               currentRoute !== "ChatList" &&
-              currentRoute !== "ChildMyPage" && <Footer />}
+              currentRoute !== "ChildMyPage" &&
+              currentRoute !== "Album" &&
+              currentRoute !== "ImageView" && <Footer />}
           </SafeAreaView>
         ) : (
           <View style={styles.safeArea}>
