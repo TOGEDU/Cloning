@@ -52,16 +52,13 @@ const ParentIdPw = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/sign/emailduplicationcheck`,
+        `http://192.168.35.172:8080/api/sign/emailduplicationcheck`,
         {
-          params: { id: 3, email },
-          headers: {
-            "Content-Type": "application/json",
-          },
+          params: { id: 3, email: email },
         }
       );
 
-      const data = await response.json();
+      const data = response.data;
 
       if (!data.success) {
         setEmailError("이미 가입된 이메일입니다.");

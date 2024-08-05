@@ -42,5 +42,6 @@
     "react-native-svg-transformer": "^1.4.0",
     "react-native-typescript-transformer": "^1.2.13"
   },
-  "private": true
+  "private": true,
+  "proxy": "http://192.168.1.100:8080"
 }

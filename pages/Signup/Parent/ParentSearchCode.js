@@ -30,20 +30,37 @@ const ParentSearchCode = () => {
   };
   const handleSearch = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/sign/parent/verification",
+      const response = await axios.get(
+        "http://192.168.35.172:8080/api/sign/parent/verification",
         {
-          parentCode: text,
+          params: { parentCode: text },
         }
       );
       const data = response.data;
       if (data.success) {
         setIsValidCode(true);
+        console.log("success");
       } else {
         setIsValidCode(false);
       }
     } catch (error) {
-      console.error("Error fetching parent verification data:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+          console.error("Response headers:", error.response.headers);
+        } else if (error.request) {
+          console.error("Request data:", error.request);
+          if (error.message === "Network Error") {
+            console.error("CORS 에러일 가능성이 있습니다.");
+          }
+        } else {
+          console.error("Error message:", error.message);
+        }
+      } else {
+        console.error("Unknown error:", error);
+      }
       setIsValidCode(false);
     }
   };
