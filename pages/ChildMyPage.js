@@ -8,6 +8,7 @@ import {
   ScrollView,
   Switch,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 
 import back from "../assets/back.png";
@@ -60,16 +61,18 @@ const ChildMyPage = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate("ChildChat")}>
-          <Image source={back} style={styles.back} />
-        </TouchableOpacity>
-        <View style={styles.headerlogo}>
-          <Image source={smallLogo} style={styles.smallLogo} />
-          <Image source={logotext} style={styles.logotext} />
+      <SafeAreaView style={styles.headerContainer} edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.navigate("ChildChat")}>
+            <Image source={back} style={styles.icon} />
+          </TouchableOpacity>
+          <View style={styles.headerlogo}>
+            <Image source={smallLogo} style={styles.icon} />
+            <Image source={logotext} style={styles.logotext} />
+          </View>
+          <Image source={mypagew} style={styles.icon} />
         </View>
-        <Image source={mypagew} style={styles.mypagew} />
-      </View>
+      </SafeAreaView>
       <View style={styles.profilecontainer}>
         <View>
           <Text style={styles.nameText}>이은지</Text>
@@ -150,6 +153,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
   },
+  headerContainer: {
+    backgroundColor: "#FFF", // Header background color
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -161,8 +167,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  icon: {
+    width: 24,
+    height: 24,
+  },
+  logotext: {
+    width: 80,
+    height: 24,
+    marginLeft: 8,
+  },
   profilecontainer: {
-    flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     marginHorizontal: 40,
@@ -178,20 +192,16 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 14,
   },
-
   infocontainer: {
-    flex: 4.5,
-    //height: 1000,
+    flex: 1,
     backgroundColor: "#858AE8",
     borderRadius: 30,
     paddingTop: 30,
   },
-
   scrollview: {
     borderRadius: 30,
     marginHorizontal: 20,
   },
-
   childinfo: {
     backgroundColor: "#EEEDFF",
     borderRadius: 30,
@@ -208,7 +218,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
-
   chevronIcon: {
     width: 20,
     height: 20,
@@ -222,7 +231,6 @@ const styles = StyleSheet.create({
   timeOptionText: {
     fontSize: 18,
   },
-
   notificationContainer: {
     backgroundColor: "#fff",
     flexDirection: "row",
@@ -245,7 +253,6 @@ const styles = StyleSheet.create({
   notificationSwitch: {
     marginLeft: 10,
   },
-
   notificationtimeContainer: {
     backgroundColor: "#fff",
     marginTop: 20,
@@ -253,7 +260,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 20,
   },
-
   logoutButtonContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -262,7 +268,6 @@ const styles = StyleSheet.create({
     marginBottom: 80,
   },
   logoutButton: {
-    //backgroundColor: "#FF6347",
     borderRadius: 10,
     paddingVertical: 6,
     paddingHorizontal: 10,
