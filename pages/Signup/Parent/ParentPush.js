@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import ModalDropdown from "react-native-modal-dropdown";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ParentPush = () => {
   const [selectedTime, setSelectedTime] = useState("오전 09:00");
@@ -11,8 +12,13 @@ const ParentPush = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-  const handleNext = () => {
-    navigation.navigate("ParentChildInfo");
+  const handleNext = async () => {
+    try {
+      await AsyncStorage.setItem("pushNotificationTime", selectedTime);
+      navigation.navigate("ParentChildInfo");
+    } catch (error) {
+      console.error("Error saving data", error);
+    }
   };
   const times = [
     "오전 08:00",
@@ -124,7 +130,6 @@ const styles = StyleSheet.create({
     width: 350,
     height: 54,
     paddingHorizontal: 16,
-
   },
   input: {
     flex: 1,

@@ -39,9 +39,10 @@ const ParentSearchCode = () => {
       const data = response.data;
       if (data.success) {
         setIsValidCode(true);
-        console.log("success");
+        console.log("Success:", data);
       } else {
         setIsValidCode(false);
+        console.log("Failed:", data);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {

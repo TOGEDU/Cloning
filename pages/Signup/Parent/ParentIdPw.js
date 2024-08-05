@@ -11,6 +11,8 @@ import {
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const ParentIdPw = () => {
   const [email, setEmail] = useState("");
@@ -28,10 +30,15 @@ const ParentIdPw = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-
-  const handleNext = () => {
+  const handleNext = async () => {
     if (validateAll()) {
-      navigation.navigate("ParentPush");
+      try {
+        await AsyncStorage.setItem('email', email);
+        await AsyncStorage.setItem('password', password);
+        navigation.navigate("ParentPush");
+      } catch (error) {
+        console.error("Error saving data", error);
+      }
     }
   };
 
