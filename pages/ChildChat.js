@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   GiftedChat,
   Bubble,
@@ -15,7 +16,6 @@ import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
 
 const ChildChat = ({ navigation }) => {
-  // navigation prop을 추가
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ const ChildChat = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Image source={burger} style={styles.burger} />
@@ -112,7 +112,7 @@ const ChildChat = ({ navigation }) => {
         renderSend={renderSend}
         renderInputToolbar={renderInputToolbar}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -145,6 +145,27 @@ const styles = StyleSheet.create({
     padding: 2,
     justifyContent: "center",
     alignItems: "center",
+  },
+  burger: {
+    width: 24,
+    height: 24,
+  },
+  smallLogo: {
+    width: 24,
+    height: 24,
+  },
+  logotext: {
+    width: 80,
+    height: 24,
+    marginLeft: 8,
+  },
+  mypage: {
+    width: 24,
+    height: 24,
+  },
+  sendButton: {
+    width: 32,
+    height: 32,
   },
 });
 
