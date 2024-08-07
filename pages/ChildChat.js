@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   GiftedChat,
@@ -7,6 +7,7 @@ import {
   Send,
   InputToolbar,
 } from "react-native-gifted-chat";
+import { Audio } from "expo-av";
 
 import burger from "../assets/burger.png";
 import smallLogo from "../assets/smallLogo.png";
@@ -14,6 +15,7 @@ import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
+import testVoice from "../assets/testvoice.wav"; // 오디오 파일 임포트
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
@@ -39,6 +41,45 @@ const ChildChat = ({ navigation }) => {
     );
   };
 
+  const playVoiceMessage = async () => {
+    const soundObject = new Audio.Sound();
+    try {
+      await soundObject.loadAsync(testVoice); // 오디오 파일 로드
+      await soundObject.playAsync(); // 오디오 파일 재생
+
+      // 재생이 끝나면 리소스를 해제
+      soundObject.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          soundObject.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.log("Failed to play the sound", error);
+    }
+  };
+
+  const handleLongPress = (context, message) => {
+    if (message.user._id === 2) {
+      // 특정 사용자 메시지에서만 재생
+      playVoiceMessage();
+    } else {
+      // 기본 메뉴 표시
+      const options = ["Copy Text", "Cancel"];
+      const cancelButtonIndex = options.length - 1;
+      context.actionSheet().showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 0) {
+            Clipboard.setString(message.text);
+          }
+        }
+      );
+    }
+  };
+
   const renderBubble = (props) => (
     <Bubble
       {...props}
@@ -50,6 +91,7 @@ const ChildChat = ({ navigation }) => {
         right: styles.textRight,
         left: styles.textLeft,
       }}
+      onLongPress={() => handleLongPress(props.context, props.currentMessage)}
     />
   );
 
