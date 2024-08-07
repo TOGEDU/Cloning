@@ -9,7 +9,9 @@ import {
   Keyboard,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChildIdPw = () => {
   const [email, setEmail] = useState("");
@@ -28,9 +30,17 @@ const ChildIdPw = () => {
     navigation.goBack();
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (validateAll()) {
-      navigation.navigate("SignupFinish");
+      try {
+        await AsyncStorage.setItem("email", email);
+        await AsyncStorage.setItem("password", password);
+        navigation.navigate("SignupFinish");
+        console.log("email:", email);
+        console.log("password:", password);
+      } catch (error) {
+        console.error("Error saving data", error);
+      }
     }
   };
 
@@ -50,23 +60,22 @@ const ChildIdPw = () => {
     }
 
     try {
-      // 이메일 중복 확인 API 요청 추가
-      const response = await fetch("https://api.example.com/check-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
+      const response = await axios.get(
+        `http://172.30.1.26:8080/api/sign/emailduplicationcheck`,
+        {
+          params: { id: 3, email: email },
+        }
+      );
+      const data = response.data;
 
-      if (data.exists) {
-        setEmailError("이미 사용 중인 이메일입니다.");
+      if (!data.success) {
+        setEmailError("이미 가입된 이메일입니다.");
       } else {
         setEmailCheckMessage("사용 가능한 이메일입니다.");
       }
     } catch (error) {
-      setEmailError("이메일 확인 중 오류가 발생했습니다.");
+      setEmailError("이메일 확인 중 오류가 발생");
+      console.log(error);
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   Text,
   View,
@@ -10,20 +10,48 @@ import {
   Keyboard,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const img = require("../assets/todayquestionimg.png");
 
 const TodayQuestion = () => {
+  const [text, setText] = useState("");
   const navigation = useNavigation();
-
   const answerInputRef = useRef(null);
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
   };
 
-  const handleWriteFinish = () => {
-    navigation.replace("WriteFinish");
+  const handleWriteFinish = async () => {
+    if (!token) {
+      console.error("Token not available");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        "http://172.30.1.26:8080/api/dailyquestion",
+        {
+          questionId: 3,
+          text: text,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (response.data.success) {
+        navigation.replace("WriteFinish");
+      } else {
+        console.error("Error during response:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error during request:", error);
+    }
   };
 
   return (
@@ -48,6 +76,8 @@ const TodayQuestion = () => {
             placeholder="답변을 입력해 주세요"
             placeholderTextColor="#AEAEAE"
             multiline
+            value={text}
+            onChangeText={setText}
           />
         </View>
         <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>

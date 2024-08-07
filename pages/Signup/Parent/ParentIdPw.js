@@ -11,6 +11,8 @@ import {
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const ParentIdPw = () => {
   const [email, setEmail] = useState("");
@@ -28,10 +30,15 @@ const ParentIdPw = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-
-  const handleNext = () => {
+  const handleNext = async () => {
     if (validateAll()) {
-      navigation.navigate("ParentPush");
+      try {
+        await AsyncStorage.setItem('email', email);
+        await AsyncStorage.setItem('password', password);
+        navigation.navigate("ParentPush");
+      } catch (error) {
+        console.error("Error saving data", error);
+      }
     }
   };
 
@@ -52,16 +59,13 @@ const ParentIdPw = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/sign/emailduplicationcheck`,
+        `http://172.30.1.26:8080/api/sign/emailduplicationcheck`,
         {
-          params: { id: 3, email },
-          headers: {
-            "Content-Type": "application/json",
-          },
+          params: { id: 3, email: email },
         }
       );
 
-      const data = await response.json();
+      const data = response.data;
 
       if (!data.success) {
         setEmailError("이미 가입된 이메일입니다.");
@@ -258,7 +262,7 @@ const ParentIdPw = () => {
           <Text style={styles.backBtnText}>이전</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleNext} style={styles.nextBtn}>
-          <Text style={styles.nextBtnText}>완료</Text>
+          <Text style={styles.nextBtnText}>다음</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
