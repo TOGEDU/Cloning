@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -33,81 +33,61 @@ const ChildChat = ({ navigation }) => {
     ]);
   }, []);
 
-  const onSend = useCallback((messages = []) => {
+  const onSend = (newMessages = []) => {
     setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-  }, []);
-
-  const renderBubble = (props) => {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          right: {
-            backgroundColor: "#586EE3",
-            borderRadius: 20,
-            padding: 10,
-          },
-          left: {
-            backgroundColor: "#F6F6F6",
-            borderRadius: 20,
-            padding: 10,
-          },
-        }}
-        textStyle={{
-          right: {
-            color: "#fff",
-          },
-          left: {
-            color: "#000",
-          },
-        }}
-      />
+      GiftedChat.append(previousMessages, newMessages)
     );
   };
 
-  const renderSend = (props) => {
-    return (
-      <TouchableOpacity
-        style={styles.sendButtonContainer}
-        onPress={() => props.onSend({ text: props.text }, true)}
-      >
-        <Image source={sendIcon} style={styles.sendButton} />
-      </TouchableOpacity>
-    );
-  };
+  const renderBubble = (props) => (
+    <Bubble
+      {...props}
+      wrapperStyle={{
+        right: styles.bubbleRight,
+        left: styles.bubbleLeft,
+      }}
+      textStyle={{
+        right: styles.textRight,
+        left: styles.textLeft,
+      }}
+    />
+  );
 
-  const renderInputToolbar = (props) => {
-    return (
-      <InputToolbar
-        {...props}
-        containerStyle={styles.inputToolbarContainer}
-        primaryStyle={styles.inputToolbarPrimary}
-      />
-    );
-  };
+  const renderSend = (props) => (
+    <TouchableOpacity
+      style={styles.sendButtonContainer}
+      onPress={() => props.onSend({ text: props.text }, true)}
+    >
+      <Image source={sendIcon} style={styles.sendButton} />
+    </TouchableOpacity>
+  );
+
+  const renderInputToolbar = (props) => (
+    <InputToolbar
+      {...props}
+      containerStyle={styles.inputToolbarContainer}
+      primaryStyle={styles.inputToolbarPrimary}
+    />
+  );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Image source={burger} style={styles.burger} />
         </TouchableOpacity>
-        <View style={styles.headerlogo}>
+        <View style={styles.headerLogo}>
           <Image source={smallLogo} style={styles.smallLogo} />
-          <Image source={logotext} style={styles.logotext} />
+          <Image source={logotext} style={styles.logoText} />
         </View>
         <TouchableOpacity onPress={() => navigation.navigate("ChildMyPage")}>
-          <Image source={mypage} style={styles.mypage} />
+          <Image source={mypage} style={styles.myPage} />
         </TouchableOpacity>
       </View>
       <GiftedChat
         messages={messages}
-        onSend={(messages) => onSend(messages)}
-        user={{
-          _id: 1,
-        }}
+        onSend={onSend}
+        user={{ _id: 1 }}
         renderBubble={renderBubble}
         renderSend={renderSend}
         renderInputToolbar={renderInputToolbar}
@@ -128,7 +108,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
   },
-  headerlogo: {
+  headerLogo: {
     flexDirection: "row",
     alignItems: "center",
   },
@@ -146,26 +126,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  burger: {
-    width: 24,
-    height: 24,
-  },
-  smallLogo: {
-    width: 24,
-    height: 24,
-  },
-  logotext: {
-    width: 80,
-    height: 24,
-    marginLeft: 8,
-  },
-  mypage: {
-    width: 24,
-    height: 24,
-  },
   sendButton: {
     width: 32,
     height: 32,
+  },
+  bubbleRight: {
+    backgroundColor: "#586EE3",
+    borderRadius: 20,
+    padding: 10,
+  },
+  bubbleLeft: {
+    backgroundColor: "#F6F6F6",
+    borderRadius: 20,
+    padding: 10,
+  },
+  textRight: {
+    color: "#fff",
+  },
+  textLeft: {
+    color: "#000",
   },
 });
 
