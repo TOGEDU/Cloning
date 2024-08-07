@@ -23,7 +23,6 @@ const Login = ({ navigation }) => {
     try {
       const response = await axios.post(
         "http://172.30.1.26:8080/api/sign/sign-in",
-
         {
           email: email,
           password: password,
