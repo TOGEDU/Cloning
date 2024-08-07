@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Audio } from "expo-av";
 
@@ -86,6 +86,12 @@ const RecordingScreen = () => {
     setRecordingState("idle");
   };
 
+  const renderButton = (title, onPress) => (
+    <TouchableOpacity style={styles.button} onPress={onPress}>
+      <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.notetext}>
@@ -107,19 +113,16 @@ const RecordingScreen = () => {
         <Text style={styles.itemText}>{item}</Text>
       </View>
 
-      {recordingState === "idle" && (
-        <Button title="녹음하기" onPress={handleRecordButtonPress} />
-      )}
-      {recordingState === "recording" && (
-        <Button title="녹음중지" onPress={handleRecordButtonPress} />
-      )}
-      {recordingState === "paused" && (
-        <Button title="녹음듣기" onPress={handlePauseButtonPress} />
-      )}
+      {recordingState === "idle" &&
+        renderButton("녹음하기", handleRecordButtonPress)}
+      {recordingState === "recording" &&
+        renderButton("녹음중지", handleRecordButtonPress)}
+      {recordingState === "paused" &&
+        renderButton("녹음듣기", handlePauseButtonPress)}
       {recordingState === "listening" && (
         <View>
-          <Button title="다시하기" onPress={handleRestart} />
-          <Button title="녹음 완료" onPress={handleComplete} />
+          {renderButton("다시하기", handleRestart)}
+          {renderButton("녹음완료", handleComplete)}
         </View>
       )}
     </View>
@@ -151,5 +154,18 @@ const styles = StyleSheet.create({
     color: "white",
     paddingVertical: 20,
     textAlign: "center",
+  },
+  button: {
+    backgroundColor: "#ABB0FE",
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+    borderRadius: 30,
+    marginHorizontal: 115,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
   },
 });
