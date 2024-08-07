@@ -152,10 +152,10 @@ const SafeAreaWrapper = ({ children, currentRoute }) => {
   }
 
   return (
-    <View style={[styles.safeArea, { backgroundColor }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor }]}>
       <StatusBar barStyle="light-content" backgroundColor={backgroundColor} />
       {children}
-    </View>
+    </SafeAreaView>
   );
 };
 
