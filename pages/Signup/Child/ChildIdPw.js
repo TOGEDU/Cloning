@@ -33,13 +33,27 @@ const ChildIdPw = () => {
   const handleNext = async () => {
     if (validateAll()) {
       try {
-        await AsyncStorage.setItem("email", email);
-        await AsyncStorage.setItem("password", password);
-        navigation.navigate("SignupFinish");
-        console.log("email:", email);
-        console.log("password:", password);
+        const childId = await AsyncStorage.getItem("childId");
+        const birthDate = await AsyncStorage.getItem("birthDate");
+        const response = await axios.post(
+          "http://192.168.35.124:8080/api/sign/child/sign-up",
+          {
+            childId: childId,
+            name: "사용자",
+            birthDate: birthDate,
+            email: email,
+            password: password,
+          }
+        );
+
+        if (response.data.success) {
+          navigation.navigate("SignupFinish");
+          console.log(response);
+        } else {
+          console.error("Signup failed:", response.data.msg);
+        }
       } catch (error) {
-        console.error("Error saving data", error);
+        console.error("Error during signup:", error);
       }
     }
   };

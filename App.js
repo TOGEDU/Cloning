@@ -68,7 +68,13 @@ const footerlessRoutes = [
 
 export default function App() {
   Font.loadAsync({
-    anton: require("./assets/fonts/LuckiestGuy-Regular.ttf"),
+    "LuckiestGuy-Regular": require("./assets/fonts/LuckiestGuy-Regular.ttf"),
+    NotoSans: require("./assets/fonts/NotoSans-VariableFont_wdth,wght.ttf"),
+    NotoSans500: require("./assets/fonts/NotoSans_Condensed-Medium.ttf"),
+    NotoSans600: require("./assets/fonts/NotoSans_Condensed-SemiBold.ttf"),
+    NotoSans700: require("./assets/fonts/NotoSans_Condensed-Bold.ttf"),
+    NotoSans800: require("./assets/fonts/NotoSans_Condensed-ExtraBold.ttf"),
+    NotoSans900: require("./assets/fonts/NotoSans_ExtraCondensed-Black.ttf"),
   });
   const [currentRoute, setCurrentRoute] = useState("Splash");
 

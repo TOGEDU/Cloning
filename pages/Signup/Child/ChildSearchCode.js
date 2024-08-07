@@ -154,12 +154,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
   subtitle: {
     fontSize: 20,
     marginTop: 23,
+    fontFamily: "NotoSans500",
     textAlign: "center",
     alignSelf: "flex-start",
     textAlign: "left",
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
   },
 
   inputIconRight: {
@@ -216,18 +217,20 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   validContainer: {
     flexDirection: "row",
     position: "absolute",
     right: 30,
-    bottom: 360,
+    bottom: 340,
   },
   validText: {
     marginRight: 5,
     fontSize: 16,
+    fontFamily: "NotoSans500",
+
   },
   nextBtn: {
     backgroundColor: "#6369D4",
@@ -242,7 +245,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
 });
