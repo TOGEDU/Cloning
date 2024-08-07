@@ -87,7 +87,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontSize: 44,
-    fontWeight: "bold",
+    fontFamily: "LuckiestGuy-Regular",
+    lineHeight: 44,
     color: "#858AE8",
     marginBottom: 80,
   },
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
   },
   signupTextContainer: {
     flexDirection: "row",
@@ -124,14 +125,14 @@ const styles = StyleSheet.create({
   signupText: {
     color: "#888",
     fontSize: 11,
-    fontWeight: "500",
+    fontFamily: "NotoSans500",
     marginRight: 4,
   },
   signupLink: {
     color: "#858AE8",
+    fontFamily: "NotoSans500",
     textDecorationLine: "none",
     fontSize: 16,
-    fontWeight: "500",
   },
 });
 

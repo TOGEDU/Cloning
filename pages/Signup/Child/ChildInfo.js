@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChildInfo = () => {
   const [name, setName] = useState("");
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
 
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
   },
 
   inputIconRight: {
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   nextBtn: {
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
 });

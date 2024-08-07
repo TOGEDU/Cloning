@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Image } from "react-native";
 const logoImg = require("../assets/logo.png");
 
-const Header = ({backgroundColor}) => {
+const Header = ({ backgroundColor }) => {
   return (
     <View style={[styles.header, { backgroundColor }]}>
       <Image source={logoImg} style={styles.logo} />
@@ -11,10 +11,6 @@ const Header = ({backgroundColor}) => {
 };
 
 export default Header;
-
-
-
-
 
 const styles = StyleSheet.create({
   header: {
@@ -33,8 +29,9 @@ const styles = StyleSheet.create({
   },
   logotext: {
     fontSize: 20,
-    fontFamily: "Luckiest Guy",
+    fontFamily: "LuckiestGuy-Regular",
     color: "#6269D4",
-    lineHeight: "19.36",
+    lineHeight: 20,
+    marginTop: 4,
   },
 });
