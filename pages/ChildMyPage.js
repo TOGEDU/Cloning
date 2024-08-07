@@ -76,7 +76,7 @@ const ChildMyPage = () => {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.headerContainer} edges={['top']}>
+      <SafeAreaView style={styles.headerContainer} edges={["top"]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.navigate("ChildChat")}>
             <Image source={back} style={styles.icon} />
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   infocontainer: {
     flex: 1,
     backgroundColor: "#858AE8",
-    borderRadius: 30,
+    borderRadius: 20,
     paddingTop: 30,
   },
   scrollview: {

@@ -22,7 +22,7 @@ const Login = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const response = await axios.post(
-        "http://192.168.35.124:8080/api/sign/sign-in",
+        "http://192.168.0.19:8080/api/sign/sign-in",
         {
           email: email,
           password: password,

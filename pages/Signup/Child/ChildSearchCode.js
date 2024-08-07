@@ -29,7 +29,7 @@ const ChildSearchCode = () => {
   const handleSearch = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.35.124:8080/api/sign/child/check",
+        "http://192.168.0.19:8080/api/sign/child/check",
         {
           params: { uniqueCode: text },
           timeout: 5000,
@@ -230,7 +230,6 @@ const styles = StyleSheet.create({
     marginRight: 5,
     fontSize: 16,
     fontFamily: "NotoSans500",
-
   },
   nextBtn: {
     backgroundColor: "#6369D4",

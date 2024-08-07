@@ -36,7 +36,7 @@ const ParentChildInfo = () => {
       console.log("pushTime: ", pushNotificationTime);
       console.log("child:", childNameList);
       const response = await axios.post(
-        "http://192.168.35.124:8080/api/sign/parent/sign-up",
+        "http://192.168.0.19:8080/api/sign/parent/sign-up",
         {
           parentId: parentId,
           name: "사용자",
