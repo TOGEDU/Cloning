@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "LuckiestGuy-Regular",
     color: "#6269D4",
-    lineHeight: "19.36",
+    lineHeight: 20,
+    marginTop: 4,
   },
 });

@@ -3,7 +3,7 @@ import { StyleSheet, View, StatusBar } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-
+import * as Font from "expo-font";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -67,6 +67,9 @@ const footerlessRoutes = [
 ];
 
 export default function App() {
+  Font.loadAsync({
+    anton: require("./assets/fonts/LuckiestGuy-Regular.ttf"),
+  });
   const [currentRoute, setCurrentRoute] = useState("Splash");
 
   useEffect(() => {
@@ -108,7 +111,10 @@ export default function App() {
 }
 
 const AppNavigator = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
+  <Stack.Navigator
+    screenOptions={{ headerShown: false }}
+    initialRouteName="Splash"
+  >
     <Stack.Screen name="Splash" component={Splash} />
     <Stack.Screen name="Login" component={Login} />
     <Stack.Screen name="ChildChat" component={ChildChat} />
@@ -144,7 +150,10 @@ const ContentWrapper = ({ children, currentRoute }) => {
     backgroundColor = "#ABB0FE";
   } else if (currentRoute === "DiaryList") {
     backgroundColor = "#858AE8";
-  } else if (currentRoute === "TodayQuestionList" || currentRoute === "Record") {
+  } else if (
+    currentRoute === "TodayQuestionList" ||
+    currentRoute === "Record"
+  ) {
     backgroundColor = "#F7F8FF";
   } else if (currentRoute === "SignupStart" || currentRoute === "ChildMyPage") {
     backgroundColor = "#6B73FF";
@@ -159,7 +168,10 @@ const HeaderWrapper = ({ currentRoute }) => {
     backgroundColor = "#ABB0FE";
   } else if (currentRoute === "DiaryList") {
     backgroundColor = "#858AE8";
-  } else if (currentRoute === "TodayQuestionList" || currentRoute === "Record") {
+  } else if (
+    currentRoute === "TodayQuestionList" ||
+    currentRoute === "Record"
+  ) {
     backgroundColor = "#F7F8FF";
   } else if (currentRoute === "SignupStart" || currentRoute === "ChildMyPage") {
     backgroundColor = "#6B73FF";
