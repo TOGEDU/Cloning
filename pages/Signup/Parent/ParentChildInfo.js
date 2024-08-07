@@ -36,7 +36,7 @@ const ParentChildInfo = () => {
       console.log("pushTime: ", pushNotificationTime);
       console.log("child:", childNameList);
       const response = await axios.post(
-        "http://172.30.1.26:8080/api/sign/parent/sign-up",
+        "http://192.168.35.124:8080/api/sign/parent/sign-up",
         {
           parentId: parentId,
           name: "사용자",
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
   subtitle: {
@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     alignSelf: "flex-start",
     textAlign: "left",
+    fontFamily: "NotoSans500",
     marginLeft: 33,
   },
   lineContainer: {
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
   },
   inputIconRight: {
     opacity: 0.5,
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
   addChildText: {
     marginLeft: 10,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
     color: "#7D7C7C",
   },
   backBtn: {
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   nextBtn: {
@@ -226,7 +227,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
 });

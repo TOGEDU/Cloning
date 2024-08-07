@@ -59,7 +59,7 @@ const ParentIdPw = () => {
 
     try {
       const response = await axios.get(
-        `http://172.30.1.26:8080/api/sign/emailduplicationcheck`,
+        `http://192.168.35.124:8080/api/sign/emailduplicationcheck`,
         {
           params: { id: 3, email: email },
         }
@@ -281,13 +281,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
   subtitle: {
     fontSize: 20,
     marginTop: 23,
     textAlign: "center",
+    fontFamily: "NotoSans500",
     alignSelf: "flex-start",
     textAlign: "left",
     marginLeft: 33,
@@ -338,7 +339,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
   },
   emailCheckButton: {
     backgroundColor: "#ABB0FE",
@@ -349,7 +350,7 @@ const styles = StyleSheet.create({
   emailCheckButtonText: {
     fontSize: 14,
     color: "#000",
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     opacity: 0.5,
   },
   inputIconRight: {
@@ -368,7 +369,7 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   nextBtn: {
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   errorText: {
@@ -392,9 +393,12 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     alignSelf: "flex-start",
     marginLeft: 33,
+    fontFamily: "NotoSans500",
   },
   successText: {
     color: "green",
+    fontFamily: "NotoSans500",
+
     marginBottom: 25,
     alignSelf: "flex-start",
     marginLeft: 33,
@@ -402,5 +406,6 @@ const styles = StyleSheet.create({
   inputError: {
     borderColor: "red",
     borderWidth: 2,
+    fontFamily: "NotoSans500",
   },
 });

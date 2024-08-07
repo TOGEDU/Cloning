@@ -158,14 +158,14 @@ const styles = StyleSheet.create({
   },
   todayQboxTitle: {
     color: "#fff",
+    fontFamily: "NotoSans900",
     fontSize: 25,
-    fontWeight: "900",
     marginTop: 40,
     marginBottom: 9,
   },
   todayQboxSecondTitle: {
     color: "#fff",
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     fontSize: 11,
   },
   todayQboxBtn: {
@@ -180,8 +180,8 @@ const styles = StyleSheet.create({
   },
   todayQboxBtnText: {
     color: "#6369D4",
+    fontFamily: "NotoSans600",
     fontSize: 13,
-    fontWeight: "600",
   },
   secondboxContainer: {
     display: "flex",
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   BoxText1: {
-    fontWeight: "500",
+    fontFamily: "NotoSans500",
     fontSize: 20,
     textAlign: "right",
     marginTop: 26,
@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
   BoxText2: {
     fontSize: 12,
     color: "#686868",
+    fontFamily: "NotoSans",
     textAlign: "right",
     marginRight: 13,
   },
@@ -280,12 +281,13 @@ const styles = StyleSheet.create({
   },
   whyRecordText1: {
     fontSize: 15,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     marginBottom: 4,
   },
   whyRecordText2: {
     fontSize: 11,
     lineHeight: 12,
+    fontFamily: "NotoSans",
     letterSpacing: -0.22,
   },
   confirmBox: {
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
   },
   confirmBoxTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
   },
   confirmBoxTop: {
     display: "flex",
