@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
   subtitle: {
@@ -305,6 +305,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     alignSelf: "flex-start",
     textAlign: "left",
+    fontFamily: "NotoSans500",
     marginLeft: 33,
   },
   lineContainer: {
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
   },
   emailCheckButton: {
     backgroundColor: "#ABB0FE",
@@ -364,7 +365,7 @@ const styles = StyleSheet.create({
   emailCheckButtonText: {
     fontSize: 14,
     color: "#000",
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     opacity: 0.5,
   },
   inputIconRight: {
@@ -383,7 +384,7 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   nextBtn: {
@@ -399,7 +400,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   errorText: {
@@ -407,12 +408,14 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     alignSelf: "flex-start",
     marginLeft: 33,
+    fontFamily: "NotoSans500",
   },
   successText: {
     color: "green",
     marginBottom: 25,
     alignSelf: "flex-start",
     marginLeft: 33,
+    fontFamily: "NotoSans500",
   },
   inputError: {
     borderColor: "red",

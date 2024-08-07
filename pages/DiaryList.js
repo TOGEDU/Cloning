@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#fff",
     fontSize: 25,
-    fontWeight: "900",
+    fontFamily: "NotoSans900",
     alignSelf: "flex-start",
     marginLeft: 22,
   },
@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: 20,
+    fontFamily: "NotoSans",
     textAlign: "center",
   },
 });

@@ -406,6 +406,5 @@ const styles = StyleSheet.create({
   inputError: {
     borderColor: "red",
     borderWidth: 2,
-    fontFamily: "NotoSans500",
   },
 });

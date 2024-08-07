@@ -120,9 +120,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontFamily: "NotoSans",
     fontSize: 25,
-    fontWeight: "bold",
+    fontFamily: "NotoSans900",
     lineHeight: 28 * 1.12,
     letterSpacing: -0.5,
   },
