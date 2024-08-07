@@ -32,7 +32,7 @@ import WriteFinish from "./pages/WriteFinish";
 import Achieve from "./pages/Achieve";
 import ChatList from "./pages/ChatList";
 import ChildMyPage from "./pages/ChildMyPage";
-
+import { AuthContext, AuthProvider } from "./AuthContext";
 const Stack = createStackNavigator();
 
 const headerlessRoutes = [
@@ -65,56 +65,63 @@ const footerlessRoutes = [
   "ChatList",
   "ChildMyPage",
 ];
-
-export default function App() {
-  Font.loadAsync({
-    "LuckiestGuy-Regular": require("./assets/fonts/LuckiestGuy-Regular.ttf"),
-    NotoSans: require("./assets/fonts/NotoSans-VariableFont_wdth,wght.ttf"),
-    NotoSans500: require("./assets/fonts/NotoSans_Condensed-Medium.ttf"),
-    NotoSans600: require("./assets/fonts/NotoSans_Condensed-SemiBold.ttf"),
-    NotoSans700: require("./assets/fonts/NotoSans_Condensed-Bold.ttf"),
-    NotoSans800: require("./assets/fonts/NotoSans_Condensed-ExtraBold.ttf"),
-    NotoSans900: require("./assets/fonts/NotoSans_ExtraCondensed-Black.ttf"),
-  });
+const App = () => {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const [currentRoute, setCurrentRoute] = useState("Splash");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentRoute("Splash");
-    }, 0);
-    return () => clearTimeout(timer);
+    const loadFonts = async () => {
+      await Font.loadAsync({
+        "LuckiestGuy-Regular": require("./assets/fonts/LuckiestGuy-Regular.ttf"),
+        NotoSans: require("./assets/fonts/NotoSans-VariableFont_wdth,wght.ttf"),
+        NotoSans500: require("./assets/fonts/NotoSans_Condensed-Medium.ttf"),
+        NotoSans600: require("./assets/fonts/NotoSans_Condensed-SemiBold.ttf"),
+        NotoSans700: require("./assets/fonts/NotoSans_Condensed-Bold.ttf"),
+        NotoSans800: require("./assets/fonts/NotoSans_Condensed-ExtraBold.ttf"),
+        NotoSans900: require("./assets/fonts/NotoSans_ExtraCondensed-Black.ttf"),
+      });
+      setFontsLoaded(true);
+    };
+
+    loadFonts();
   }, []);
 
+  if (!fontsLoaded) {
+    return null; // 스플래시 화면이나 로딩 컴포넌트를 반환할 수 있습니다.
+  }
+
   return (
-    <SafeAreaProvider>
-      <NavigationContainer
-        onStateChange={(state) => {
-          const route = state.routes[state.index];
-          setCurrentRoute(route.name);
-        }}
-      >
-        {headerlessRoutes.includes(currentRoute) ? (
-          <View style={styles.container}>
-            <StatusBar barStyle="dark-content" />
-            <ContentWrapper currentRoute={currentRoute}>
-              <AppNavigator />
-            </ContentWrapper>
-            {!footerlessRoutes.includes(currentRoute) && <Footer />}
-          </View>
-        ) : (
-          <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" />
-            <HeaderWrapper currentRoute={currentRoute} />
-            <ContentWrapper currentRoute={currentRoute}>
-              <AppNavigator />
-            </ContentWrapper>
-            {!footerlessRoutes.includes(currentRoute) && <Footer />}
-          </SafeAreaView>
-        )}
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <NavigationContainer
+          onStateChange={(state) => {
+            const route = state.routes[state.index];
+            setCurrentRoute(route.name);
+          }}
+        >
+          {headerlessRoutes.includes(currentRoute) ? (
+            <View style={styles.container}>
+              <StatusBar barStyle="dark-content" />
+              <ContentWrapper currentRoute={currentRoute}>
+                <AppNavigator />
+              </ContentWrapper>
+              {!footerlessRoutes.includes(currentRoute) && <Footer />}
+            </View>
+          ) : (
+            <SafeAreaView style={styles.container}>
+              <StatusBar barStyle="dark-content" />
+              <HeaderWrapper currentRoute={currentRoute} />
+              <ContentWrapper currentRoute={currentRoute}>
+                <AppNavigator />
+              </ContentWrapper>
+              {!footerlessRoutes.includes(currentRoute) && <Footer />}
+            </SafeAreaView>
+          )}
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </AuthProvider>
   );
-}
+};
 
 const AppNavigator = () => (
   <Stack.Navigator
@@ -194,3 +201,5 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+export default App;

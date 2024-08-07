@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   t1: {
     fontSize: 30,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     marginLeft: 33,
   },
   t2: {

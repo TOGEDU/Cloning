@@ -26,10 +26,11 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     color: "#fff",
+    fontFamily: "NotoSans",
   },
   logo: {
     fontSize: 66,
-    fontWeight: "bold",
+    fontFamily: "LuckiestGuy-Regular",
     color: "#fff",
   },
 });

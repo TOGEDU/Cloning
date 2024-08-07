@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,12 @@ import {
   Keyboard,
 } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "../AuthContext";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useContext(AuthContext);
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -38,8 +39,6 @@ const Login = ({ navigation }) => {
         } else {
           navigation.navigate("ChildChat");
         }
-        console.log("token:", data.token);
-        await AsyncStorage.setItem("authToken", data.token);
       } else {
         console.error("Login failed:", response.data.msg);
       }
@@ -47,6 +46,7 @@ const Login = ({ navigation }) => {
       console.error("Error during login:", error);
     }
   };
+
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
       <View style={styles.container}>

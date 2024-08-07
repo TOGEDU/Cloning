@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Text,
   View,
@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "../AuthContext";
 import todayQListImage from "../assets/todayQList.png";
 import QImage from "../assets/Qimage.png";
 import AImage from "../assets/Aimage.png";
@@ -18,13 +18,12 @@ import upIcon from "../assets/chevron-up.png";
 const TodayQuestionList = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [questionData, setQuestionData] = useState([]);
+  const { authToken } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = await AsyncStorage.getItem("authToken");
-
-        if (!token) {
+        if (!authToken) {
           console.error("Token not available");
           return;
         }
@@ -33,7 +32,7 @@ const TodayQuestionList = () => {
           "http://192.168.0.19:8080/api/dailyquestion",
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${authToken}`,
             },
           }
         );
@@ -50,7 +49,7 @@ const TodayQuestionList = () => {
     };
 
     fetchData();
-  }, []);
+  }, [authToken]);
 
   const toggleExpand = (id) => {
     setExpandedId((prevId) => (prevId === id ? null : id));
@@ -120,9 +119,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontFamily: "NotoSans",
     fontSize: 25,
-    fontWeight: "bold",
+    fontFamily: "NotoSans900",
     lineHeight: 28 * 1.12,
     letterSpacing: -0.5,
   },

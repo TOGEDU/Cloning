@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#fff",
     fontSize: 25,
-    fontWeight: "900",
+    fontFamily: "NotoSans900",
     lineHeight: 35,
     marginTop: 20,
   },
@@ -136,6 +136,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     letterSpacing: -0.36,
     lineHeight: 27,
+    fontFamily: "NotoSans",
+
   },
   answerBox: {
     width: 331,
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
   answerInput: {
     color: "#AEAEAE",
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
   },
   btn: {
     width: 143,
@@ -174,6 +176,6 @@ const styles = StyleSheet.create({
   btnText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
   },
 });

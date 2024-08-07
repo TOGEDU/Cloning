@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 32,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     color: "#fff",
     marginBottom: 13,
     alignSelf: "flex-start",
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   instructionText: {
     fontSize: 18,
     color: "#fff",
-    fontWeight: "500",
+    fontFamily: "NotoSans500",
     marginBottom: 35,
     alignSelf: "flex-start",
     marginLeft: 30,
@@ -83,12 +83,12 @@ const styles = StyleSheet.create({
   },
   optionTitle: {
     fontSize: 24,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     marginBottom: 3,
   },
   optionDescription: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "NotoSans500",
     color: "#9B9B9B",
   },
 });
