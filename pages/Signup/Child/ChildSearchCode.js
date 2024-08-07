@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChildSearchCode = () => {
   const [text, onChangeText] = useState("");
@@ -26,25 +27,29 @@ const ChildSearchCode = () => {
     }
   };
   const handleSearch = async () => {
-    if (text.trim() === "") {
-      setIsValidCode(false);
-      return;
-    }
-
     try {
       const response = await axios.get(
-        "http://localhost:8080/api/sign/child/check",
+        "http://172.30.1.26:8080/api/sign/child/check",
         {
           params: { uniqueCode: text },
-          headers: {
-            "Content-Type": "application/json",
-          },
+          timeout: 5000,
         }
       );
-
       const data = response.data;
-      setIsValidCode(data.success);
+      if (data.success) {
+        setIsValidCode(true);
+        await AsyncStorage.setItem("childId", JSON.stringify(data.childId));
+        console.log("Success:", data);
+      } else {
+        setIsValidCode(false);
+        console.log("Failed:", data);
+      }
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+      } else {
+        console.error("Unknown error:", error);
+      }
       setIsValidCode(false);
     }
   };

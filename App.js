@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, StatusBar } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { enableScreens } from "react-native-screens";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -31,12 +30,8 @@ import MyPage from "./pages/MyPage";
 import SignupFinish from "./pages/Signup/SignupFinish";
 import WriteFinish from "./pages/WriteFinish";
 import Achieve from "./pages/Achieve";
-import ChatList from "./pages/ChatList"; // 경로를 적절히 변경하세요
-import ChildMyPage from "./pages/ChildMyPage"; // 경로를 적절히 변경하세요
-import Album from "./pages/Album";
-import ImageView from "./pages/ImageView";
-
-enableScreens();
+import ChatList from "./pages/ChatList";
+import ChildMyPage from "./pages/ChildMyPage";
 
 const Stack = createStackNavigator();
 
@@ -58,100 +53,25 @@ export default function App() {
           setCurrentRoute(route.name);
         }}
       >
-        {currentRoute !== "Splash" ? (
-          <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-            {currentRoute !== "Splash" &&
-              currentRoute !== "Login" &&
-              currentRoute !== "SignupStart" &&
-              currentRoute !== "SignupFinish" &&
-              currentRoute !== "WriteFinish" &&
-              currentRoute !== "ChildChat" &&
-              currentRoute !== "ChatList" &&
-              currentRoute !== "ChildMyPage" &&
-              currentRoute !== "Album" &&
-              currentRoute !== "ImageView" && (
-                <HeaderWrapper currentRoute={currentRoute} />
-              )}
-            <View style={styles.content}>
-              <Stack.Navigator
-                screenOptions={{ headerShown: false }}
-                initialRouteName="Splash"
-              >
-                <Stack.Screen name="Splash" component={Splash} />
-                <Stack.Screen name="Login" component={Login} />
-                <Stack.Screen name="ChildChat" component={ChildChat} />
-
-                <Stack.Screen name="SignupStart" component={SignupStart} />
-                <Stack.Screen name="ParentSignup" component={ParentSignup} />
-                <Stack.Screen
-                  name="ParentSearchCode"
-                  component={ParentSearchCode}
-                />
-                <Stack.Screen name="ParentIdPw" component={ParentIdPw} />
-                <Stack.Screen name="ParentPush" component={ParentPush} />
-                <Stack.Screen
-                  name="ParentChildInfo"
-                  component={ParentChildInfo}
-                />
-                <Stack.Screen name="ChildSignup" component={ChildSignup} />
-                <Stack.Screen
-                  name="ChildSearchCode"
-                  component={ChildSearchCode}
-                />
-                <Stack.Screen name="ChildInfo" component={ChildInfo} />
-                <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
-
-                <Stack.Screen name="SignupFinish" component={SignupFinish} />
-                <Stack.Screen name="Achieve" component={Achieve} />
-                <Stack.Screen name="Home" component={Home} />
-                <Stack.Screen name="Record" component={Record} />
-                <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
-                <Stack.Screen
-                  name="TodayQuestionList"
-                  component={TodayQuestionList}
-                />
-                <Stack.Screen name="MyPage" component={MyPage} />
-                <Stack.Screen name="DiaryList" component={DiaryList} />
-                <Stack.Screen name="Diary" component={Diary} />
-                <Stack.Screen
-                  name="RecordingScreen"
-                  component={RecordingScreen}
-                />
-                <Stack.Screen name="WriteFinish" component={WriteFinish} />
-                <Stack.Screen name="ChatList" component={ChatList} />
-                <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
-                <Stack.Screen name="Album" component={Album} />
-                <Stack.Screen name="ImageView" component={ImageView} />
-              </Stack.Navigator>
-            </View>
-            {currentRoute !== "Splash" &&
-              currentRoute !== "Login" &&
-              currentRoute !== "SignupStart" &&
-              currentRoute !== "ParentSignup" &&
-              currentRoute !== "ParentSearchCode" &&
-              currentRoute !== "ParentIdPw" &&
-              currentRoute !== "ParentPush" &&
-              currentRoute !== "ParentChildInfo" &&
-              currentRoute !== "ChildSignup" &&
-              currentRoute !== "ChildSearchCode" &&
-              currentRoute !== "ChildInfo" &&
-              currentRoute !== "ChildIdPw" &&
-              currentRoute !== "SignupFinish" &&
-              currentRoute !== "WriteFinish" &&
-              currentRoute !== "ChildChat" &&
-              currentRoute !== "ChatList" &&
-              currentRoute !== "ChildMyPage" &&
-              currentRoute !== "Album" &&
-              currentRoute !== "ImageView" && <Footer />}
-          </SafeAreaView>
-        ) : (
-          <View style={styles.safeArea}>
+        <SafeAreaWrapper currentRoute={currentRoute}>
+          {currentRoute !== "Splash" &&
+            currentRoute !== "Login" &&
+            currentRoute !== "SignupStart" &&
+            currentRoute !== "SignupFinish" &&
+            currentRoute !== "WriteFinish" &&
+            currentRoute !== "ChildChat" &&
+            currentRoute !== "ChatList" &&
+            currentRoute !== "ChildMyPage" && (
+              <HeaderWrapper currentRoute={currentRoute} />
+            )}
+          <View style={styles.content}>
             <Stack.Navigator
               screenOptions={{ headerShown: false }}
               initialRouteName="Splash"
             >
               <Stack.Screen name="Splash" component={Splash} />
               <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="ChildChat" component={ChildChat} />
               <Stack.Screen name="SignupStart" component={SignupStart} />
               <Stack.Screen name="ParentSignup" component={ParentSignup} />
               <Stack.Screen
@@ -172,6 +92,7 @@ export default function App() {
               <Stack.Screen name="ChildInfo" component={ChildInfo} />
               <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
               <Stack.Screen name="SignupFinish" component={SignupFinish} />
+              <Stack.Screen name="Achieve" component={Achieve} />
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Record" component={Record} />
               <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
@@ -179,22 +100,64 @@ export default function App() {
                 name="TodayQuestionList"
                 component={TodayQuestionList}
               />
-              <Stack.Screen name="WriteFinish" component={WriteFinish} />
+              <Stack.Screen name="MyPage" component={MyPage} />
               <Stack.Screen name="DiaryList" component={DiaryList} />
               <Stack.Screen name="Diary" component={Diary} />
               <Stack.Screen
                 name="RecordingScreen"
                 component={RecordingScreen}
               />
+              <Stack.Screen name="WriteFinish" component={WriteFinish} />
               <Stack.Screen name="ChatList" component={ChatList} />
               <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
             </Stack.Navigator>
           </View>
-        )}
+          {currentRoute !== "Splash" &&
+            currentRoute !== "Login" &&
+            currentRoute !== "SignupStart" &&
+            currentRoute !== "ParentSignup" &&
+            currentRoute !== "ParentSearchCode" &&
+            currentRoute !== "ParentIdPw" &&
+            currentRoute !== "ParentPush" &&
+            currentRoute !== "ParentChildInfo" &&
+            currentRoute !== "ChildSignup" &&
+            currentRoute !== "ChildSearchCode" &&
+            currentRoute !== "ChildInfo" &&
+            currentRoute !== "ChildIdPw" &&
+            currentRoute !== "SignupFinish" &&
+            currentRoute !== "WriteFinish" &&
+            currentRoute !== "ChildChat" &&
+            currentRoute !== "ChatList" &&
+            currentRoute !== "ChildMyPage" && <Footer />}
+        </SafeAreaWrapper>
       </NavigationContainer>
     </SafeAreaProvider>
   );
 }
+
+const SafeAreaWrapper = ({ children, currentRoute }) => {
+  // 각 페이지별로 상단바 색상을 설정
+  let backgroundColor = "#fff";
+  if (currentRoute === "TodayQuestion" || currentRoute === "SignupFinish") {
+    backgroundColor = "#ABB0FE";
+  } else if (currentRoute === "DiaryList") {
+    backgroundColor = "#858AE8";
+  } else if (
+    currentRoute === "TodayQuestionList" ||
+    currentRoute === "Record"
+  ) {
+    backgroundColor = "#F7F8FF";
+  } else if (currentRoute === "SignupStart" || currentRoute === "ChildMyPage") {
+    backgroundColor = "#6B73FF"; // SignupStart와 ChildMyPage의 배경색
+  }
+
+  return (
+    <View style={[styles.safeArea, { backgroundColor }]}>
+      <StatusBar barStyle="light-content" backgroundColor={backgroundColor} />
+      {children}
+    </View>
+  );
+};
 
 const HeaderWrapper = ({ currentRoute }) => {
   let backgroundColor = "#fff";
@@ -207,6 +170,8 @@ const HeaderWrapper = ({ currentRoute }) => {
     currentRoute === "Record"
   ) {
     backgroundColor = "#F7F8FF";
+  } else if (currentRoute === "SignupStart" || currentRoute === "ChildMyPage") {
+    backgroundColor = "#6B73FF"; // SignupStart와 ChildMyPage의 배경색
   }
 
   return <Header backgroundColor={backgroundColor} />;
@@ -215,7 +180,6 @@ const HeaderWrapper = ({ currentRoute }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   content: {
     flex: 1,
