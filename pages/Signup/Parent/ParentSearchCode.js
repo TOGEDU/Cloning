@@ -9,6 +9,8 @@ import {
   Keyboard,
 } from "react-native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
@@ -31,14 +33,16 @@ const ParentSearchCode = () => {
   const handleSearch = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.35.172:8080/api/sign/parent/verification",
+        "http://172.30.1.26:8080/api/sign/parent/verification",
         {
           params: { parentCode: text },
+          timeout: 5000,
         }
       );
       const data = response.data;
       if (data.success) {
         setIsValidCode(true);
+        await AsyncStorage.setItem("parentId", JSON.stringify(data.parentId));
         console.log("Success:", data);
       } else {
         setIsValidCode(false);

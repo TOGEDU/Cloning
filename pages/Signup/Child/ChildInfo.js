@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChildInfo = () => {
   const [name, setName] = useState("");
@@ -21,8 +22,16 @@ const ChildInfo = () => {
     navigation.goBack();
   };
 
-  const handleNext = () => {
-    navigation.navigate("ChildIdPw");
+  const handleNext = async () => {
+    try {
+      await AsyncStorage.setItem("name", name);
+      await AsyncStorage.setItem("birthDate", birth);
+      navigation.navigate("ChildIdPw");
+      console.log("name:", name);
+      console.log("birthDate:", birth);
+    } catch (error) {
+      console.error("Error saving data", error);
+    }
   };
 
   return (
@@ -108,7 +117,6 @@ const styles = StyleSheet.create({
     marginTop: 85,
     flexDirection: "row",
     marginBottom: 50,
-
   },
   lineColor: {
     width: 68,

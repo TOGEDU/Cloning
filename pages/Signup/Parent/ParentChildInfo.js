@@ -23,27 +23,33 @@ const ParentChildInfo = () => {
 
   const handleNext = async () => {
     try {
+      const parentId = await AsyncStorage.getItem("parentId");
       const email = await AsyncStorage.getItem("email");
       const password = await AsyncStorage.getItem("password");
       const pushNotificationTime = await AsyncStorage.getItem(
         "pushNotificationTime"
       );
       const childNameList = children.map((child) => ({ name: child.name }));
-
+      console.log("parentId:", parentId);
+      console.log("Email:", email);
+      console.log("Password:", password);
+      console.log("pushTime: ", pushNotificationTime);
+      console.log("child:", childNameList);
       const response = await axios.post(
-        "http://192.168.35.172:8080/api/sign/parent/sign-up",
+        "http://172.30.1.26:8080/api/sign/parent/sign-up",
         {
-          parentId: 3,
+          parentId: parentId,
           name: "사용자",
           email: email,
           password: password,
-          pushNotificationTime: pushNotificationTime,
           childNameList: childNameList,
+          pushNotificationTime: pushNotificationTime,
         }
       );
 
       if (response.data.success) {
         navigation.navigate("SignupFinish");
+        console.log(response);
       } else {
         console.error("Signup failed:", response.data.msg);
       }

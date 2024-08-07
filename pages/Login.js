@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import axios from "axios";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -17,17 +18,35 @@ const Login = ({ navigation }) => {
     Keyboard.dismiss();
   };
 
-  const handleLogin = () => {
-    // 임시로 부모, 자식 로그인 구별
-    if (email === "12" && password === "12") {
-      navigation.replace("Home");
-    } else if (email === "56" && password === "56") {
-      navigation.replace("ChildChat");
-    } else {
-      alert("잘못된 이메일 또는 비밀번호입니다.");
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post(
+        "http://172.30.1.26:8080/api/sign/sign-in",
+
+        {
+          email: email,
+          password: password,
+          fcmToken: "sldijbfg.sdgh.sdoq",
+        }
+      );
+      
+      const data = response.data;
+
+
+      if (response.data.success) {
+        console.log(response.msg);
+        if (data.role === "Parent") {
+          navigation.navigate("Home");
+        } else {
+          navigation.navigate("ChildChat");
+        }
+      } else {
+        console.error("Login failed:", response.data.msg);
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
     }
   };
-
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
       <View style={styles.container}>

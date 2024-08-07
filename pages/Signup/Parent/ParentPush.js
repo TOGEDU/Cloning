@@ -6,7 +6,7 @@ import ModalDropdown from "react-native-modal-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ParentPush = () => {
-  const [selectedTime, setSelectedTime] = useState("오전 09:00");
+  const [selectedTime, setSelectedTime] = useState("08:00:00");
   const navigation = useNavigation();
 
   const handleBack = () => {
@@ -21,16 +21,16 @@ const ParentPush = () => {
     }
   };
   const times = [
-    "오전 08:00",
-    "오전 09:00",
-    "오전 10:00",
-    "오전 11:00",
-    "오후 12:00",
-    "오후 01:00",
-    "오후 02:00",
-    "오후 03:00",
-    "오후 04:00",
-    "오후 05:00",
+    "08:00:00",
+    "09:00:00",
+    "10:00:00",
+    "11:00:00",
+    "12:00:00",
+    // "오후 01:00",
+    // "오후 02:00",
+    // "오후 03:00",
+    // "오후 04:00",
+    // "오후 05:00",
   ];
 
   return (
