@@ -9,14 +9,21 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const img = require("../assets/todayquestionimg.png");
 
 const TodayQuestion = () => {
+  const navigation = useNavigation();
+
   const answerInputRef = useRef(null);
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
+  };
+
+  const handleWriteFinish = () => {
+    navigation.replace("WriteFinish");
   };
 
   return (
@@ -43,7 +50,7 @@ const TodayQuestion = () => {
             multiline
           />
         </View>
-        <TouchableOpacity style={styles.btn}>
+        <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
           <Text style={styles.btnText}>기록하기</Text>
         </TouchableOpacity>
       </View>

@@ -5,43 +5,57 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   const handleLogin = () => {
-    // 로그인 로직을 여기에 추가
-    navigation.replace("Home");
+    // 임시로 부모, 자식 로그인 구별
+    if (email === "12" && password === "12") {
+      navigation.replace("Home");
+    } else if (email === "56" && password === "56") {
+      navigation.replace("ChildChat");
+    } else {
+      alert("잘못된 이메일 또는 비밀번호입니다.");
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.logo}>CLONING</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="이메일"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="비밀번호"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>로그인</Text>
-      </TouchableOpacity>
-      <View style={styles.signupTextContainer}>
-        <Text style={styles.signupText}>아직 계정이 없다면? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("SignupStart")}>
-          <Text style={styles.signupLink}>회원가입</Text>
+    <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
+      <View style={styles.container}>
+        <Text style={styles.logo}>CLONING</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="이메일"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="비밀번호"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>로그인</Text>
         </TouchableOpacity>
+        <View style={styles.signupTextContainer}>
+          <Text style={styles.signupText}>아직 계정이 없다면? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("SignupStart")}>
+            <Text style={styles.signupLink}>회원가입</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 

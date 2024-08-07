@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import axios from "axios";
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
@@ -20,12 +21,30 @@ const ChildSearchCode = () => {
     navigation.goBack();
   };
   const handleNext = () => {
-    navigation.navigate("ChildInfo");
+    if (isValidCode) {
+      navigation.navigate("ChildInfo");
+    }
   };
-  const handleSearch = () => {
-    if (text === "1234") {
-      setIsValidCode(true);
-    } else {
+  const handleSearch = async () => {
+    if (text.trim() === "") {
+      setIsValidCode(false);
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/sign/child/check",
+        {
+          params: { uniqueCode: text },
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = response.data;
+      setIsValidCode(data.success);
+    } catch (error) {
       setIsValidCode(false);
     }
   };
@@ -145,7 +164,6 @@ const styles = StyleSheet.create({
     marginTop: 50,
     flexDirection: "row",
     marginBottom: 50,
-
   },
   lineColor: {
     width: 68,

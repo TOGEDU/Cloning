@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const ParentIdPw = () => {
   const [email, setEmail] = useState("");
@@ -50,23 +51,25 @@ const ParentIdPw = () => {
     }
 
     try {
-      // 이메일 중복 확인 API 요청 추가
-      const response = await fetch("https://api.example.com/check-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await axios.get(
+        `http://localhost:8080/api/sign/emailduplicationcheck`,
+        {
+          params: { id: 3, email },
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       const data = await response.json();
 
-      if (data.exists) {
-        setEmailError("이미 사용 중인 이메일입니다.");
+      if (!data.success) {
+        setEmailError("이미 가입된 이메일입니다.");
       } else {
         setEmailCheckMessage("사용 가능한 이메일입니다.");
       }
     } catch (error) {
-      setEmailError("이메일 확인 중 오류가 발생했습니다.");
+      setEmailError("이메일 확인 중 오류가 발생");
     }
   };
 
@@ -81,7 +84,8 @@ const ParentIdPw = () => {
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
     if (password.length < 6) {
       setPasswordError("비밀번호는 6자리 이상이어야 합니다.");
       return false;
@@ -105,7 +109,10 @@ const ParentIdPw = () => {
   const validateAll = () => {
     const emailValid = validateEmail(email);
     const passwordValid = validatePassword(password);
-    const passwordConfirmValid = validatePasswordConfirm(password, passwordConfirm);
+    const passwordConfirmValid = validatePasswordConfirm(
+      password,
+      passwordConfirm
+    );
 
     return emailValid && passwordValid && passwordConfirmValid;
   };

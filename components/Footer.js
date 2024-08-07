@@ -30,7 +30,10 @@ const Footer = () => {
             />
           </Svg>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("Achieve")}
+        >
           <Svg
             xmlns="http://www.w3.org/2000/svg"
             width="26"
