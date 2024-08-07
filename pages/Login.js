@@ -9,6 +9,7 @@ import {
   Keyboard,
 } from "react-native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -29,17 +30,17 @@ const Login = ({ navigation }) => {
           fcmToken: "sldijbfg.sdgh.sdoq",
         }
       );
-      
+
       const data = response.data;
 
-
       if (response.data.success) {
-        console.log(response.msg);
         if (data.role === "Parent") {
           navigation.navigate("Home");
         } else {
           navigation.navigate("ChildChat");
         }
+        console.log("token:", data.token);
+        await AsyncStorage.setItem("authToken", data.token);
       } else {
         console.error("Login failed:", response.data.msg);
       }
