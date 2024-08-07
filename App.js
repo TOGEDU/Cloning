@@ -35,6 +35,37 @@ import ChildMyPage from "./pages/ChildMyPage";
 
 const Stack = createStackNavigator();
 
+const headerlessRoutes = [
+  "Splash",
+  "Login",
+  "SignupStart",
+  "SignupFinish",
+  "WriteFinish",
+  "ChildChat",
+  "ChatList",
+  "ChildMyPage",
+];
+
+const footerlessRoutes = [
+  "Splash",
+  "Login",
+  "SignupStart",
+  "ParentSignup",
+  "ParentSearchCode",
+  "ParentIdPw",
+  "ParentPush",
+  "ParentChildInfo",
+  "ChildSignup",
+  "ChildSearchCode",
+  "ChildInfo",
+  "ChildIdPw",
+  "SignupFinish",
+  "WriteFinish",
+  "ChildChat",
+  "ChatList",
+  "ChildMyPage",
+];
+
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState("Splash");
 
@@ -53,110 +84,73 @@ export default function App() {
           setCurrentRoute(route.name);
         }}
       >
-        <SafeAreaWrapper currentRoute={currentRoute}>
-          {currentRoute !== "Splash" &&
-            currentRoute !== "Login" &&
-            currentRoute !== "SignupStart" &&
-            currentRoute !== "SignupFinish" &&
-            currentRoute !== "WriteFinish" &&
-            currentRoute !== "ChildChat" &&
-            currentRoute !== "ChatList" &&
-            currentRoute !== "ChildMyPage" && (
-              <HeaderWrapper currentRoute={currentRoute} />
-            )}
-          <View style={styles.content}>
-            <Stack.Navigator
-              screenOptions={{ headerShown: false }}
-              initialRouteName="Splash"
-            >
-              <Stack.Screen name="Splash" component={Splash} />
-              <Stack.Screen name="Login" component={Login} />
-              <Stack.Screen name="ChildChat" component={ChildChat} />
-              <Stack.Screen name="SignupStart" component={SignupStart} />
-              <Stack.Screen name="ParentSignup" component={ParentSignup} />
-              <Stack.Screen
-                name="ParentSearchCode"
-                component={ParentSearchCode}
-              />
-              <Stack.Screen name="ParentIdPw" component={ParentIdPw} />
-              <Stack.Screen name="ParentPush" component={ParentPush} />
-              <Stack.Screen
-                name="ParentChildInfo"
-                component={ParentChildInfo}
-              />
-              <Stack.Screen name="ChildSignup" component={ChildSignup} />
-              <Stack.Screen
-                name="ChildSearchCode"
-                component={ChildSearchCode}
-              />
-              <Stack.Screen name="ChildInfo" component={ChildInfo} />
-              <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
-              <Stack.Screen name="SignupFinish" component={SignupFinish} />
-              <Stack.Screen name="Achieve" component={Achieve} />
-              <Stack.Screen name="Home" component={Home} />
-              <Stack.Screen name="Record" component={Record} />
-              <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
-              <Stack.Screen
-                name="TodayQuestionList"
-                component={TodayQuestionList}
-              />
-              <Stack.Screen name="MyPage" component={MyPage} />
-              <Stack.Screen name="DiaryList" component={DiaryList} />
-              <Stack.Screen name="Diary" component={Diary} />
-              <Stack.Screen
-                name="RecordingScreen"
-                component={RecordingScreen}
-              />
-              <Stack.Screen name="WriteFinish" component={WriteFinish} />
-              <Stack.Screen name="ChatList" component={ChatList} />
-              <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
-            </Stack.Navigator>
+        {headerlessRoutes.includes(currentRoute) ? (
+          <View style={styles.container}>
+            <StatusBar barStyle="dark-content" />
+            <ContentWrapper currentRoute={currentRoute}>
+              <AppNavigator />
+            </ContentWrapper>
+            {!footerlessRoutes.includes(currentRoute) && <Footer />}
           </View>
-          {currentRoute !== "Splash" &&
-            currentRoute !== "Login" &&
-            currentRoute !== "SignupStart" &&
-            currentRoute !== "ParentSignup" &&
-            currentRoute !== "ParentSearchCode" &&
-            currentRoute !== "ParentIdPw" &&
-            currentRoute !== "ParentPush" &&
-            currentRoute !== "ParentChildInfo" &&
-            currentRoute !== "ChildSignup" &&
-            currentRoute !== "ChildSearchCode" &&
-            currentRoute !== "ChildInfo" &&
-            currentRoute !== "ChildIdPw" &&
-            currentRoute !== "SignupFinish" &&
-            currentRoute !== "WriteFinish" &&
-            currentRoute !== "ChildChat" &&
-            currentRoute !== "ChatList" &&
-            currentRoute !== "ChildMyPage" && <Footer />}
-        </SafeAreaWrapper>
+        ) : (
+          <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="dark-content" />
+            <HeaderWrapper currentRoute={currentRoute} />
+            <ContentWrapper currentRoute={currentRoute}>
+              <AppNavigator />
+            </ContentWrapper>
+            {!footerlessRoutes.includes(currentRoute) && <Footer />}
+          </SafeAreaView>
+        )}
       </NavigationContainer>
     </SafeAreaProvider>
   );
 }
 
-const SafeAreaWrapper = ({ children, currentRoute }) => {
-  // 각 페이지별로 상단바 색상을 설정
+const AppNavigator = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
+    <Stack.Screen name="Splash" component={Splash} />
+    <Stack.Screen name="Login" component={Login} />
+    <Stack.Screen name="ChildChat" component={ChildChat} />
+    <Stack.Screen name="SignupStart" component={SignupStart} />
+    <Stack.Screen name="ParentSignup" component={ParentSignup} />
+    <Stack.Screen name="ParentSearchCode" component={ParentSearchCode} />
+    <Stack.Screen name="ParentIdPw" component={ParentIdPw} />
+    <Stack.Screen name="ParentPush" component={ParentPush} />
+    <Stack.Screen name="ParentChildInfo" component={ParentChildInfo} />
+    <Stack.Screen name="ChildSignup" component={ChildSignup} />
+    <Stack.Screen name="ChildSearchCode" component={ChildSearchCode} />
+    <Stack.Screen name="ChildInfo" component={ChildInfo} />
+    <Stack.Screen name="ChildIdPw" component={ChildIdPw} />
+    <Stack.Screen name="SignupFinish" component={SignupFinish} />
+    <Stack.Screen name="Achieve" component={Achieve} />
+    <Stack.Screen name="Home" component={Home} />
+    <Stack.Screen name="Record" component={Record} />
+    <Stack.Screen name="TodayQuestion" component={TodayQuestion} />
+    <Stack.Screen name="TodayQuestionList" component={TodayQuestionList} />
+    <Stack.Screen name="MyPage" component={MyPage} />
+    <Stack.Screen name="DiaryList" component={DiaryList} />
+    <Stack.Screen name="Diary" component={Diary} />
+    <Stack.Screen name="RecordingScreen" component={RecordingScreen} />
+    <Stack.Screen name="WriteFinish" component={WriteFinish} />
+    <Stack.Screen name="ChatList" component={ChatList} />
+    <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
+  </Stack.Navigator>
+);
+
+const ContentWrapper = ({ children, currentRoute }) => {
   let backgroundColor = "#fff";
   if (currentRoute === "TodayQuestion" || currentRoute === "SignupFinish") {
     backgroundColor = "#ABB0FE";
   } else if (currentRoute === "DiaryList") {
     backgroundColor = "#858AE8";
-  } else if (
-    currentRoute === "TodayQuestionList" ||
-    currentRoute === "Record"
-  ) {
+  } else if (currentRoute === "TodayQuestionList" || currentRoute === "Record") {
     backgroundColor = "#F7F8FF";
   } else if (currentRoute === "SignupStart" || currentRoute === "ChildMyPage") {
-    backgroundColor = "#6B73FF"; // SignupStart와 ChildMyPage의 배경색
+    backgroundColor = "#6B73FF";
   }
 
-  return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor }]}>
-      <StatusBar barStyle="light-content" backgroundColor={backgroundColor} />
-      {children}
-    </SafeAreaView>
-  );
+  return <View style={[styles.content, { backgroundColor }]}>{children}</View>;
 };
 
 const HeaderWrapper = ({ currentRoute }) => {
@@ -165,20 +159,17 @@ const HeaderWrapper = ({ currentRoute }) => {
     backgroundColor = "#ABB0FE";
   } else if (currentRoute === "DiaryList") {
     backgroundColor = "#858AE8";
-  } else if (
-    currentRoute === "TodayQuestionList" ||
-    currentRoute === "Record"
-  ) {
+  } else if (currentRoute === "TodayQuestionList" || currentRoute === "Record") {
     backgroundColor = "#F7F8FF";
   } else if (currentRoute === "SignupStart" || currentRoute === "ChildMyPage") {
-    backgroundColor = "#6B73FF"; // SignupStart와 ChildMyPage의 배경색
+    backgroundColor = "#6B73FF";
   }
 
   return <Header backgroundColor={backgroundColor} />;
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
   },
   content: {

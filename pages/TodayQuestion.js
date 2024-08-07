@@ -30,7 +30,7 @@ const TodayQuestion = () => {
     }
     try {
       const response = await axios.post(
-        "http://172.30.1.26:8080/api/dailyquestion",
+        "http://192.168.35.124:8080/api/dailyquestion",
         {
           questionId: 3,
           text: text,

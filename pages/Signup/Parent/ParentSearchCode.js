@@ -33,7 +33,7 @@ const ParentSearchCode = () => {
   const handleSearch = async () => {
     try {
       const response = await axios.get(
-        "http://172.30.1.26:8080/api/sign/parent/verification",
+        "http://192.168.35.124:8080/api/sign/parent/verification",
         {
           params: { parentCode: text },
           timeout: 5000,
