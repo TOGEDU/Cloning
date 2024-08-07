@@ -11,8 +11,7 @@ import {
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ParentIdPw = () => {
   const [email, setEmail] = useState("");
@@ -33,8 +32,8 @@ const ParentIdPw = () => {
   const handleNext = async () => {
     if (validateAll()) {
       try {
-        await AsyncStorage.setItem('email', email);
-        await AsyncStorage.setItem('password', password);
+        await AsyncStorage.setItem("email", email);
+        await AsyncStorage.setItem("password", password);
         navigation.navigate("ParentPush");
       } catch (error) {
         console.error("Error saving data", error);
@@ -59,7 +58,7 @@ const ParentIdPw = () => {
 
     try {
       const response = await axios.get(
-        `http://172.30.1.26:8080/api/sign/emailduplicationcheck`,
+        `http://192.168.0.19:8080/api/sign/emailduplicationcheck`,
         {
           params: { id: 3, email: email },
         }
