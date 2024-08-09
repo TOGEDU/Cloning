@@ -106,17 +106,20 @@ const MyPage = () => {
 
       const response = await axios.put(
         `${BASE_URL}/api/mypage/push-status`,
-        { pushStatus: newPushStatus },
+        null,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
+          params: {
+            pushStatus: newPushStatus
+          }
         }
       );    
       console.log("Push status updated:", response.data);
 
-      Alert.alert("알림", "푸시 알림 상태 변경 완료");
+    Alert.alert("알림", "푸시 알림 상태 변경 완료");
     } catch (error) {
       if (error.response) {
         console.error("응답 오류:", error.response);        
