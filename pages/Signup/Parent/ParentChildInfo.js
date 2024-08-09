@@ -38,6 +38,7 @@ const ParentChildInfo = () => {
       console.log("child:", childNameList);
       const response = await axios.post(
         `${BASE_URL}/api/sign/parent/sign-up`,
+
         {
           parentId: parentId,
           name: "사용자",
