@@ -11,8 +11,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import BASE_URL from "../../../api";
-
+import BASE_URL from "../api";
 const img = require("../assets/todayquestionimg.png");
 
 const TodayQuestion = () => {

@@ -14,7 +14,7 @@ import QImage from "../assets/Qimage.png";
 import AImage from "../assets/Aimage.png";
 import downIcon from "../assets/chevron-down.png";
 import upIcon from "../assets/chevron-up.png";
-import BASE_URL from "../../../api";
+import BASE_URL from "../api";
 
 const TodayQuestionList = () => {
   const [expandedId, setExpandedId] = useState(null);
