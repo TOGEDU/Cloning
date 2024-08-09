@@ -12,27 +12,30 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import BASE_URL from "../api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const img = require("../assets/todayquestionimg.png");
 
 const TodayQuestion = () => {
   const [text, setText] = useState("");
   const navigation = useNavigation();
-  const answerInputRef = useRef(null);
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
   };
 
   const handleWriteFinish = async () => {
-    if (!token) {
-      console.error("Token not available");
-      return;
-    }
     try {
+      const token = await AsyncStorage.getItem("authToken");
+      console.log("Token:", token);
+      if (!token) {
+        console.error("Token doesn't exist");
+        return;
+      }
+
       const response = await axios.post(
         `${BASE_URL}/api/dailyquestion`,
         {
-          questionId: 3,
+          questionId: 4,
           text: text,
         },
         {
@@ -42,15 +45,16 @@ const TodayQuestion = () => {
         }
       );
 
-      const data = response.data;
-
-      if (response.data.success) {
+      if (response.data === "질문 답변 추가 완료") {
         navigation.replace("WriteFinish");
       } else {
-        console.error("Error during response:", response.data.message);
+        console.error("Error during response:", response.data);
       }
     } catch (error) {
       console.error("Error during request:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+      }
     }
   };
 
