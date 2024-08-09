@@ -84,11 +84,46 @@ const MyPage = () => {
     setChildren(newChildren);
   };
 
-  const handleSave = () => {
-    // 저장 로직을 여기에 추가하세요.
-    console.log("자녀 정보 저장: ", children);
-    setDropdownOpen(false);
+  const handleSave = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      for (const [index, childName] of children.entries()) {
+        const childId = index + 1; // 자녀 ID를 실제로 업데이트할 때 필요
+        await axios.put(
+          `${BASE_URL}/api/mypage/child`,
+          {
+            childId: childId,
+            name: childName
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
+      Alert.alert("알림", "자녀 이름이 변경되었습니다.");
+      setDropdownOpen(false);
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);        
+        Alert.alert("오류", `자녀 이름 변경 중 오류 발생: ${error.response.data}`);
+      } else if (error.request) {
+        console.error("응답 없음:", error.request);
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:", error.message);
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
+
 
 
   const toggleSwitch = async () => {
@@ -137,10 +172,55 @@ const MyPage = () => {
     setTimeDropdownOpen(!timeDropdownOpen);
   };
 
-  const handleTimeSelect = (time) => {
+  const handleTimeSelect = async (time) => {
     setSelectedTime(time);
     setTimeDropdownOpen(false);
+
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const [period, timePart] = time.split(' ');
+      let [hours, minutes] = timePart.split(':');
+
+      if (period === "오후" && parseInt(hours, 10) !== 12) {
+        hours = (parseInt(hours, 10) + 12).toString().padStart(2, '0');
+      } else if (period === "오전" && parseInt(hours, 10) === 12) {
+        hours = '00';
+      }
+      const formattedTime = `${hours}:${minutes}:00`;
+
+      const response = await axios.put(
+        `${BASE_URL}/api/mypage/push-time`,
+        null,
+        {
+          params: { pushNotificationTime: formattedTime },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      console.log("Push time updated:", response.data);
+
+      Alert.alert("알림", "알림 시간이 변경되었습니다.");
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);        
+        Alert.alert("오류", `알림 시간 변경 중 오류 발생: ${error.response.data}`);
+      } else if (error.request) {
+        console.error("응답 없음:");
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:");
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
+
 
   const handleLogout = () => {
     // 로그아웃 로직을 여기에 추가하세요.
