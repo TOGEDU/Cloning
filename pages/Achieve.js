@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // 토큰 저장을 위해 사용
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import BASE_URL from "../api";
 
 const images = {
@@ -39,6 +39,8 @@ const Achieve = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        console.log("API Response:", response.data);
 
         const apiData = response.data;
         const updatedData = { ...data };
