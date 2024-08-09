@@ -34,6 +34,7 @@ const ChildIdPw = () => {
   const handleNext = async () => {
     if (validateAll()) {
       try {
+        const name = await AsyncStorage.getItem("name");
         const childId = await AsyncStorage.getItem("childId");
         const birthDate = await AsyncStorage.getItem("birthDate");
         const response = await axios.post(
@@ -42,7 +43,7 @@ const ChildIdPw = () => {
 
           {
             childId: childId,
-            name: "사용자",
+            name: name,
             birthDate: birthDate,
             email: email,
             password: password,
