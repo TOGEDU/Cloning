@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -12,45 +12,107 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import BASE_URL from "../api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const img = require("../assets/todayquestionimg.png");
 
 const TodayQuestion = () => {
   const [text, setText] = useState("");
+  const [question, setQuestion] = useState("");
+  const [questionId, setQuestionId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   const navigation = useNavigation();
-  const answerInputRef = useRef(null);
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
   };
 
-  const handleWriteFinish = async () => {
-    if (!token) {
-      console.error("Token not available");
-      return;
-    }
-    try {
-      const response = await axios.post(
-        `${BASE_URL}/api/dailyquestion`,
-        {
-          questionId: 3,
-          text: text,
-        },
-        {
+  useEffect(() => {
+    const fetchQuestion = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (!token) {
+          console.error("Token doesn't exist");
+          return;
+        }
+
+        const response = await axios.get(`${BASE_URL}/api/dailyquestion`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        });
+
+        const todayQuestion = response.data;
+
+        if (todayQuestion && todayQuestion.question) {
+          setQuestion(todayQuestion.question);
+          setQuestionId(todayQuestion.questionId);
+
+          if (todayQuestion.text) {
+            setText(todayQuestion.text);
+            setIsEditing(true);
+          }
+        } 
+      } catch (error) {
+        console.error("Error fetching question:", error);
+        if (error.response) {
+          console.error("Error response data:", error.response.data);
         }
-      );
+      }
+    };
 
-      const data = response.data;
+    fetchQuestion();
+  }, []);
 
-      if (response.data.success) {
+  const handleWriteFinish = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      console.log("Token:", token);
+      if (!token) {
+        console.error("Token doesn't exist");
+        return;
+      }
+
+      const response = isEditing
+        ? await axios.put(
+            `${BASE_URL}/api/dailyquestion`,
+            {
+              questionId: questionId,
+              text: text,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+        : await axios.post(
+            `${BASE_URL}/api/dailyquestion`,
+            {
+              questionId: questionId,
+              text: text,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+      const successMessage = isEditing
+        ? "질문 답변 변경 완료"
+        : "질문 답변 추가 완료";
+
+      if (response.data === successMessage) {
         navigation.replace("WriteFinish");
       } else {
-        console.error("Error during response:", response.data.message);
+        console.error("Error during response:", response.data);
       }
     } catch (error) {
       console.error("Error during request:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+      }
     }
   };
 
@@ -65,8 +127,7 @@ const TodayQuestion = () => {
         </View>
         <View style={styles.middleBox}>
           <Text style={styles.middleText}>
-            아이가 학교에서 친구와 다투고 온 날{"\n"}해주고 싶은 말은
-            무엇인가요?
+            {question ? question : "오늘의 질문이 없습니다."}
           </Text>
         </View>
 
@@ -81,7 +142,9 @@ const TodayQuestion = () => {
           />
         </View>
         <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
-          <Text style={styles.btnText}>기록하기</Text>
+          <Text style={styles.btnText}>
+            {isEditing ? "수정하기" : "기록하기"}
+          </Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -95,6 +158,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+    flex: 1,
   },
   topBackground: {
     backgroundColor: "#ABB0FE",
@@ -137,6 +201,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.36,
     lineHeight: 27,
     fontFamily: "NotoSans",
+    textAlign: "center",
   },
   answerBox: {
     width: 331,
