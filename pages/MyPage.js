@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,20 +7,68 @@ import {
   Image,
   StyleSheet,
   ScrollView,
-  Switch,
+  Switch, Alert
 } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // React Navigation 사용
+import { useNavigation } from "@react-navigation/native";
 import profileimg from "../assets/profileimg.png";
 import chevronDown from "../assets/chevron-down.png";
 import chevronUp from "../assets/chevron-up.png";
+import BASE_URL from "../api";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios'; 
 
 const MyPage = () => {
-  const navigation = useNavigation(); // 네비게이션 훅 사용
+  const navigation = useNavigation();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [children, setChildren] = useState([""]);
   const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState("오전 9:00");
+  const [profile, setProfile] = useState({ name: '', email: '', pushStatus: false });
+  const [isEnabled, setIsEnabled] = useState(false);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+        
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        const response = await axios.get(`${BASE_URL}/api/mypage`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = response.data;
+
+        setProfile({
+          name: data.name,
+          email: data.email,
+          pushStatus: data.pushStatus,
+        });
+
+        const hours = parseInt(data.pushNotificationTime.split(':')[0], 10);
+        const period = hours >= 12 ? "오후" : "오전";
+        const formattedHours = hours > 12 ? hours - 12 : hours;
+        setSelectedTime(`${period} ${formattedHours}:00`);
+
+        setChildren(data.childList.map(child => child.name));
+
+        setIsEnabled(data.pushStatus);
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -42,9 +90,46 @@ const MyPage = () => {
     setDropdownOpen(false);
   };
 
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
 
+  const toggleSwitch = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      console.log("Token:", token);
+
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const newPushStatus = !isEnabled;
+      setIsEnabled(newPushStatus);
+
+      const response = await axios.put(
+        `${BASE_URL}/api/mypage/push-status`,
+        { pushStatus: newPushStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );    
+      console.log("Push status updated:", response.data);
+
+      Alert.alert("알림", "푸시 알림 상태 변경 완료");
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);        
+        Alert.alert("오류", `푸시 알림 상태 변경 중 오류 발생: ${error.response.data}`);
+      } else if (error.request) {
+        console.error("응답 없음:", error.request);
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:", error.message);
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
+  };
   const toggleTimeDropdown = () => {
     setTimeDropdownOpen(!timeDropdownOpen);
   };
@@ -81,8 +166,8 @@ const MyPage = () => {
     <View style={styles.container}>
       <View style={styles.profilecontainer}>
         <View>
-          <Text style={styles.nameText}>박은영</Text>
-          <Text style={styles.emailText}>cloning@gmail.com</Text>
+          <Text style={styles.nameText}>{profile.name}</Text>
+          <Text style={styles.emailText}>{profile.email}</Text>
         </View>
         <Image source={profileimg} style={styles.profileImage} />
       </View>

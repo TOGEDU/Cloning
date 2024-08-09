@@ -1,14 +1,57 @@
-import React, { useState } from "react";
-import { Text, View, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, View, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
+import axios from 'axios'; 
+import BASE_URL from "../api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const diaryImg = require("../assets/diaryListImg.png");
 
 const DiaryList = () => {
   const [selectedDate, setSelectedDate] = useState("");
+  const [markedDates, setMarkedDates] = useState({});
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+
+        const year = 2024; 
+        const month = 6; 
+        const response = await axios.get(`${BASE_URL}/api/home/calendar`, {
+          params: { year, month },
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = response.data;
+        const marked = {};
+
+        data.forEach(item => {
+          if (item.diary) {
+            marked[item.date] = {
+              marked: true,
+              dotColor: 'yellow',
+              activeOpacity: 0
+            };
+          }
+        });
+
+        setMarkedDates(marked);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const getMarkedDates = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -28,8 +71,12 @@ const DiaryList = () => {
       };
     }
 
-    return markedDates;
+    return { ...markedDates, ...markedDates };
   };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <View style={styles.container}>
