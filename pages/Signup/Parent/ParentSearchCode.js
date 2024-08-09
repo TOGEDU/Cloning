@@ -34,7 +34,7 @@ const ParentSearchCode = () => {
     try {
       const response = await axios.get(
         `${BASE_URL}/api/sign/parent/verification`,
-        {
+
           params: { parentCode: text },
           timeout: 5000,
         }

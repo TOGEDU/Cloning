@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BASE_URL from "../../../api";
 
 
+
 const ParentIdPw = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,8 +35,8 @@ const ParentIdPw = () => {
   const handleNext = async () => {
     if (validateAll()) {
       try {
-        await AsyncStorage.setItem('email', email);
-        await AsyncStorage.setItem('password', password);
+        await AsyncStorage.setItem("email", email);
+        await AsyncStorage.setItem("password", password);
         navigation.navigate("ParentPush");
       } catch (error) {
         console.error("Error saving data", error);
@@ -61,6 +62,7 @@ const ParentIdPw = () => {
     try {
       const response = await axios.get(
         `${BASE_URL}/api/sign/emailduplicationcheck`,
+
         {
           params: { id: 3, email: email },
         }

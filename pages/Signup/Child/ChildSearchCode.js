@@ -31,6 +31,7 @@ const ChildSearchCode = () => {
     try {
       const response = await axios.get(
         `${BASE_URL}/api/sign/child/check`,
+
         {
           params: { uniqueCode: text },
           timeout: 5000,
@@ -231,7 +232,6 @@ const styles = StyleSheet.create({
     marginRight: 5,
     fontSize: 16,
     fontFamily: "NotoSans500",
-
   },
   nextBtn: {
     backgroundColor: "#6369D4",
