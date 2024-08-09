@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import BASE_URL from "../../../api";
 
 const images = {
   월: require("../assets/mon.png"),

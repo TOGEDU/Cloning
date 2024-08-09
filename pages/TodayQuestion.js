@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import BASE_URL from "../../../api";
 
 const img = require("../assets/todayquestionimg.png");
 
@@ -30,7 +31,7 @@ const TodayQuestion = () => {
     }
     try {
       const response = await axios.post(
-        "http://192.168.35.124:8080/api/dailyquestion",
+        `${BASE_URL}/api/dailyquestion`,
         {
           questionId: 3,
           text: text,
@@ -137,7 +138,6 @@ const styles = StyleSheet.create({
     letterSpacing: -0.36,
     lineHeight: 27,
     fontFamily: "NotoSans",
-
   },
   answerBox: {
     width: 331,

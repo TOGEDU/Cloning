@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { AuthContext } from "../AuthContext";
+import BASE_URL from "../../../api";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -23,7 +24,7 @@ const Login = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const response = await axios.post(
-        "http://192.168.35.124:8080/api/sign/sign-in",
+        `${BASE_URL}/api/sign/sign-in`,
         {
           email: email,
           password: password,

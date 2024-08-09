@@ -14,6 +14,7 @@ import QImage from "../assets/Qimage.png";
 import AImage from "../assets/Aimage.png";
 import downIcon from "../assets/chevron-down.png";
 import upIcon from "../assets/chevron-up.png";
+import BASE_URL from "../../../api";
 
 const TodayQuestionList = () => {
   const [expandedId, setExpandedId] = useState(null);
@@ -28,14 +29,11 @@ const TodayQuestionList = () => {
           return;
         }
 
-        const response = await axios.get(
-          "http://192.168.35.124:8080/api/dailyquestion",
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
+        const response = await axios.get(`${BASE_URL}/api/dailyquestion`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
         console.log("API response:", response.data);
 
         if (response.data) {

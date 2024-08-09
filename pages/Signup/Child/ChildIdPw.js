@@ -12,6 +12,7 @@ import Svg, { Path } from "react-native-svg";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../../../api";
 
 const ChildIdPw = () => {
   const [email, setEmail] = useState("");
@@ -36,7 +37,7 @@ const ChildIdPw = () => {
         const childId = await AsyncStorage.getItem("childId");
         const birthDate = await AsyncStorage.getItem("birthDate");
         const response = await axios.post(
-          "http://192.168.35.124:8080/api/sign/child/sign-up",
+          `${BASE_URL}/api/sign/child/sign-up`,
           {
             childId: childId,
             name: "사용자",
