@@ -1,19 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   TouchableOpacity,
   Image,
-  Platform,
+  StyleSheet,
+  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
-import * as ImagePicker from "react-native-image-picker";
 import Svg, { Path } from "react-native-svg";
+import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-
-// 날짜 가져올거면 route로 가져올 수 있음!
+import axios from "axios";
+import BASE_URL from "../api";
 
 const Diary = () => {
   const navigation = useNavigation();
@@ -22,86 +25,180 @@ const Diary = () => {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState(null);
   const [image, setImage] = useState(null);
+  const [childrenOptions, setChildrenOptions] = useState([]);
 
-  const handleSave = () => {
-    // 일기 저장 로직 추가하기
-    navigation.replace("WriteFinish");
-  };
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        // console.log("Retrieved Token:", token);
 
-  const handleImagePicker = () => {
-    const options = {
-      mediaType: "photo",
-      quality: 1,
+        const today = new Date().toISOString().split("T")[0];
+
+        const response = await axios.get(
+          `${BASE_URL}/api/diary/check-availability`,
+          {
+            params: {
+              date: today,
+            },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const childrenOptions = response.data
+          .filter((child) => !child.isHave)
+          .map((child) => ({
+            label: child.name,
+            value: child.parentChildId,
+          }));
+
+        setChildrenOptions(childrenOptions);
+      } catch (error) {
+        console.error("Failed to fetch children:", error);
+      }
     };
 
-    ImagePicker.launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.error) {
-        console.log("ImagePicker Error: ", response.error);
-      } else {
-        const source = { uri: response.assets[0].uri };
-        setImage(source);
+    fetchChildren();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        Alert.alert("Error", "No token found");
+        return;
       }
+
+      const today = new Date().toISOString().split("T")[0];
+
+      const formData = new FormData();
+      formData.append(
+        "diaryRequestDto",
+        JSON.stringify({
+          parentChildId: 1,
+          date: today,
+          text: content,
+        })
+      );
+
+      if (image) {
+        formData.append("file", {
+          uri: image.uri,
+          type: "image/jpeg",
+          name: "리락쿠마.jpg",
+        });
+      }
+
+      const response = await axios.post(`${BASE_URL}/api/diary`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data === "육아일기가 기록되었습니다.") {
+        navigation.replace("WriteFinish");
+      } else {
+        Alert.alert("저장 실패", "일기 저장에 실패했습니다.");
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        console.error("Error response headers:", error.response.headers);
+      } else if (error.request) {
+        console.error("Error request data:", error.request);
+      } else {
+        console.error("Error message:", error.message);
+      }
+      Alert.alert("Error", "An error occurred while saving the diary.");
+    }
+  };
+
+  const handleImagePicker = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Permission required",
+        "Permission to access gallery is required!"
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
     });
+
+    if (!result.canceled && result.assets.length > 0) {
+      setImage(result.assets[0]);
+    }
+  };
+
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-          <Path
-            d="M12.8334 12.8333L31.1667 31.1666M12.8334 31.1666L31.1667 12.8333"
-            stroke="#545454"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </Svg>
-      </TouchableOpacity>
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+            <Path
+              d="M12.8334 12.8333L31.1667 31.1666M12.8334 31.1666L31.1667 12.8333"
+              stroke="#545454"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </TouchableOpacity>
 
-      <RNPickerSelect
-        onValueChange={(value) => setCategory(value)}
-        items={[
-          { label: "첫째", value: "첫째" },
-          { label: "둘째", value: "둘째" },
-        ]}
-        placeholder={{ label: "자식 선택", value: null }}
-        style={{
-          inputIOS: styles.picker,
-          inputAndroid: styles.picker,
-        }}
-      />
+        <RNPickerSelect
+          onValueChange={(value) => setCategory(value)}
+          items={childrenOptions}
+          placeholder={{ label: "자식 선택", value: null }}
+          style={{
+            inputIOS: styles.picker,
+            inputAndroid: styles.picker,
+          }}
+        />
 
-      <Text style={styles.title}>제목</Text>
-
-      <TextInput
-        style={styles.titleInput}
-        placeholder="일기의 제목을 적어주세요"
-        value={title}
-        onChangeText={setTitle}
-      />
-      <Text style={styles.contentTitle}>내용</Text>
-      <TextInput
-        style={styles.contentInput}
-        placeholder="일기의 내용을 적어주세요"
-        value={content}
-        onChangeText={setContent}
-        multiline
-      />
-      <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
-        {image ? (
-          <Image source={image} style={styles.image} />
-        ) : (
-          <Text style={styles.imagePickerText}>+ 사진 추가</Text>
-        )}
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.btn} onPress={handleSave}>
-        <Text style={styles.btnText}>기록하기</Text>
-      </TouchableOpacity>
-    </View>
+        <Text style={styles.title}>제목</Text>
+        <TextInput
+          style={styles.titleInput}
+          placeholder="일기의 제목을 적어주세요"
+          value={title}
+          onChangeText={setTitle}
+        />
+        <Text style={styles.contentTitle}>내용</Text>
+        <TextInput
+          style={styles.contentInput}
+          placeholder="일기의 내용을 적어주세요"
+          value={content}
+          onChangeText={setContent}
+          multiline
+        />
+        <TouchableOpacity
+          style={styles.imagePicker}
+          onPress={handleImagePicker}
+        >
+          {image ? (
+            <Image source={{ uri: image.uri }} style={styles.image} />
+          ) : (
+            <Text style={styles.imagePickerText}>+ 사진 추가</Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.btn} onPress={handleSave}>
+          <Text style={styles.btnText}>기록하기</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -117,7 +214,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    top: 0,
+    top: 20,
     right: 20,
     zIndex: 1,
   },

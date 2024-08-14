@@ -1,25 +1,86 @@
-import React, { useState } from "react";
-import { Text, View, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, View, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import BASE_URL from "../api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const diaryImg = require("../assets/diaryListImg.png");
 
 const DiaryList = () => {
   const [selectedDate, setSelectedDate] = useState("");
+  const [markedDates, setMarkedDates] = useState({});
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+
+  const fetchDiaryDates = async (year, month) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      console.log("Retrieved Token:", token);
+
+      const formattedMonth = `${year}-${String(month).padStart(2, "0")}`;
+
+      console.log("Authorization Header:", `Bearer ${token}`);
+
+      const response = await axios.get(`${BASE_URL}/api/diary/calendar`, {
+        params: { month: formattedMonth },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("API Response Data:", response.data);
+
+      const data = response.data.dateList || [];
+      const marked = {};
+
+      if (data.length > 0) {
+        data.forEach((item) => {
+          if (item.count > 0) {
+            marked[item.date] = {
+              marked: true,
+              dotColor: "yellow",
+              activeOpacity: 0,
+            };
+          }
+        });
+      } else {
+        console.log("No diary entries for this month.");
+      }
+
+      setMarkedDates(marked);
+      console.log("Marked Dates:", marked);
+    } catch (error) {
+      // console.error("Error fetching data:", error);
+      // console.error("Error response:", error.response?.data);
+      // console.error("Error status:", error.response?.status);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth() + 1;
+    fetchDiaryDates(year, month);
+  }, []);
 
   const getMarkedDates = () => {
     const today = new Date().toISOString().split("T")[0];
-    let markedDates = {
+
+    const customMarkedDates = {
+      ...markedDates,
       [today]: {
         marked: true,
+        dotColor: "red",
       },
     };
 
     if (selectedDate) {
-      markedDates[selectedDate] = {
+      customMarkedDates[selectedDate] = {
+        ...customMarkedDates[selectedDate],
         selected: true,
         customStyles: {
           container: styles.selectedContainer,
@@ -28,8 +89,12 @@ const DiaryList = () => {
       };
     }
 
-    return markedDates;
+    return customMarkedDates;
   };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <View style={styles.container}>
@@ -53,7 +118,9 @@ const DiaryList = () => {
           hideExtraDays={true}
           monthFormat={"M월"}
           onMonthChange={(month) => {
-            console.log(month);
+            const year = month.year;
+            const newMonth = month.month;
+            fetchDiaryDates(year, newMonth);
           }}
           renderArrow={(direction) =>
             direction === "left" ? (
