@@ -36,7 +36,7 @@ const ChildIdPw = () => {
         const childId = await AsyncStorage.getItem("childId");
         const birthDate = await AsyncStorage.getItem("birthDate");
         const response = await axios.post(
-          "http://192.168.0.19:8080/api/sign/child/sign-up",
+          "http://172.30.1.27:8080/api/sign/child/sign-up",
           {
             childId: childId,
             name: "사용자",

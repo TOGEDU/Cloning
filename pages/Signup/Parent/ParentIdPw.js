@@ -58,7 +58,7 @@ const ParentIdPw = () => {
 
     try {
       const response = await axios.get(
-        `http://192.168.0.19:8080/api/sign/emailduplicationcheck`,
+        `http://172.30.1.27:8080/api/sign/emailduplicationcheck`,
         {
           params: { id: 3, email: email },
         }

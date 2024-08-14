@@ -215,15 +215,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  icon: {
-    width: 24,
-    height: 24,
-  },
-  logotext: {
-    width: 80,
-    height: 24,
-    marginLeft: 8,
-  },
+
   profilecontainer: {
     flexDirection: "row",
     justifyContent: "space-between",

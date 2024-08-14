@@ -30,7 +30,7 @@ const TodayQuestionList = () => {
         }
 
         const response = await axios.get(
-          "http://192.168.0.19:8080/api/dailyquestion",
+          "http://172.30.1.27:8080/api/dailyquestion",
           {
             headers: {
               Authorization: `Bearer ${token}`,
