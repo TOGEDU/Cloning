@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncSt
 import back from "../assets/back.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
-import mypagew from "../assets/mypagew.png";
+import pencil from "../assets/pencil.png";
 import BASE_URL from "../api";
 
 const ChatList = ({ navigation }) => {
@@ -56,14 +56,16 @@ const ChatList = ({ navigation }) => {
     <View style={styles.container}>
       <SafeAreaView style={styles.headerContainer} edges={["top"]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.navigate("ChildChat")}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image source={back} style={styles.back} />
           </TouchableOpacity>
           <View style={styles.headerlogo}>
             <Image source={smallLogo} style={styles.smallLogo} />
             <Image source={logotext} style={styles.logotext} />
           </View>
-          <Image source={mypagew} style={styles.mypagew} />
+          <TouchableOpacity onPress={() => navigation.navigate("ChildChat")}>
+            <Image source={pencil} style={styles.pencil} />
+          </TouchableOpacity>
         </View>
         <View style={styles.listcontainer}>
           {chatRooms.map((room) => (
