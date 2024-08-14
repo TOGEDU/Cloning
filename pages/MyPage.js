@@ -99,19 +99,15 @@ const MyPage = () => {
       for (const childName of children) {
         if (!childName.trim()) continue;
 
-        await axios.post(
-          `${BASE_URL}/api/mypage/child`,
-          null, 
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            params: {
-              name: childName,
-            },
-          }
-        );
+        await axios.post(`${BASE_URL}/api/mypage/child`, null, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          params: {
+            name: childName,
+          },
+        });
       }
 
       Alert.alert("알림", "자녀 이름이 변경되었습니다.");
@@ -284,10 +280,46 @@ const MyPage = () => {
     }
   };
 
-  const handleLogout = () => {
-    // 로그아웃 로직을 여기에 추가하세요.
-    console.log("로그아웃");
-    navigation.navigate("Login"); // 로그인 화면으로 이동
+  const handleLogout = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const response = await axios.post(`${BASE_URL}/api/sign/logout`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.data.success) {
+        Alert.alert("알림", "로그아웃 완료");
+
+        await AsyncStorage.removeItem("authToken");
+
+        navigation.navigate("Login");
+      } else {
+        Alert.alert("오류", response.data.msg || "로그아웃에 실패했습니다.");
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);
+        Alert.alert(
+          "오류",
+          `로그아웃 중 오류 발생: ${error.response.data.msg}`
+        );
+      } else if (error.request) {
+        console.error("응답 없음:", error.request);
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:", error.message);
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
   const timeOptions = [
