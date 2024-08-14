@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Text,
   View,
@@ -8,35 +8,33 @@ import {
   ScrollView,
 } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "../AuthContext";
 import todayQListImage from "../assets/todayQList.png";
 import QImage from "../assets/Qimage.png";
 import AImage from "../assets/Aimage.png";
 import downIcon from "../assets/chevron-down.png";
 import upIcon from "../assets/chevron-up.png";
+import BASE_URL from "../api";
 
 const TodayQuestionList = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [questionData, setQuestionData] = useState([]);
+  const { authToken } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = await AsyncStorage.getItem("authToken");
-
-        if (!token) {
+        if (!authToken) {
           console.error("Token not available");
           return;
         }
 
-        const response = await axios.get(
-          "http://172.30.1.27:8080/api/dailyquestion",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`${BASE_URL}/api/dailyquestion`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
         console.log("API response:", response.data);
 
         if (response.data) {
@@ -50,7 +48,7 @@ const TodayQuestionList = () => {
     };
 
     fetchData();
-  }, []);
+  }, [authToken]);
 
   const toggleExpand = (id) => {
     setExpandedId((prevId) => (prevId === id ? null : id));
@@ -120,9 +118,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontFamily: "NotoSans",
     fontSize: 25,
-    fontWeight: "bold",
+    fontFamily: "NotoSans900",
     lineHeight: 28 * 1.12,
     letterSpacing: -0.5,
   },

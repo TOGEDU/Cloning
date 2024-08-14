@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 30,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
     marginBottom: 50,
   },
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
 });

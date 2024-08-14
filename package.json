@@ -21,8 +21,10 @@
     "@react-navigation/stack": "^6.4.1",
     "axios": "^1.7.2",
     "expo": "~51.0.14",
+    "expo-av": "~14.0.6",
     "expo-font": "^12.0.9",
     "expo-status-bar": "~1.12.1",
+    "jwt-decode": "^3.1.2",
     "react": "18.2.0",
     "react-native": "0.74.2",
     "react-native-audio-recorder-player": "^3.6.10",
@@ -39,15 +41,13 @@
     "react-native-screens": "^3.32.0",
     "react-native-sound": "^0.11.2",
     "react-native-svg": "^15.3.0",
-    "react-native-vector-icons": "^10.1.0",
-    "expo-av": "~14.0.6"
+    "react-native-vector-icons": "^10.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "metro-config": "^0.80.9",
     "metro-react-native-babel-preset": "^0.77.0",
-    "react-native-svg-transformer": "^1.4.0",
-    "react-native-typescript-transformer": "^1.2.13"
+    "react-native-svg-transformer": "^1.4.0"
   },
   "private": true,
   "proxy": "http://192.168.1.100:8080"

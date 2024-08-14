@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../api";
 
 const images = {
   월: require("../assets/mon.png"),
@@ -15,16 +18,52 @@ const images = {
 const days = ["월", "화", "수", "목", "금", "토", "일"];
 
 const Achieve = () => {
-  const data = {
-    // 임시 데이터
-    월: { diary: true, question: true },
-    화: { diary: false, question: true },
-    수: { diary: true, question: false },
-    목: { diary: true, question: true },
-    금: { diary: false, question: false },
-    토: { diary: true, question: true },
-    일: { diary: true, question: true },
-  };
+  const [data, setData] = useState({
+    월: { badge: false },
+    화: { badge: false },
+    수: { badge: false },
+    목: { badge: false },
+    금: { badge: false },
+    토: { badge: false },
+    일: { badge: false },
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (!token) throw new Error("No token found");
+
+        const response = await axios.get(`${BASE_URL}/api/stat`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("API Response:", response.data);
+
+        const apiData = response.data;
+        const updatedData = { ...data };
+
+        apiData.forEach((item) => {
+          const date = new Date(item.date);
+          const dayIndex = (date.getDay() + 6) % 7;
+          const dayKey = days[dayIndex];
+          updatedData[dayKey] = { badge: item.badge };
+        });
+
+        setData(updatedData);
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          console.error("Unauthorized: Invalid token");
+        } else {
+          console.error("Error fetching data:", error);
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -50,8 +89,12 @@ const Achieve = () => {
       <View style={styles.circleContainer}>
         {days.map((day, index) => (
           <View key={day} style={[styles.circle, styles[`circle${index}`]]}>
-            {data[day].diary && data[day].question ? (
-              <Image source={images[day]} style={styles.image} resizeMode="contain" />
+            {data[day].badge ? (
+              <Image
+                source={images[day]}
+                style={styles.image}
+                resizeMode="contain"
+              />
             ) : (
               <View style={styles.emptyCircle} />
             )}
@@ -73,7 +116,7 @@ const styles = StyleSheet.create({
   },
   t1: {
     fontSize: 30,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     marginLeft: 33,
   },
   t2: {

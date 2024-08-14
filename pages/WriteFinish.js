@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     color: "#fff",
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     marginBottom: 50,
   },
   img: {
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
 });

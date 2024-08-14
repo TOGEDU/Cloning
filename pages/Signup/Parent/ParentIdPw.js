@@ -12,6 +12,7 @@ import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../../../api";
 
 const ParentIdPw = () => {
   const [email, setEmail] = useState("");
@@ -58,7 +59,8 @@ const ParentIdPw = () => {
 
     try {
       const response = await axios.get(
-        `http://172.30.1.27:8080/api/sign/emailduplicationcheck`,
+        `${BASE_URL}/api/sign/emailduplicationcheck`,
+
         {
           params: { id: 3, email: email },
         }
@@ -405,6 +407,5 @@ const styles = StyleSheet.create({
   inputError: {
     borderColor: "red",
     borderWidth: 2,
-    fontFamily: "NotoSans500",
   },
 });

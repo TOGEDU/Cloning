@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import BASE_URL from "../../../api";
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
@@ -33,7 +33,7 @@ const ParentSearchCode = () => {
   const handleSearch = async () => {
     try {
       const response = await axios.get(
-        "http://172.30.1.27:8080/api/sign/parent/verification",
+        `${BASE_URL}/api/sign/parent/verification`,
         {
           params: { parentCode: text },
           timeout: 5000,

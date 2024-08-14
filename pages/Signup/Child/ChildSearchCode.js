@@ -12,6 +12,7 @@ import axios from "axios";
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../../../api";
 
 const ChildSearchCode = () => {
   const [text, onChangeText] = useState("");
@@ -29,7 +30,8 @@ const ChildSearchCode = () => {
   const handleSearch = async () => {
     try {
       const response = await axios.get(
-        "http://172.30.1.27:8080/api/sign/child/check",
+        `${BASE_URL}/api/sign/child/check`,
+
         {
           params: { uniqueCode: text },
           timeout: 5000,

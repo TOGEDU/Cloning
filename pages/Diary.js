@@ -123,8 +123,10 @@ const styles = StyleSheet.create({
   },
   picker: {
     marginLeft: 28,
+    color: "#838383",
     marginBottom: 15,
-    fontSize: 15,
+    fontSize: 13,
+    fontFamily: "NotoSans",
     width: 100,
     height: 32,
     borderWidth: 1,
@@ -136,12 +138,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     alignSelf: "flex-start",
     marginLeft: 36,
+    fontFamily: "NotoSans",
     marginBottom: 15,
   },
   contentTitle: {
     fontSize: 24,
     alignSelf: "flex-start",
     marginLeft: 36,
+    fontFamily: "NotoSans",
     marginBottom: 15,
   },
   titleInput: {
@@ -196,6 +200,6 @@ const styles = StyleSheet.create({
   btnText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
   },
 });

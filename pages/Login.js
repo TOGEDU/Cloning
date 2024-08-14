@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,14 @@ import {
   Keyboard,
 } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import jwtDecode from "jwt-decode";
+import { AuthContext } from "../AuthContext";
+import BASE_URL from "../api";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useContext(AuthContext);
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -21,32 +24,41 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(
-        "http://172.30.1.27:8080/api/sign/sign-in",
-        {
-          email: email,
-          password: password,
-          fcmToken: "sldijbfg.sdgh.sdoq",
-        }
-      );
-
+      const response = await axios.post(`${BASE_URL}/api/sign/sign-in`, {
+        email: email,
+        password: password,
+        fcmToken: "sldijbfg.sdgh.sdoq",
+      });
       const data = response.data;
 
-      if (response.data.success) {
-        if (data.role === "Parent") {
-          navigation.navigate("Home");
+      if (data.success) {
+        const token = data.token;
+        if (token) {
+          login(token);
+
+          const decodedToken = jwtDecode(token);
+          console.log("Decoded Token:", decodedToken);
+          console.log("Token expires at:", new Date(decodedToken.exp * 1000));
+
+          if (data.role === "Parent") {
+            navigation.navigate("Home");
+          } else {
+            navigation.navigate("ChildChat");
+          }
         } else {
-          navigation.navigate("ChildChat");
+          console.error("Login failed: No token received");
         }
-        console.log("token:", data.token);
-        await AsyncStorage.setItem("authToken", data.token);
       } else {
-        console.error("Login failed:", response.data.msg);
+        console.error("Login failed:", data.msg);
       }
     } catch (error) {
       console.error("Error during login:", error);
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+      }
     }
   };
+
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
       <View style={styles.container}>
