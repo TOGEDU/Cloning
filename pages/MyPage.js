@@ -96,9 +96,21 @@ const MyPage = () => {
       }
       console.log("토큰 확인:", token);
 
-      for (const childName of children) {
-        if (!childName.trim()) continue;
+      const response = await axios.get(`${BASE_URL}/api/mypage`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      const existingChildren = response.data.childList.map(
+        (child) => child.name
+      );
+
+      const newChildren = children.filter(
+        (childName) => childName.trim() && !existingChildren.includes(childName)
+      );
+
+      for (const childName of newChildren) {
         await axios.post(`${BASE_URL}/api/mypage/child`, null, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -110,7 +122,7 @@ const MyPage = () => {
         });
       }
 
-      Alert.alert("알림", "자녀 이름이 변경되었습니다.");
+      Alert.alert("알림", "자녀가 추가되었습니다!");
       setDropdownOpen(false);
     } catch (error) {
       if (error.response) {
