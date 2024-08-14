@@ -14,6 +14,7 @@ import back from "../assets/back.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
 import mypagew from "../assets/mypagew.png";
+import BASE_URL from "../api";
 
 const ChatList = ({ navigation }) => {
   const [chatRooms, setChatRooms] = useState([]); // API로부터 받은 데이터를 저장할 상태 선언
@@ -24,14 +25,11 @@ const ChatList = ({ navigation }) => {
       try {
         const token = await AsyncStorage.getItem("authToken"); // 토큰을 AsyncStorage에서 가져옴
         if (token) {
-          const response = await axios.get(
-            "http://172.30.1.27:8080/api/chat/rooms",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`, // 헤더에 토큰 추가
-              },
-            }
-          );
+          const response = await axios.get(`${BASE_URL}/api/chat/rooms`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // 헤더에 토큰 추가
+            },
+          });
           setChatRooms(response.data); // 받아온 데이터를 상태에 저장
         } else {
           console.error("토큰이 없습니다.");
