@@ -31,30 +31,30 @@ const Diary = () => {
     const fetchChildren = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        // console.log("Retrieved Token:", token);
-
+        console.log(token);
         const today = new Date().toISOString().split("T")[0];
 
         const response = await axios.get(
           `${BASE_URL}/api/diary/check-availability`,
           {
-            params: {
-              date: today,
-            },
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            params: { date: today },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        const childrenOptions = response.data
+        const fetchedChildrenOptions = response.data
           .filter((child) => !child.isHave)
           .map((child) => ({
             label: child.name,
             value: child.parentChildId,
           }));
 
-        setChildrenOptions(childrenOptions);
+        const optionsWithCommon = [
+          { label: "공통", value: "common" },
+          ...fetchedChildrenOptions,
+        ];
+
+        setChildrenOptions(optionsWithCommon);
       } catch (error) {
         console.error("Failed to fetch children:", error);
       }
@@ -66,39 +66,43 @@ const Diary = () => {
   const handleSave = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      if (!token) {
-        Alert.alert("Error", "No token found");
-        return;
-      }
 
       const today = new Date().toISOString().split("T")[0];
 
       const formData = new FormData();
-      formData.append(
-        "diaryRequestDto",
-        JSON.stringify({
-          parentChildId: 1,
-          date: today,
-          text: content,
-        })
-      );
+
+      formData.append("date", today);
+      formData.append("title", title);
+      formData.append("content", content);
 
       if (image) {
-        formData.append("file", {
+        formData.append("image", {
           uri: image.uri,
           type: "image/jpeg",
-          name: "리락쿠마.jpg",
+          name: "사진.jpg",
         });
+      } else {
+        formData.append("image", null);
+      }
+
+      if (category === "common") {
+        formData.append("parentChildId", -100);
+      } else if (category) {
+        formData.append("parentChildId", category);
       }
 
       const response = await axios.post(`${BASE_URL}/api/diary`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      if (response.data === "육아일기가 기록되었습니다.") {
+      if (response.data.success === true) {
+        // Alert.alert("저장 성공", response.data.msg);
         navigation.replace("WriteFinish");
+      } else if (response.data.success === false) {
+        Alert.alert("저장 실패", response.data.msg);
       } else {
         Alert.alert("저장 실패", "일기 저장에 실패했습니다.");
       }
@@ -106,13 +110,12 @@ const Diary = () => {
       if (error.response) {
         console.error("Error response data:", error.response.data);
         console.error("Error response status:", error.response.status);
-        console.error("Error response headers:", error.response.headers);
+        // console.error("Error response headers:", error.response.headers);
       } else if (error.request) {
         console.error("Error request data:", error.request);
       } else {
         console.error("Error message:", error.message);
       }
-      Alert.alert("Error", "An error occurred while saving the diary.");
     }
   };
 
