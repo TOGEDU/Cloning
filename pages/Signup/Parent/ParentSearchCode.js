@@ -8,24 +8,64 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../../../api";
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
 const ParentSearchCode = () => {
-  const [text, onChangeText] = useState("");
+  const [text, setText] = useState("");
   const [isValidCode, setIsValidCode] = useState(false);
   const navigation = useNavigation();
 
   const handleBack = () => {
     navigation.goBack();
   };
+
+  const handleChangeText = (inputText) => {
+    setText(inputText);
+    setIsValidCode(null);
+  };
   const handleNext = () => {
     navigation.navigate("ParentIdPw");
   };
-  const handleSearch = () => {
-    if (text === "1234") {
-      setIsValidCode(true);
-    } else {
+  const handleSearch = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/api/sign/parent/verification`,
+        {
+          params: { parentCode: text },
+          timeout: 5000,
+        }
+      );
+      const data = response.data;
+      if (data.success) {
+        setIsValidCode(true);
+        await AsyncStorage.setItem("parentId", JSON.stringify(data.parentId));
+        console.log("Success:", data);
+      } else {
+        setIsValidCode(false);
+        console.log("Failed:", data);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+          console.error("Response headers:", error.response.headers);
+        } else if (error.request) {
+          console.error("Request data:", error.request);
+          if (error.message === "Network Error") {
+            console.error("CORS 에러일 가능성이 있습니다.");
+          }
+        } else {
+          console.error("Error message:", error.message);
+        }
+      } else {
+        console.error("Unknown error:", error);
+      }
       setIsValidCode(false);
     }
   };
@@ -49,7 +89,7 @@ const ParentSearchCode = () => {
             style={styles.input}
             placeholder="고유 코드"
             value={text}
-            onChangeText={onChangeText}
+            onChangeText={handleChangeText}
           />
           <TouchableOpacity onPress={handleSearch}>
             <Svg
@@ -131,7 +171,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
   subtitle: {
@@ -140,6 +180,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     alignSelf: "flex-start",
     textAlign: "left",
+    fontFamily: "NotoSans500",
     marginLeft: 33,
   },
   lineContainer: {
@@ -174,7 +215,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
   },
 
   inputIconRight: {
@@ -193,7 +234,7 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   validContainer: {
@@ -205,6 +246,7 @@ const styles = StyleSheet.create({
   validText: {
     marginRight: 5,
     fontSize: 16,
+    fontFamily: "NotoSans500",
   },
   nextBtn: {
     backgroundColor: "#6369D4",
@@ -219,7 +261,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
 });

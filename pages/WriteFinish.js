@@ -1,47 +1,47 @@
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-const img = require("../../assets/signupfinish.png");
+const img = require("../assets/clap.png");
 
-const ParentChildInfo = () => {
+const WriteFinish = () => {
   const navigation = useNavigation();
-  const handleLoginPress = () => {
-    navigation.navigate("Login");
+
+  const handleFinishPress = () => {
+    // 작성완료 로직 추가
+    navigation.replace("Home");
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>회원가입 완료!!</Text>
+      <Text style={styles.title}>기록 완료!!</Text>
       <Image source={img} style={styles.img} />
-      <TouchableOpacity style={styles.nextBtn} onPress={handleLoginPress}>
-        <Text style={styles.nextBtnText}>로그인하러 가기</Text>
+      <TouchableOpacity style={styles.nextBtn} onPress={handleFinishPress}>
+        <Text style={styles.nextBtnText}>홈으로 가기</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-export default ParentChildInfo;
+export default WriteFinish;
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 152,
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ABB0FE",
-    flex: 1,
   },
-
   title: {
-    fontSize: 30,
-    fontFamily: "NotoSans600",
+    fontSize: 32,
     color: "#fff",
+    fontFamily: "NotoSans600",
     marginBottom: 50,
   },
   img: {
-    width: 133,
-    height: 341,
+    width: 280,
+    height: 300,
   },
-
   nextBtn: {
     backgroundColor: "#6369D4",
     width: 245,

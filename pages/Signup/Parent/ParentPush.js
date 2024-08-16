@@ -3,28 +3,42 @@ import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import ModalDropdown from "react-native-modal-dropdown";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ParentPush = () => {
-  const [selectedTime, setSelectedTime] = useState("오전 09:00");
+  const [selectedTime, setSelectedTime] = useState("08:00:00");
   const navigation = useNavigation();
 
   const handleBack = () => {
     navigation.goBack();
   };
-  const handleNext = () => {
-    navigation.navigate("ParentChildInfo");
+  const handleNext = async () => {
+    try {
+      await AsyncStorage.setItem("pushNotificationTime", selectedTime);
+      navigation.navigate("ParentChildInfo");
+    } catch (error) {
+      console.error("Error saving data", error);
+    }
   };
   const times = [
-    "오전 08:00",
-    "오전 09:00",
-    "오전 10:00",
-    "오전 11:00",
-    "오후 12:00",
-    "오후 01:00",
-    "오후 02:00",
-    "오후 03:00",
-    "오후 04:00",
-    "오후 05:00",
+    "06:00:00",
+    "07:00:00",
+    "08:00:00",
+    "09:00:00",
+    "10:00:00",
+    "11:00:00",
+    "12:00:00",
+    "13:00:00",
+    "14:00:00",
+    "15:00:00",
+    "16:00:00",
+    "17:00:00",
+    "18:00:00",
+    "19:00:00",
+    "20:00:00",
+    "21:00:00",
+    "22:00:00",
+    "23:00:00",
   ];
 
   return (
@@ -86,7 +100,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
   subtitle: {
@@ -95,6 +109,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     alignSelf: "flex-start",
     textAlign: "left",
+    fontFamily: "NotoSans500",
     marginLeft: 33,
   },
   lineContainer: {
@@ -124,7 +139,6 @@ const styles = StyleSheet.create({
     width: 350,
     height: 54,
     paddingHorizontal: 16,
-
   },
   input: {
     flex: 1,
@@ -132,7 +146,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
     justifyContent: "center",
   },
   dropdown: {
@@ -149,7 +163,7 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
     paddingLeft: 10,
     paddingRight: 10,
   },
@@ -170,7 +184,7 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   nextBtn: {
@@ -186,7 +200,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
 });

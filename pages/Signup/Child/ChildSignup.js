@@ -90,14 +90,16 @@ const ChildSignup = () => {
             />
           </Svg>
         </TouchableOpacity>
-        <Text style={styles.text}>
-          [필수] CLONING 이용 약관
+        <View style={styles.detailContainer}>
+          <Text style={styles.text}>
+            [필수] CLONING 이용 약관
+          </Text>
           <TouchableOpacity
             onPress={() => handleDetailPress("TOGEDU 이용 약관")}
           >
             <Text style={styles.detailText}>자세히</Text>
           </TouchableOpacity>
-        </Text>
+        </View>
       </View>
       <View style={styles.textContainer}>
         <TouchableOpacity onPress={() => handleTermsClick("marketingConsent")}>
@@ -114,15 +116,16 @@ const ChildSignup = () => {
             />
           </Svg>
         </TouchableOpacity>
-
-        <Text style={styles.text}>
-          [필수] 개인정보 수집 및 이용 동의
+        <View style={styles.detailContainer}>
+          <Text style={styles.text}>
+            [필수] 개인정보 수집 및 이용 동의
+          </Text>
           <TouchableOpacity
             onPress={() => handleDetailPress("개인정보 수집 및 이용 동의")}
           >
             <Text style={styles.detailText}>자세히</Text>
           </TouchableOpacity>
-        </Text>
+        </View>
       </View>
       <View style={styles.textContainer}>
         <TouchableOpacity onPress={() => handleTermsClick("additionalTerms")}>
@@ -139,7 +142,9 @@ const ChildSignup = () => {
             />
           </Svg>
         </TouchableOpacity>
-        <Text style={styles.text}>[선택] 광고성 정보 수신 동의 </Text>
+        <View style={styles.detailContainer}>
+          <Text style={styles.text}>[선택] 광고성 정보 수신 동의</Text>
+        </View>
       </View>
       <View style={styles.textContainer}>
         <TouchableOpacity onPress={() => handleTermsClick("serviceTerms")}>
@@ -156,14 +161,16 @@ const ChildSignup = () => {
             />
           </Svg>
         </TouchableOpacity>
-        <Text style={styles.text}>
-          [선택] 개인정보 수집 및 이용 동의
+        <View style={styles.detailContainer}>
+          <Text style={styles.text}>
+            [선택] 개인정보 수집 및 이용 동의
+          </Text>
           <TouchableOpacity
             onPress={() => handleDetailPress("개인정보 수집 및 이용 동의")}
           >
             <Text style={styles.detailText}>자세히</Text>
           </TouchableOpacity>
-        </Text>
+        </View>
       </View>
       <TouchableOpacity
         onPress={() => {
@@ -226,14 +233,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
   },
   lineContainer: {
     marginTop: 50,
     flexDirection: "row",
     marginBottom: 50,
-
-
   },
   lineColor: {
     width: 68,
@@ -265,7 +270,7 @@ const styles = StyleSheet.create({
   },
   agreeText: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     marginLeft: 9,
   },
   textContainer: {
@@ -275,13 +280,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginLeft: 40,
   },
+  detailContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   text: {
     fontSize: 15,
+    color: "#4F4F4F",
     marginLeft: 11,
+    fontFamily: "NotoSans500",
   },
   detailText: {
     textDecorationLine: "underline",
     marginLeft: 5,
+    color: "#4F4F4F",
+    fontFamily: "NotoSans500",
   },
   nextBtn: {
     backgroundColor: "#6369D4",
@@ -296,7 +309,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   modalContainer: {
@@ -323,7 +336,7 @@ const styles = StyleSheet.create({
   modalTitleText: {
     color: "white",
     fontSize: 20,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     textAlign: "center",
   },
   modalIcon: {

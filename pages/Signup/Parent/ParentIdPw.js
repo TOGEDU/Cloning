@@ -10,6 +10,9 @@ import {
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../../../api";
 
 const ParentIdPw = () => {
   const [email, setEmail] = useState("");
@@ -27,10 +30,15 @@ const ParentIdPw = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-
-  const handleNext = () => {
+  const handleNext = async () => {
     if (validateAll()) {
-      navigation.navigate("ParentPush");
+      try {
+        await AsyncStorage.setItem("email", email);
+        await AsyncStorage.setItem("password", password);
+        navigation.navigate("ParentPush");
+      } catch (error) {
+        console.error("Error saving data", error);
+      }
     }
   };
 
@@ -50,23 +58,23 @@ const ParentIdPw = () => {
     }
 
     try {
-      // 이메일 중복 확인 API 요청 추가
-      const response = await fetch("https://api.example.com/check-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
+      const response = await axios.get(
+        `${BASE_URL}/api/sign/emailduplicationcheck`,
 
-      if (data.exists) {
-        setEmailError("이미 사용 중인 이메일입니다.");
+        {
+          params: { id: 3, email: email },
+        }
+      );
+
+      const data = response.data;
+
+      if (!data.success) {
+        setEmailError("이미 가입된 이메일입니다.");
       } else {
         setEmailCheckMessage("사용 가능한 이메일입니다.");
       }
     } catch (error) {
-      setEmailError("이메일 확인 중 오류가 발생했습니다.");
+      setEmailError("이메일 확인 중 오류가 발생");
     }
   };
 
@@ -81,7 +89,8 @@ const ParentIdPw = () => {
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
     if (password.length < 6) {
       setPasswordError("비밀번호는 6자리 이상이어야 합니다.");
       return false;
@@ -105,7 +114,10 @@ const ParentIdPw = () => {
   const validateAll = () => {
     const emailValid = validateEmail(email);
     const passwordValid = validatePassword(password);
-    const passwordConfirmValid = validatePasswordConfirm(password, passwordConfirm);
+    const passwordConfirmValid = validatePasswordConfirm(
+      password,
+      passwordConfirm
+    );
 
     return emailValid && passwordValid && passwordConfirmValid;
   };
@@ -251,7 +263,7 @@ const ParentIdPw = () => {
           <Text style={styles.backBtnText}>이전</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleNext} style={styles.nextBtn}>
-          <Text style={styles.nextBtnText}>완료</Text>
+          <Text style={styles.nextBtnText}>다음</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -270,13 +282,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
   subtitle: {
     fontSize: 20,
     marginTop: 23,
     textAlign: "center",
+    fontFamily: "NotoSans500",
     alignSelf: "flex-start",
     textAlign: "left",
     marginLeft: 33,
@@ -327,7 +340,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
   },
   emailCheckButton: {
     backgroundColor: "#ABB0FE",
@@ -338,7 +351,7 @@ const styles = StyleSheet.create({
   emailCheckButtonText: {
     fontSize: 14,
     color: "#000",
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     opacity: 0.5,
   },
   inputIconRight: {
@@ -357,7 +370,7 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   nextBtn: {
@@ -373,7 +386,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   errorText: {
@@ -381,9 +394,12 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     alignSelf: "flex-start",
     marginLeft: 33,
+    fontFamily: "NotoSans500",
   },
   successText: {
     color: "green",
+    fontFamily: "NotoSans500",
+
     marginBottom: 25,
     alignSelf: "flex-start",
     marginLeft: 33,

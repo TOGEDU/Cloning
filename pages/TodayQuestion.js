@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -9,14 +9,111 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import BASE_URL from "../api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const img = require("../assets/todayquestionimg.png");
 
 const TodayQuestion = () => {
-  const answerInputRef = useRef(null);
+  const [text, setText] = useState("");
+  const [question, setQuestion] = useState("");
+  const [questionId, setQuestionId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const navigation = useNavigation();
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
+  };
+
+  useEffect(() => {
+    const fetchQuestion = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (!token) {
+          console.error("Token doesn't exist");
+          return;
+        }
+
+        const response = await axios.get(`${BASE_URL}/api/dailyquestion`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const todayQuestion = response.data;
+
+        if (todayQuestion && todayQuestion.question) {
+          setQuestion(todayQuestion.question);
+          setQuestionId(todayQuestion.questionId);
+
+          if (todayQuestion.text) {
+            setText(todayQuestion.text);
+            setIsEditing(true);
+          }
+        } 
+      } catch (error) {
+        console.error("Error fetching question:", error);
+        if (error.response) {
+          console.error("Error response data:", error.response.data);
+        }
+      }
+    };
+
+    fetchQuestion();
+  }, []);
+
+  const handleWriteFinish = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      console.log("Token:", token);
+      if (!token) {
+        console.error("Token doesn't exist");
+        return;
+      }
+
+      const response = isEditing
+        ? await axios.put(
+            `${BASE_URL}/api/dailyquestion`,
+            {
+              questionId: questionId,
+              text: text,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+        : await axios.post(
+            `${BASE_URL}/api/dailyquestion`,
+            {
+              questionId: questionId,
+              text: text,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+      const successMessage = isEditing
+        ? "질문 답변 변경 완료"
+        : "질문 답변 추가 완료";
+
+      if (response.data === successMessage) {
+        navigation.replace("WriteFinish");
+      } else {
+        console.error("Error during response:", response.data);
+      }
+    } catch (error) {
+      console.error("Error during request:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+      }
+    }
   };
 
   return (
@@ -30,8 +127,7 @@ const TodayQuestion = () => {
         </View>
         <View style={styles.middleBox}>
           <Text style={styles.middleText}>
-            아이가 학교에서 친구와 다투고 온 날{"\n"}해주고 싶은 말은
-            무엇인가요?
+            {question ? question : "오늘의 질문이 없습니다."}
           </Text>
         </View>
 
@@ -41,10 +137,14 @@ const TodayQuestion = () => {
             placeholder="답변을 입력해 주세요"
             placeholderTextColor="#AEAEAE"
             multiline
+            value={text}
+            onChangeText={setText}
           />
         </View>
-        <TouchableOpacity style={styles.btn}>
-          <Text style={styles.btnText}>기록하기</Text>
+        <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
+          <Text style={styles.btnText}>
+            {isEditing ? "수정하기" : "기록하기"}
+          </Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -58,6 +158,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+    flex: 1,
   },
   topBackground: {
     backgroundColor: "#ABB0FE",
@@ -69,7 +170,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#fff",
     fontSize: 25,
-    fontWeight: "900",
+    fontFamily: "NotoSans900",
     lineHeight: 35,
     marginTop: 20,
   },
@@ -99,6 +200,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     letterSpacing: -0.36,
     lineHeight: 27,
+    fontFamily: "NotoSans",
+    textAlign: "center",
   },
   answerBox: {
     width: 331,
@@ -120,7 +223,7 @@ const styles = StyleSheet.create({
   answerInput: {
     color: "#AEAEAE",
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
   },
   btn: {
     width: 143,
@@ -137,6 +240,6 @@ const styles = StyleSheet.create({
   btnText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
   },
 });

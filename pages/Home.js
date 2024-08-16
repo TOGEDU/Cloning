@@ -33,7 +33,9 @@ const Home = () => {
     <View style={styles.container}>
       <View style={styles.todayQbox}>
         <Text style={styles.todayQboxTitle}>매일 다른 오늘의 질문</Text>
-        <Text style={styles.todayQboxSecondTitle}>머라고 ~~ !!</Text>
+        <Text style={styles.todayQboxSecondTitle}>
+          질문에 답하여 부모님의 사랑을 AI에 새겨보세요
+        </Text>
         <TouchableOpacity
           style={styles.todayQboxBtn}
           onPress={handleTodayQuestion}
@@ -156,15 +158,15 @@ const styles = StyleSheet.create({
   },
   todayQboxTitle: {
     color: "#fff",
+    fontFamily: "NotoSans900",
     fontSize: 25,
-    fontWeight: "900",
     marginTop: 40,
-    marginBottom: 5,
+    marginBottom: 9,
   },
   todayQboxSecondTitle: {
     color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
+    fontFamily: "NotoSans600",
+    fontSize: 11,
   },
   todayQboxBtn: {
     width: 97,
@@ -174,12 +176,12 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 29,
+    marginTop: 25,
   },
   todayQboxBtnText: {
     color: "#6369D4",
+    fontFamily: "NotoSans600",
     fontSize: 13,
-    fontWeight: "600",
   },
   secondboxContainer: {
     display: "flex",
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   BoxText1: {
-    fontWeight: "500",
+    fontFamily: "NotoSans500",
     fontSize: 20,
     textAlign: "right",
     marginTop: 26,
@@ -222,6 +224,7 @@ const styles = StyleSheet.create({
   BoxText2: {
     fontSize: 12,
     color: "#686868",
+    fontFamily: "NotoSans",
     textAlign: "right",
     marginRight: 13,
   },
@@ -278,12 +281,13 @@ const styles = StyleSheet.create({
   },
   whyRecordText1: {
     fontSize: 15,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
     marginBottom: 4,
   },
   whyRecordText2: {
     fontSize: 11,
     lineHeight: 12,
+    fontFamily: "NotoSans",
     letterSpacing: -0.22,
   },
   confirmBox: {
@@ -302,7 +306,7 @@ const styles = StyleSheet.create({
   },
   confirmBoxTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "NotoSans600",
   },
   confirmBoxTop: {
     display: "flex",

@@ -8,8 +8,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import axios from "axios";
 import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../../../api";
 
 const ChildSearchCode = () => {
   const [text, onChangeText] = useState("");
@@ -20,12 +23,35 @@ const ChildSearchCode = () => {
     navigation.goBack();
   };
   const handleNext = () => {
-    navigation.navigate("ChildInfo");
+    if (isValidCode) {
+      navigation.navigate("ChildInfo");
+    }
   };
-  const handleSearch = () => {
-    if (text === "1234") {
-      setIsValidCode(true);
-    } else {
+  const handleSearch = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/api/sign/child/check`,
+
+        {
+          params: { uniqueCode: text },
+          timeout: 5000,
+        }
+      );
+      const data = response.data;
+      if (data.success) {
+        setIsValidCode(true);
+        await AsyncStorage.setItem("childId", JSON.stringify(data.childId));
+        console.log("Success:", data);
+      } else {
+        setIsValidCode(false);
+        console.log("Failed:", data);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+      } else {
+        console.error("Unknown error:", error);
+      }
       setIsValidCode(false);
     }
   };
@@ -130,12 +156,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontWeight: "bold",
+    fontFamily: "NotoSans700",
     alignSelf: "flex-start",
   },
   subtitle: {
     fontSize: 20,
     marginTop: 23,
+    fontFamily: "NotoSans500",
     textAlign: "center",
     alignSelf: "flex-start",
     textAlign: "left",
@@ -145,7 +172,6 @@ const styles = StyleSheet.create({
     marginTop: 50,
     flexDirection: "row",
     marginBottom: 50,
-
   },
   lineColor: {
     width: 68,
@@ -174,7 +200,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "NotoSans500",
   },
 
   inputIconRight: {
@@ -193,18 +219,19 @@ const styles = StyleSheet.create({
   },
   backBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
   validContainer: {
     flexDirection: "row",
     position: "absolute",
     right: 30,
-    bottom: 360,
+    bottom: 340,
   },
   validText: {
     marginRight: 5,
     fontSize: 16,
+    fontFamily: "NotoSans500",
   },
   nextBtn: {
     backgroundColor: "#6369D4",
@@ -219,7 +246,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "NotoSans600",
     color: "#fff",
   },
 });
