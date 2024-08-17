@@ -67,6 +67,27 @@ const DiaryList = () => {
     fetchDiaryDates(year, month);
   }, []);
 
+  const checkDiaryExistence = async (date) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await axios.get(`${BASE_URL}/api/diary`, {
+        params: { date },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // 일기가 있으면 DiaryDetail
+      if (response.data && response.data.length > 0) {
+        navigation.navigate("DiaryDetail", { date });
+      } else {
+        // 일기가 없으면 Diary
+        navigation.navigate("Diary", { date });
+      }
+    } catch (error) {
+      console.error("Error checking diary existence:", error);
+      Alert.alert("오류", "일기 데이터를 확인하는 중 문제가 발생했습니다.");
+    }
+  };
+
   const getMarkedDates = () => {
     const today = new Date().toISOString().split("T")[0];
 
@@ -113,7 +134,7 @@ const DiaryList = () => {
           }}
           onDayPress={(day) => {
             setSelectedDate(day.dateString);
-            navigation.navigate("Diary", { date: day.dateString });
+            checkDiaryExistence(day.dateString);
           }}
           hideExtraDays={true}
           monthFormat={"M월"}
