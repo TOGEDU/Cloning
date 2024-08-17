@@ -7,9 +7,6 @@ import {
   Send,
   InputToolbar,
 } from "react-native-gifted-chat";
-import axios from "axios"; // Axios import 추가
-import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncStorage import 추가
-
 import { Audio } from "expo-av";
 
 import burger from "../assets/burger.png";
@@ -19,8 +16,6 @@ import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
 import testVoice from "../assets/testvoice.wav"; // 오디오 파일 임포트
-
-import BASE_URL from "../api"; // BASE_URL 임포트
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
@@ -40,46 +35,10 @@ const ChildChat = ({ navigation }) => {
     ]);
   }, []);
 
-  const onSend = async (newMessages = []) => {
+  const onSend = (newMessages = []) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, newMessages)
     );
-
-    // AsyncStorage에서 토큰 가져오기
-    try {
-      const token = await AsyncStorage.getItem("authToken");
-
-      if (token) {
-        // API 요청 보내기
-        const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
-          headers: {
-            Authorization: `Bearer ${token}`, // 가져온 토큰 사용
-          },
-          params: {
-            prompt: newMessages[0].text, // 사용자가 보낸 메시지를 prompt로 설정
-          },
-        });
-
-        // API 응답 처리 (예: 채팅창에 응답 메시지 추가)
-        const apiMessage = {
-          _id: response.data.id,
-          text: `API 응답 ID: ${response.data.id}`, // API로부터 받은 ID를 처리
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: "React Native",
-            avatar: profileimg,
-          },
-        };
-        setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, apiMessage)
-        );
-      } else {
-        console.error("토큰을 가져오지 못했습니다.");
-      }
-    } catch (error) {
-      console.error("API 요청에 실패했습니다.", error);
-    }
   };
 
   const playVoiceMessage = async () => {

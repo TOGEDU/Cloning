@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  ScrollView,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncStorage를 import
@@ -67,16 +68,18 @@ const ChatList = ({ navigation }) => {
             <Image source={pencil} style={styles.pencil} />
           </TouchableOpacity>
         </View>
-        <View style={styles.listcontainer}>
-          {chatRooms.map((room) => (
-            <View key={room.id} style={styles.list}>
-              <View style={styles.textContainer}>
-                <Text style={styles.listtext}>{room.summary}</Text>
-                <Text style={styles.listsubtext}>{room.date}</Text>
+        <ScrollView>
+          <View style={styles.listcontainer}>
+            {chatRooms.map((room) => (
+              <View key={room.id} style={styles.list}>
+                <View style={styles.textContainer}>
+                  <Text style={styles.listtext}>{room.summary}</Text>
+                  <Text style={styles.listsubtext}>{room.date}</Text>
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );

@@ -1,6 +1,5 @@
-// ImageView.js
 import React from "react";
-import { View, Image, StyleSheet, Text } from "react-native";
+import { View, Image, StyleSheet, Text, SafeAreaView } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import smallLogo from "../assets/smallLogo.png";
@@ -8,17 +7,25 @@ import logotext from "../assets/logotext.png";
 
 const ImageView = () => {
   const route = useRoute();
-  const { imageSource } = route.params;
+  const { imageSource, date } = route.params;
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={smallLogo} style={styles.smallLogo} />
-        <Image source={logotext} style={styles.logotext} />
-      </View>
+      <SafeAreaView style={styles.headerContainer} edges={["top"]}>
+        <View style={styles.header}>
+          <Image source={smallLogo} style={styles.smallLogo} />
+          <Image source={logotext} style={styles.logotext} />
+        </View>
+      </SafeAreaView>
+
       <View style={styles.imgcontainer}>
-        <Text style={styles.date}>JUN 6, 2024</Text>
-        <Image source={imageSource} style={styles.image} />
+        <Text style={styles.date}>{date}</Text>
+        <Image
+          source={
+            typeof imageSource === "string" ? { uri: imageSource } : imageSource
+          }
+          style={styles.image}
+        />
       </View>
     </View>
   );
@@ -34,7 +41,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 10,
-    //backgroundColor: "pink",
   },
   imgcontainer: {
     paddingTop: 10,
@@ -46,14 +52,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     color: "#ccc",
     fontSize: 12,
-    //backgroundColor: "yellow",
     marginBottom: 20,
   },
   image: {
     width: "100%",
     height: 490,
     resizeMode: "contain",
-    backgroundColor: "#ccc",
+    //backgroundColor: "#ccc",
   },
 });
 
