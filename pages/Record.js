@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -8,19 +8,36 @@ import {
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../api"; // BASE_URL을 불러옵니다.
 
 const Record = () => {
-  const [progress, setProgress] = useState(45);
-  const [pendingRecordings, setPendingRecordings] = useState([
-    "제 말을 믿으셔도 됩니다.",
-    "나 지금 약간 배고픈 상태에 있는 중이야.",
-    "나는 웃음을 멈출 수가 없었어.",
-    "중국 음식을 먹고 싶은데, 넌 어때?",
-    "저녁 메뉴 뭐 먹을지 고민",
-    "아메리카노는 이제 좀 질려",
-  ]);
+  const [progress, setProgress] = useState(0); // 초기 진행률을 0으로 설정합니다.
+  const [pendingRecordings, setPendingRecordings] = useState([]);
   const [completedRecordings, setCompletedRecordings] = useState([]);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchRecordings = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken"); // authToken을 AsyncStorage에서 가져옵니다.
+        const response = await axios.get(`${BASE_URL}/api/voice`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // 헤더에 토큰을 추가합니다.
+          },
+        });
+
+        const { progressPercentage, sentenceList } = response.data;
+        setProgress(progressPercentage);
+        setPendingRecordings(sentenceList.map((sentence) => sentence.text));
+      } catch (error) {
+        console.error("Failed to fetch recordings", error);
+      }
+    };
+
+    fetchRecordings(); // 컴포넌트가 마운트될 때 API 호출을 실행합니다.
+  }, []);
 
   const handleRecordComplete = (item) => {
     setCompletedRecordings([...completedRecordings, item]);
