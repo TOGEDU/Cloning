@@ -7,7 +7,6 @@ import {
   Send,
   InputToolbar,
 } from "react-native-gifted-chat";
-import { Audio } from "expo-av";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -19,13 +18,12 @@ import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
-import testVoice from "../assets/testvoice.wav";
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
-  const [chatroomId, setChatroomId] = useState(null);
 
   useEffect(() => {
+    // 초기 상태일 때 표시할 메시지 설정
     setMessages([
       {
         _id: 1,
@@ -51,56 +49,29 @@ const ChildChat = ({ navigation }) => {
 
       const sentMessage = newMessages[0];
 
-      // 1. 사용자에게 보낸 메시지를 즉시 화면에 표시
-      setMessages((previousMessages) =>
-        GiftedChat.append(previousMessages, newMessages)
-      );
+      // 콘솔에 로그 추가
+      console.log("Sending message:", sentMessage.text);
 
-      if (!chatroomId) {
-        // 2. 새로운 채팅방 생성
-        const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            prompt: sentMessage.text,
-          },
-        });
+      // 새로운 채팅방 생성
+      const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          prompt: sentMessage.text,
+        },
+      });
 
-        const newChatroomId = response.data.chatroomId;
-        setChatroomId(newChatroomId);
+      // API 응답 확인
+      console.log("API response:", response.data);
 
-        const receivedMessages = response.data.messageList.map(
-          (msg, index) => ({
-            _id: `${newChatroomId}-${index}`,
-            text: msg.message,
-            createdAt: new Date(), // 이 부분을 실제 응답에 포함된 시간으로 변경 가능
-            user: {
-              _id: msg.role === 1 ? 2 : 1,
-              name: msg.role === 1 ? "Parent AI" : "You",
-              avatar: msg.role === 1 ? profileimg : null,
-            },
-          })
-        );
+      const newChatroomId = response.data.chatroomId;
 
-        // 3. 서버에서 받은 메시지를 화면에 추가
-        setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, receivedMessages)
-        );
-      } else {
-        // 4. 기존 채팅방에 메시지 추가 (추가적인 POST 요청이 있을 경우 처리)
-        await axios.post(
-          `${BASE_URL}/api/chat/chatroom/${chatroomId}/message`,
-          {
-            message: sentMessage.text,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
+      // 새로운 채팅방으로 이동, 사용자가 입력한 메시지를 포함
+      navigation.navigate("ChatRoomScreen", {
+        chatroomId: newChatroomId,
+        initialMessage: sentMessage,
+      });
     } catch (error) {
       if (error.response && error.response.status === 401) {
         Alert.alert(
@@ -117,42 +88,6 @@ const ChildChat = ({ navigation }) => {
     }
   };
 
-  const playVoiceMessage = async () => {
-    const soundObject = new Audio.Sound();
-    try {
-      await soundObject.loadAsync(testVoice);
-      await soundObject.playAsync();
-
-      soundObject.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          soundObject.unloadAsync();
-        }
-      });
-    } catch (error) {
-      console.log("Failed to play the sound", error);
-    }
-  };
-
-  const handleLongPress = (context, message) => {
-    if (message.user._id === 2) {
-      playVoiceMessage();
-    } else {
-      const options = ["Copy Text", "Cancel"];
-      const cancelButtonIndex = options.length - 1;
-      context.actionSheet().showActionSheetWithOptions(
-        {
-          options,
-          cancelButtonIndex,
-        },
-        (buttonIndex) => {
-          if (buttonIndex === 0) {
-            Clipboard.setString(message.text);
-          }
-        }
-      );
-    }
-  };
-
   const renderBubble = (props) => (
     <Bubble
       {...props}
@@ -164,7 +99,6 @@ const ChildChat = ({ navigation }) => {
         right: styles.textRight,
         left: styles.textLeft,
       }}
-      onLongPress={() => handleLongPress(props.context, props.currentMessage)}
     />
   );
 
