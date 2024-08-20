@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import { View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -91,7 +92,6 @@ const ChatRoomScreen = ({ navigation, route }) => {
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, newMessages)
       );
-
       await axios.post(
         `${BASE_URL}/api/chat/chatroom/${chatroomId}/message`,
         { message: newMessages[0].text },
@@ -113,6 +113,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         GiftedChat.append(previousMessages, chatMessages)
       );
     } catch (error) {
+
       Alert.alert(
         "Failed to send the message",
         error.message || "An error occurred while sending the message."
@@ -125,6 +126,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
       {...props}
       wrapperStyle={{ right: styles.bubbleRight, left: styles.bubbleLeft }}
       textStyle={{ right: styles.textRight, left: styles.textLeft }}
+
     />
   );
 
@@ -162,6 +164,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
       <GiftedChat
         onSend={onSend}
         user={{ _id: 0 }}
+
         renderSend={renderSend}
         renderBubble={renderBubble}
         messages={messages}
