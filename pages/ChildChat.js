@@ -7,10 +7,11 @@ import {
   Send,
   InputToolbar,
 } from "react-native-gifted-chat";
-import axios from "axios"; // Axios import 추가
-import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncStorage import 추가
-
 import { Audio } from "expo-av";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import BASE_URL from "../api";
 
 import burger from "../assets/burger.png";
 import smallLogo from "../assets/smallLogo.png";
@@ -18,12 +19,11 @@ import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
-import testVoice from "../assets/testvoice.wav"; // 오디오 파일 임포트
-
-import BASE_URL from "../api"; // BASE_URL 임포트
+import testVoice from "../assets/testvoice.wav";
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
+  const [chatroomId, setChatroomId] = useState(null);
 
   useEffect(() => {
     setMessages([
@@ -41,54 +41,88 @@ const ChildChat = ({ navigation }) => {
   }, []);
 
   const onSend = async (newMessages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
-    );
-
-    // AsyncStorage에서 토큰 가져오기
     try {
       const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Auth token is missing or invalid");
+        Alert.alert("Authentication error", "Please log in again.");
+        return;
+      }
 
-      if (token) {
-        // API 요청 보내기
+      const sentMessage = newMessages[0];
+
+      // 1. 사용자에게 보낸 메시지를 즉시 화면에 표시
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, newMessages)
+      );
+
+      if (!chatroomId) {
+        // 2. 새로운 채팅방 생성
         const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
           headers: {
-            Authorization: `Bearer ${token}`, // 가져온 토큰 사용
+            Authorization: `Bearer ${token}`,
           },
           params: {
-            prompt: newMessages[0].text, // 사용자가 보낸 메시지를 prompt로 설정
+            prompt: sentMessage.text,
           },
         });
 
-        // API 응답 처리 (예: 채팅창에 응답 메시지 추가)
-        const apiMessage = {
-          _id: response.data.id,
-          text: `API 응답 ID: ${response.data.id}`, // API로부터 받은 ID를 처리
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: "React Native",
-            avatar: profileimg,
-          },
-        };
+        const newChatroomId = response.data.chatroomId;
+        setChatroomId(newChatroomId);
+
+        const receivedMessages = response.data.messageList.map(
+          (msg, index) => ({
+            _id: `${newChatroomId}-${index}`,
+            text: msg.message,
+            createdAt: new Date(), // 이 부분을 실제 응답에 포함된 시간으로 변경 가능
+            user: {
+              _id: msg.role === 1 ? 2 : 1,
+              name: msg.role === 1 ? "Parent AI" : "You",
+              avatar: msg.role === 1 ? profileimg : null,
+            },
+          })
+        );
+
+        // 3. 서버에서 받은 메시지를 화면에 추가
         setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, apiMessage)
+          GiftedChat.append(previousMessages, receivedMessages)
         );
       } else {
-        console.error("토큰을 가져오지 못했습니다.");
+        // 4. 기존 채팅방에 메시지 추가 (추가적인 POST 요청이 있을 경우 처리)
+        await axios.post(
+          `${BASE_URL}/api/chat/chatroom/${chatroomId}/message`,
+          {
+            message: sentMessage.text,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
       }
     } catch (error) {
-      console.error("API 요청에 실패했습니다.", error);
+      if (error.response && error.response.status === 401) {
+        Alert.alert(
+          "Authentication error",
+          "Your session has expired. Please log in again."
+        );
+      } else {
+        console.error("Failed to send the message", error);
+        Alert.alert(
+          "Failed to send the message",
+          error.message || "An error occurred while sending the message."
+        );
+      }
     }
   };
 
   const playVoiceMessage = async () => {
     const soundObject = new Audio.Sound();
     try {
-      await soundObject.loadAsync(testVoice); // 오디오 파일 로드
-      await soundObject.playAsync(); // 오디오 파일 재생
+      await soundObject.loadAsync(testVoice);
+      await soundObject.playAsync();
 
-      // 재생이 끝나면 리소스를 해제
       soundObject.setOnPlaybackStatusUpdate((status) => {
         if (status.didJustFinish) {
           soundObject.unloadAsync();
@@ -101,10 +135,8 @@ const ChildChat = ({ navigation }) => {
 
   const handleLongPress = (context, message) => {
     if (message.user._id === 2) {
-      // 특정 사용자 메시지에서만 재생
       playVoiceMessage();
     } else {
-      // 기본 메뉴 표시
       const options = ["Copy Text", "Cancel"];
       const cancelButtonIndex = options.length - 1;
       context.actionSheet().showActionSheetWithOptions(

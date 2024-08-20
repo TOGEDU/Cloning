@@ -6,48 +6,47 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncStorage를 import
+import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncStorage를 import합니다.
+import axios from "axios"; // axios를 import합니다.
+import BASE_URL from "../api"; // BASE_URL을 import합니다.
 
 import back from "../assets/back.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
+import mypagew from "../assets/mypagew.png";
 import pencil from "../assets/pencil.png";
-import BASE_URL from "../api";
 
 const ChatList = ({ navigation }) => {
-  const [chatRooms, setChatRooms] = useState([]); // API로부터 받은 데이터를 저장할 상태 선언
-  const [loading, setLoading] = useState(true); // 로딩 상태 추가
+  const [chatList, setChatList] = useState([]); // 채팅 목록을 저장할 상태
+  const [loading, setLoading] = useState(true); // 로딩 상태
 
   useEffect(() => {
-    const fetchChatRooms = async () => {
+    const fetchChatList = async () => {
       try {
-        const token = await AsyncStorage.getItem("authToken"); // 토큰을 AsyncStorage에서 가져옴
-        if (token) {
-          const response = await axios.get(`${BASE_URL}/api/chat/rooms`, {
-            headers: {
-              Authorization: `Bearer ${token}`, // 헤더에 토큰 추가
-            },
-          });
-          setChatRooms(response.data); // 받아온 데이터를 상태에 저장
-        } else {
-          console.error("토큰이 없습니다.");
-        }
+        const token = await AsyncStorage.getItem("authToken"); // AsyncStorage에서 토큰을 가져옴
+        const response = await axios.get(`${BASE_URL}/api/chat/rooms`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // 가져온 토큰을 헤더에 추가
+          },
+        });
+        setChatList(response.data.chatList); // 응답 데이터로 채팅 목록 상태를 업데이트
       } catch (error) {
-        console.error("API 호출 중 에러 발생:", error);
+        console.error("Failed to fetch chat list:", error); // 에러 발생 시 로그 출력
       } finally {
-        setLoading(false); // API 호출이 끝나면 로딩 상태 해제
+        setLoading(false); // 데이터 로딩 완료 후 로딩 상태를 false로 변경
       }
     };
 
-    fetchChatRooms(); // API 호출 함수 실행
+    fetchChatList(); // 컴포넌트가 마운트될 때 fetchChatList 함수 호출
   }, []);
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text>로딩 중...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
   }
@@ -67,16 +66,20 @@ const ChatList = ({ navigation }) => {
             <Image source={pencil} style={styles.pencil} />
           </TouchableOpacity>
         </View>
-        <View style={styles.listcontainer}>
-          {chatRooms.map((room) => (
-            <View key={room.id} style={styles.list}>
-              <View style={styles.textContainer}>
-                <Text style={styles.listtext}>{room.summary}</Text>
-                <Text style={styles.listsubtext}>{room.date}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
+        <ScrollView>
+          <View style={styles.listcontainer}>
+            {chatList.map((chat) => (
+              <TouchableOpacity key={chat.id}>
+                <View style={styles.list}>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.listtext}>{chat.summary}</Text>
+                    <Text style={styles.listsubtext}>{chat.date}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -123,6 +126,11 @@ const styles = StyleSheet.create({
   listsubtext: {
     fontSize: 16,
     color: "#BDBDBD",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

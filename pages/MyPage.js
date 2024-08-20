@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,19 +8,70 @@ import {
   StyleSheet,
   ScrollView,
   Switch,
+  Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // React Navigation 사용
+import { useNavigation } from "@react-navigation/native";
 import profileimg from "../assets/profileimg.png";
 import chevronDown from "../assets/chevron-down.png";
 import chevronUp from "../assets/chevron-up.png";
+import BASE_URL from "../api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import * as ImagePicker from "expo-image-picker";
 
 const MyPage = () => {
-  const navigation = useNavigation(); // 네비게이션 훅 사용
+  const navigation = useNavigation();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [children, setChildren] = useState([""]);
   const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState("오전 9:00");
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    pushStatus: false,
+  });
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        const response = await axios.get(`${BASE_URL}/api/mypage`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = response.data;
+
+        setProfile({
+          name: data.name,
+          email: data.email,
+          pushStatus: data.pushStatus,
+        });
+
+        const hours = parseInt(data.pushNotificationTime.split(":")[0], 10);
+        const period = hours >= 12 ? "오후" : "오전";
+        const formattedHours = hours > 12 ? hours - 12 : hours;
+        setSelectedTime(`${period} ${formattedHours}:00`);
+
+        setChildren(data.childList.map((child) => child.name));
+
+        setIsEnabled(data.pushStatus);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -36,28 +87,251 @@ const MyPage = () => {
     setChildren(newChildren);
   };
 
-  const handleSave = () => {
-    // 저장 로직을 여기에 추가하세요.
-    console.log("자녀 정보 저장: ", children);
-    setDropdownOpen(false);
+  const handleSave = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+      console.log("토큰 확인:", token);
+
+      const response = await axios.get(`${BASE_URL}/api/mypage`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const existingChildren = response.data.childList.map(
+        (child) => child.name
+      );
+
+      const newChildren = children.filter(
+        (childName) => childName.trim() && !existingChildren.includes(childName)
+      );
+
+      for (const childName of newChildren) {
+        await axios.post(`${BASE_URL}/api/mypage/child`, null, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          params: {
+            name: childName,
+          },
+        });
+      }
+
+      Alert.alert("알림", "자녀가 추가되었습니다!");
+      setDropdownOpen(false);
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);
+        Alert.alert(
+          "오류",
+          `자녀 이름 변경 중 오류 발생: ${error.response.data}`
+        );
+      } else if (error.request) {
+        console.error("응답 없음:", error.request);
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:", error.message);
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  const toggleSwitch = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      console.log("Token:", token);
 
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const newPushStatus = !isEnabled;
+      setIsEnabled(newPushStatus);
+
+      const response = await axios.put(
+        `${BASE_URL}/api/mypage/push-status`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          params: {
+            pushStatus: newPushStatus,
+          },
+        }
+      );
+      console.log("Push status updated:", response.data);
+
+      Alert.alert("알림", "푸시 알림 상태 변경 완료");
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);
+        Alert.alert(
+          "오류",
+          `푸시 알림 상태 변경 중 오류 발생: ${error.response.data}`
+        );
+      } else if (error.request) {
+        console.error("응답 없음:", error.request);
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:", error.message);
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
+  };
   const toggleTimeDropdown = () => {
     setTimeDropdownOpen(!timeDropdownOpen);
   };
 
-  const handleTimeSelect = (time) => {
+  const handleTimeSelect = async (time) => {
     setSelectedTime(time);
     setTimeDropdownOpen(false);
+
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const [period, timePart] = time.split(" ");
+      let [hours, minutes] = timePart.split(":");
+
+      if (period === "오후" && parseInt(hours, 10) !== 12) {
+        hours = (parseInt(hours, 10) + 12).toString().padStart(2, "0");
+      } else if (period === "오전" && parseInt(hours, 10) === 12) {
+        hours = "00";
+      }
+      const formattedTime = `${hours}:${minutes}:00`;
+
+      const response = await axios.put(
+        `${BASE_URL}/api/mypage/push-time`,
+        null,
+        {
+          params: { pushNotificationTime: formattedTime },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Push time updated:", response.data);
+
+      Alert.alert("알림", "알림 시간이 변경되었습니다.");
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);
+        Alert.alert(
+          "오류",
+          `알림 시간 변경 중 오류 발생: ${error.response.data}`
+        );
+      } else if (error.request) {
+        console.error("응답 없음:");
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:");
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
-  const handleLogout = () => {
-    // 로그아웃 로직을 여기에 추가하세요.
-    console.log("로그아웃");
-    navigation.navigate("Login"); // 로그인 화면으로 이동
+  const updateProfileImage = async (image) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("No token found");
+        Alert.alert("오류", "로그인 상태를 확인하세요.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("profileImage", {
+        uri: image.uri,
+        type: image.type || "image/jpeg",
+        name: image.uri.split("/").pop(),
+      });
+
+      const response = await axios.put(
+        `${BASE_URL}/api/mypage/profile-image`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        Alert.alert("성공", "프로필 사진 변경 완료");
+      } else {
+        Alert.alert("오류", "프로필 사진 변경에 실패했습니다.");
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);
+        Alert.alert(
+          "오류",
+          `프로필 사진 변경 중 오류 발생: ${error.response.data}`
+        );
+      } else if (error.request) {
+        console.error("응답 없음:", error.request);
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:", error.message);
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const response = await axios.post(`${BASE_URL}/api/sign/logout`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.data.success) {
+        Alert.alert("알림", "로그아웃 완료");
+
+        await AsyncStorage.removeItem("authToken");
+
+        navigation.navigate("Login");
+      } else {
+        Alert.alert("오류", response.data.msg || "로그아웃에 실패했습니다.");
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("응답 오류:", error.response);
+        Alert.alert(
+          "오류",
+          `로그아웃 중 오류 발생: ${error.response.data.msg}`
+        );
+      } else if (error.request) {
+        console.error("응답 없음:", error.request);
+        Alert.alert("오류", "서버에 연결할 수 없습니다.");
+      } else {
+        console.error("요청 설정 오류:", error.message);
+        Alert.alert("오류", "알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
   const timeOptions = [
@@ -77,14 +351,35 @@ const MyPage = () => {
     "오후 10:00",
   ];
 
+  const handleImageSelect = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("권한 오류", "사진첩 접근 권한이 필요합니다.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      allowsEditing: true,
+    });
+
+    if (!result.canceled) {
+      const selectedImage = result.assets[0];
+      updateProfileImage(selectedImage);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.profilecontainer}>
         <View>
-          <Text style={styles.nameText}>박은영</Text>
-          <Text style={styles.emailText}>cloning@gmail.com</Text>
+          <Text style={styles.nameText}>{profile.name}</Text>
+          <Text style={styles.emailText}>{profile.email}</Text>
         </View>
-        <Image source={profileimg} style={styles.profileImage} />
+        <TouchableOpacity onPress={handleImageSelect}>
+          <Image source={profileimg} style={styles.profileImage} />
+        </TouchableOpacity>
       </View>
       <View style={styles.infocontainer}>
         <ScrollView style={styles.scrollview}>
