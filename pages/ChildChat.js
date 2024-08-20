@@ -67,10 +67,9 @@ const ChildChat = ({ navigation }) => {
 
       const newChatroomId = response.data.chatroomId;
 
-      // 새로운 채팅방으로 이동, 사용자가 입력한 메시지를 포함
+      // 새로운 채팅방으로 이동, 사용자가 입력한 메시지를 포함하지 않음
       navigation.navigate("ChatRoomScreen", {
         chatroomId: newChatroomId,
-        initialMessage: sentMessage,
       });
     } catch (error) {
       if (error.response && error.response.status === 401) {

@@ -63,10 +63,14 @@ const ChatList = ({ navigation }) => {
             <Image source={logotext} style={styles.logotext} />
           </View>
           <TouchableOpacity
-  onPress={() => navigation.navigate("ChildChat", { initial: true })}>
-  <Image source={pencil} style={styles.pencil} />
-</TouchableOpacity>
-
+            onPress={() =>
+              navigation.navigate("ChildChat", {
+                initial: true, // 초기 상태로 넘어갈 수 있도록 initial 값을 true로 전달
+              })
+            }
+          >
+            <Image source={pencil} style={styles.pencilIcon} />
+          </TouchableOpacity>
 
         </View>
         <ScrollView>

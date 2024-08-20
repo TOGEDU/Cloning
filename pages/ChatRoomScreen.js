@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  Text,
-} from "react-native";
+
+import { View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   GiftedChat,
@@ -32,120 +25,95 @@ const ChatRoomScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log(`Navigated to ChatRoomScreen with chatroomId: ${chatroomId}`);
-
-    const fetchMessages = async () => {
-      try {
-        const token = await AsyncStorage.getItem("authToken");
-        if (!token) {
-          console.error("Auth token is missing or invalid");
-          Alert.alert("Authentication error", "Please log in again.");
-          return;
-        }
-
-        const response = await axios.get(`${BASE_URL}/api/chat/chats`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            roomid: chatroomId,
-          },
-        });
-
-        console.log("Fetched messages:", response.data);
-
-        const chatMessages = response.data.messageList.map((msg, index) => ({
-          _id: `${chatroomId}-${index}`,
-          text: msg.message,
-          createdAt: new Date(`${response.data.date}T${msg.time}:00`),
-          user: {
-            _id: msg.role === 0 ? 1 : 2, // 사용자는 1, 부모 AI는 2로 설정
-            name: msg.role === 0 ? "You" : "Parent AI",
-            avatar: msg.role === 1 ? profileimg : null,
-          },
-        }));
-
-        if (initialMessage) {
-          const initialMsg = {
-            _id: "initial",
-            text: initialMessage.text,
-            createdAt: new Date(),
-            user: { _id: 1, name: "You" },
-          };
-          chatMessages.push(initialMsg);
-        }
-
-        setMessages(chatMessages.reverse()); // 역순으로 정렬하여 올바른 순서로 표시
-      } catch (error) {
-        console.error("Failed to fetch messages:", error);
-        Alert.alert(
-          "Failed to fetch messages",
-          error.message || "An error occurred while fetching messages."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMessages();
-  }, [chatroomId]);
+  }, [chatroomId, initialMessage]);
+
+  const getAuthToken = async () => {
+    const token = await AsyncStorage.getItem("authToken");
+    if (!token) {
+      Alert.alert("Authentication error", "Please log in again.");
+      throw new Error("No auth token found");
+    }
+    return token;
+  };
+
+  const processMessages = (messageList, chatroomId, date) => {
+    return messageList.map((msg, index) => ({
+      _id: `${chatroomId}-${index}`,
+      text: msg.message,
+      createdAt: new Date(`${date}T${msg.time}:00`),
+      user: {
+        _id: msg.role === 0 ? 0 : 1,
+        name: msg.role === 0 ? "You" : "Parent AI",
+        avatar: msg.role === 1 ? profileimg : null,
+      },
+    }));
+  };
+
+  const fetchMessages = async () => {
+    try {
+      const token = await getAuthToken();
+
+      const response = await axios.get(`${BASE_URL}/api/chat/chats`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { roomid: chatroomId },
+      });
+
+      const chatMessages = processMessages(
+        response.data.messageList,
+        response.data.chatroomId,
+        response.data.date
+      );
+
+      if (initialMessage) {
+        chatMessages.push({
+          _id: "initial",
+          text: initialMessage.text,
+          createdAt: new Date(),
+          user: { _id: 0, name: "You" },
+        });
+      }
+
+      setMessages(chatMessages);
+    } catch (error) {
+      Alert.alert(
+        "Failed to fetch messages",
+        error.message || "An error occurred while fetching messages."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onSend = async (newMessages = []) => {
     try {
-      const token = await AsyncStorage.getItem("authToken");
-      if (!token) {
-        console.error("Auth token is missing or invalid");
-        Alert.alert("Authentication error", "Please log in again.");
-        return;
-      }
-
-      const sentMessage = newMessages[0];
+      const token = await getAuthToken();
 
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, newMessages)
       );
-
-      console.log("Sending message:", sentMessage.text);
-
       await axios.post(
         `${BASE_URL}/api/chat/chatroom/${chatroomId}/message`,
-        {
-          message: sentMessage.text,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { message: newMessages[0].text },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      console.log("Message sent successfully");
 
       const response = await axios.get(`${BASE_URL}/api/chat/chats`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          roomid: chatroomId,
-        },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { roomid: chatroomId },
       });
 
-      const chatMessages = response.data.messageList.map((msg, index) => ({
-        _id: `${chatroomId}-${index}`,
-        text: msg.message,
-        createdAt: new Date(`${response.data.date}T${msg.time}:00`),
-        user: {
-          _id: msg.role === 0 ? 1 : 2, // 사용자는 1, 부모 AI는 2로 설정
-          name: msg.role === 0 ? "You" : "Parent AI",
-          avatar: msg.role === 1 ? profileimg : null,
-        },
-      }));
+      const chatMessages = processMessages(
+        response.data.messageList,
+        response.data.chatroomId,
+        response.data.date
+      );
 
       setMessages((previousMessages) =>
-        GiftedChat.append(previousMessages, chatMessages.reverse()) // 역순으로 정렬하여 올바른 순서로 추가
+        GiftedChat.append(previousMessages, chatMessages)
       );
     } catch (error) {
-      console.error("Failed to send the message", error);
+
       Alert.alert(
         "Failed to send the message",
         error.message || "An error occurred while sending the message."
@@ -156,14 +124,9 @@ const ChatRoomScreen = ({ navigation, route }) => {
   const renderBubble = (props) => (
     <Bubble
       {...props}
-      wrapperStyle={{
-        right: styles.bubbleRight,
-        left: styles.bubbleLeft,
-      }}
-      textStyle={{
-        right: styles.textRight,
-        left: styles.textLeft,
-      }}
+      wrapperStyle={{ right: styles.bubbleRight, left: styles.bubbleLeft }}
+      textStyle={{ right: styles.textRight, left: styles.textLeft }}
+
     />
   );
 
@@ -185,7 +148,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Image source={burger} style={styles.burger} />
@@ -200,7 +163,8 @@ const ChatRoomScreen = ({ navigation, route }) => {
       </View>
       <GiftedChat
         onSend={onSend}
-        user={{ _id: 1 }}
+        user={{ _id: 0 }}
+
         renderSend={renderSend}
         renderBubble={renderBubble}
         messages={messages}
