@@ -165,7 +165,11 @@ const AppNavigator = () => (
     <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
     <Stack.Screen name="Album" component={Album} />
     <Stack.Screen name="ImageView" component={ImageView} />
-    <Stack.Screen name="ChatRoomScreen" component={ChatRoomScreen} />
+    <Stack.Screen
+      name="ChatRoomScreen"
+      component={ChatRoomScreen}
+      options={{ animationEnabled: false }}
+    />
   </Stack.Navigator>
 );
 
