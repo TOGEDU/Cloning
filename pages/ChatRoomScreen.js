@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Alert,
+  Text,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   GiftedChat,
   Bubble,
   Send,
   InputToolbar,
+  Day,
+  Time,
 } from "react-native-gifted-chat";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import moment from "moment";
 
 import BASE_URL from "../api";
 import burger from "../assets/burger.png";
@@ -37,16 +47,19 @@ const ChatRoomScreen = ({ navigation, route }) => {
   };
 
   const processMessages = (messageList, chatroomId, date) => {
-    return messageList.map((msg, index) => ({
-      _id: `${chatroomId}-${index}`,
-      text: msg.message,
-      createdAt: new Date(`${date}T${msg.time}:00`),
-      user: {
-        _id: msg.role === 0 ? 0 : 1,
-        name: msg.role === 0 ? "You" : "Parent AI",
-        avatar: msg.role === 1 ? profileimg : null,
-      },
-    }));
+    return messageList.map((msg, index) => {
+      const dateTime = moment(`${date} ${msg.time}`, "YYYY-MM-DD HH:mm");
+      return {
+        _id: `${chatroomId}-${index}`,
+        text: msg.message,
+        createdAt: dateTime.toDate(),
+        user: {
+          _id: msg.role === 0 ? 0 : 1,
+          name: msg.role === 0 ? "You" : "Parent AI",
+          avatar: msg.role === 1 ? profileimg : null,
+        },
+      };
+    });
   };
 
   const fetchMessages = async () => {
@@ -145,6 +158,30 @@ const ChatRoomScreen = ({ navigation, route }) => {
     />
   );
 
+  const renderDay = (props) => {
+    const { currentMessage, previousMessage } = props;
+    const currentCreatedAt = moment(currentMessage.createdAt);
+    const previousCreatedAt = moment(previousMessage.createdAt);
+
+    if (
+      !previousMessage._id ||
+      !currentCreatedAt.isSame(previousCreatedAt, "day")
+    ) {
+      return (
+        <Day
+          {...props}
+          dateFormat="YYYY년 MM월 DD일"
+          textStyle={styles.dayText}
+        />
+      );
+    }
+    return null;
+  };
+
+  const renderTime = (props) => {
+    return <Time {...props} timeFormat="HH:mm" textStyle={styles.timeText} />;
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -166,6 +203,8 @@ const ChatRoomScreen = ({ navigation, route }) => {
         renderBubble={renderBubble}
         messages={messages}
         renderInputToolbar={renderInputToolbar}
+        renderDay={renderDay}
+        renderTime={renderTime}
       />
     </SafeAreaView>
   );
@@ -221,6 +260,14 @@ const styles = StyleSheet.create({
   },
   textLeft: {
     color: "#000",
+  },
+  dayText: {
+    color: "#A7A7A7",
+    fontSize: 12,
+  },
+  timeText: {
+    color: "#A7A7A7",
+    fontSize: 10,
   },
 });
 
