@@ -31,9 +31,11 @@ import SignupFinish from "./pages/Signup/SignupFinish";
 import WriteFinish from "./pages/WriteFinish";
 import Achieve from "./pages/Achieve";
 import ChatList from "./pages/ChatList";
+import ChatRoomScreen from "./pages/ChatRoomScreen";
 import ChildMyPage from "./pages/ChildMyPage";
 import Album from "./pages/Album";
 import ImageView from "./pages/ImageView";
+import ChatRoomScreen from "./pages/ChatRoomScreen";
 import { AuthContext, AuthProvider } from "./AuthContext";
 const Stack = createStackNavigator();
 
@@ -48,6 +50,8 @@ const headerlessRoutes = [
   "ChildMyPage",
   "Album",
   "ImageView",
+  "ChatRoomScreen",
+
 ];
 
 const footerlessRoutes = [
@@ -70,6 +74,8 @@ const footerlessRoutes = [
   "ChildMyPage",
   "Album",
   "ImageView",
+  "ChatRoomScreen",
+
 ];
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -162,6 +168,11 @@ const AppNavigator = () => (
     <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
     <Stack.Screen name="Album" component={Album} />
     <Stack.Screen name="ImageView" component={ImageView} />
+    <Stack.Screen
+      name="ChatRoomScreen"
+      component={ChatRoomScreen}
+      options={{ animationEnabled: false }}
+    />
   </Stack.Navigator>
 );
 

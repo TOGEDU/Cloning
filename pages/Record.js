@@ -30,7 +30,7 @@ const Record = () => {
 
         const { progressPercentage, sentenceList } = response.data;
         setProgress(progressPercentage);
-        setPendingRecordings(sentenceList.map((sentence) => sentence.text));
+        setPendingRecordings(sentenceList); // item 객체 전체를 저장
       } catch (error) {
         console.error("Failed to fetch recordings", error);
       }
@@ -51,10 +51,14 @@ const Record = () => {
   };
 
   const handleRecordingPress = (item) => {
-    navigation.navigate("RecordingScreen", {
-      item,
-      onRecordComplete: handleRecordComplete,
-    });
+    if (item) {
+      navigation.navigate("RecordingScreen", {
+        item, // 아이템을 전달
+        onRecordComplete: handleRecordComplete,
+      });
+    } else {
+      alert("아이템 정보가 없습니다.");
+    }
   };
 
   return (
@@ -91,7 +95,7 @@ const Record = () => {
               style={styles.recordingItem}
               onPress={() => handleRecordingPress(item)}
             >
-              <Text style={styles.recordingText}>{item}</Text>
+              <Text style={styles.recordingText}>{item.text}</Text>
             </TouchableOpacity>
           ))}
         </View>
