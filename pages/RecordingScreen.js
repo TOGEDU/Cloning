@@ -26,6 +26,10 @@ const RecordingScreen = () => {
     };
   }, [route.params?.onRecordComplete]);
 
+  useEffect(() => {
+    console.log("Received item in RecordingScreen: ", item);
+  }, []);
+
   const handleRecordButtonPress = async () => {
     if (recordingState === "idle") {
       await startRecording();
@@ -154,7 +158,7 @@ const RecordingScreen = () => {
       </Text>
       <View style={styles.itemContainer}>
         <Text style={styles.itemText}>
-          {item ? item.text : "No text available"}
+          {item?.text ?? "아이템 정보가 없습니다."}
         </Text>
       </View>
 
@@ -193,11 +197,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 30,
     marginHorizontal: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
   },
   itemText: {
     fontSize: 16,
     color: "white",
-    paddingVertical: 20,
     textAlign: "center",
   },
   button: {
