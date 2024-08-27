@@ -99,8 +99,8 @@ const RecordingScreen = () => {
       formData.append("id", item.id.toString()); // 문장 아이디 추가
       formData.append("voiceRecord", {
         uri,
-        name: "recording.mp3",
         type: "audio/mpeg",
+        name: "recording"+item.id.toString()+".mp3",
       });
 
       const response = await axios.post(`${BASE_URL}/api/voice`, formData, {

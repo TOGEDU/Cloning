@@ -104,7 +104,6 @@ const ChatRoomScreen = ({ navigation, route }) => {
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, newMessages)
       );
-
       await axios.post(
         `${BASE_URL}/api/chat/chatroom/${chatroomId}/message`,
         { message: newMessages[0].text },

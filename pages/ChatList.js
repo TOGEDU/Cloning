@@ -71,6 +71,7 @@ const ChatList = ({ navigation }) => {
           >
             <Image source={pencil} style={styles.pencilIcon} />
           </TouchableOpacity>
+
         </View>
         <ScrollView>
           <View style={styles.listcontainer}>
