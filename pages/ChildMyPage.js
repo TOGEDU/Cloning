@@ -140,7 +140,7 @@ const ChildMyPage = () => {
             <View>
               <Text style={styles.notificationText}>푸시 알림 켜기</Text>
               <Text style={styles.notificationSubText}>
-                매일 오늘의 질문을 받아보세요
+                특별한 날 부모님의 연락을 받아보세요
               </Text>
             </View>
             <Switch
