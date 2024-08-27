@@ -31,7 +31,6 @@ import SignupFinish from "./pages/Signup/SignupFinish";
 import WriteFinish from "./pages/WriteFinish";
 import Achieve from "./pages/Achieve";
 import ChatList from "./pages/ChatList";
-import ChatRoomScreen from "./pages/ChatRoomScreen";
 import ChildMyPage from "./pages/ChildMyPage";
 import Album from "./pages/Album";
 import ImageView from "./pages/ImageView";
