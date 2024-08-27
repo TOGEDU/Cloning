@@ -38,7 +38,6 @@ const ChildIdPw = () => {
         const childId = await AsyncStorage.getItem("childId");
         const birthDate = await AsyncStorage.getItem("birthDate");
         const response = await axios.post(
-
           `${BASE_URL}/api/sign/child/sign-up`,
 
           {
@@ -79,7 +78,7 @@ const ChildIdPw = () => {
 
     try {
       const response = await axios.get(
-        `http://192.168.0.19:8080/api/sign/emailduplicationcheck`,
+        `${BASE_URL}/api/sign/emailduplicationcheck`,
         {
           params: { id: 3, email: email },
         }

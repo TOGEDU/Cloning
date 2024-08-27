@@ -24,7 +24,6 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-
       const response = await axios.post(`${BASE_URL}/api/sign/sign-in`, {
         email: email,
         password: password,

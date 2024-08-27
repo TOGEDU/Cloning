@@ -38,7 +38,6 @@ const ParentSearchCode = () => {
           params: { parentCode: text },
           timeout: 5000,
         }
-        
       );
       const data = response.data;
       if (data.success) {

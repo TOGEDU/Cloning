@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Audio } from "expo-av";
+import axios from "axios";
+import BASE_URL from "../api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const RecordingScreen = () => {
   const route = useRoute();
@@ -11,13 +14,6 @@ const RecordingScreen = () => {
   const [recording, setRecording] = useState(null);
   const [sound, setSound] = useState(null);
   const [recordingState, setRecordingState] = useState("idle"); // 'idle', 'recording', 'paused', 'listening'
-
-  const handleComplete = () => {
-    if (onRecordComplete) {
-      onRecordComplete(item);
-      navigation.goBack();
-    }
-  };
 
   useEffect(() => {
     if (route.params?.onRecordComplete) {
@@ -29,6 +25,10 @@ const RecordingScreen = () => {
       }
     };
   }, [route.params?.onRecordComplete]);
+
+  useEffect(() => {
+    console.log("Received item in RecordingScreen: ", item);
+  }, []);
 
   const handleRecordButtonPress = async () => {
     if (recordingState === "idle") {
@@ -86,6 +86,53 @@ const RecordingScreen = () => {
     setRecordingState("idle");
   };
 
+  const uploadRecording = async (uri) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+
+      if (!item || !item.id) {
+        alert("아이템 정보가 올바르게 전달되지 않았습니다.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("id", item.id.toString()); // 문장 아이디 추가
+      formData.append("voiceRecord", {
+        uri,
+        type: "audio/mpeg",
+        name: "recording"+item.id.toString()+".mp3",
+      });
+
+      const response = await axios.post(`${BASE_URL}/api/voice`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        alert("녹음이 성공적으로 업로드되었습니다.");
+      } else {
+        alert("녹음 업로드에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("녹음 업로드 중 오류 발생", error);
+      alert("녹음 업로드 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleComplete = async () => {
+    if (sound && recording) {
+      const uri = recording.getURI();
+      await uploadRecording(uri);
+    }
+
+    if (onRecordComplete) {
+      onRecordComplete(item);
+      navigation.goBack();
+    }
+  };
+
   const renderButton = (title, onPress) => (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
@@ -110,7 +157,9 @@ const RecordingScreen = () => {
         잡음이 들어기지 않도록 주의해주세요
       </Text>
       <View style={styles.itemContainer}>
-        <Text style={styles.itemText}>{item}</Text>
+        <Text style={styles.itemText}>
+          {item?.text ?? "아이템 정보가 없습니다."}
+        </Text>
       </View>
 
       {recordingState === "idle" &&
@@ -148,11 +197,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 30,
     marginHorizontal: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
   },
   itemText: {
     fontSize: 16,
     color: "white",
-    paddingVertical: 20,
     textAlign: "center",
   },
   button: {

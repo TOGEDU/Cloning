@@ -7,7 +7,10 @@ import {
   Send,
   InputToolbar,
 } from "react-native-gifted-chat";
-import { Audio } from "expo-av";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import BASE_URL from "../api";
 
 import burger from "../assets/burger.png";
 import smallLogo from "../assets/smallLogo.png";
@@ -15,12 +18,12 @@ import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
-import testVoice from "../assets/testvoice.wav"; // 오디오 파일 임포트
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
+    // 초기 상태일 때 표시할 메시지 설정
     setMessages([
       {
         _id: 1,
@@ -35,48 +38,52 @@ const ChildChat = ({ navigation }) => {
     ]);
   }, []);
 
-  const onSend = (newMessages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
-    );
-  };
-
-  const playVoiceMessage = async () => {
-    const soundObject = new Audio.Sound();
+  const onSend = async (newMessages = []) => {
     try {
-      await soundObject.loadAsync(testVoice); // 오디오 파일 로드
-      await soundObject.playAsync(); // 오디오 파일 재생
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Auth token is missing or invalid");
+        Alert.alert("Authentication error", "Please log in again.");
+        return;
+      }
 
-      // 재생이 끝나면 리소스를 해제
-      soundObject.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          soundObject.unloadAsync();
-        }
+      const sentMessage = newMessages[0];
+
+      // 콘솔에 로그 추가
+      console.log("Sending message:", sentMessage.text);
+
+      // 새로운 채팅방 생성
+      const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          prompt: sentMessage.text,
+        },
+      });
+
+      // API 응답 확인
+      console.log("API response:", response.data);
+
+      const newChatroomId = response.data.chatroomId;
+
+      // 새로운 채팅방으로 이동, 사용자가 입력한 메시지를 포함하지 않음
+      navigation.navigate("ChatRoomScreen", {
+        chatroomId: newChatroomId,
       });
     } catch (error) {
-      console.log("Failed to play the sound", error);
-    }
-  };
-
-  const handleLongPress = (context, message) => {
-    if (message.user._id === 2) {
-      // 특정 사용자 메시지에서만 재생
-      playVoiceMessage();
-    } else {
-      // 기본 메뉴 표시
-      const options = ["Copy Text", "Cancel"];
-      const cancelButtonIndex = options.length - 1;
-      context.actionSheet().showActionSheetWithOptions(
-        {
-          options,
-          cancelButtonIndex,
-        },
-        (buttonIndex) => {
-          if (buttonIndex === 0) {
-            Clipboard.setString(message.text);
-          }
-        }
-      );
+      if (error.response && error.response.status === 401) {
+        Alert.alert(
+          "Authentication error",
+          "Your session has expired. Please log in again."
+        );
+      } else {
+        console.error("Failed to send the message", error);
+        Alert.alert(
+          "Failed to send the message",
+          error.message || "An error occurred while sending the message."
+        );
+      }
     }
   };
 
@@ -91,7 +98,6 @@ const ChildChat = ({ navigation }) => {
         right: styles.textRight,
         left: styles.textLeft,
       }}
-      onLongPress={() => handleLongPress(props.context, props.currentMessage)}
     />
   );
 

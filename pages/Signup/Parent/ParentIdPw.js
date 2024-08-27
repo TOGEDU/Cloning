@@ -11,10 +11,8 @@ import {
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import BASE_URL from "../../../api";
-
-
 
 const ParentIdPw = () => {
   const [email, setEmail] = useState("");
