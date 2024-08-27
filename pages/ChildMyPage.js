@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios"; // axios를 임포트합니다.
+import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncStorage를 임포트합니다.
 import back from "../assets/back.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
@@ -18,6 +20,7 @@ import mypagew from "../assets/mypagew.png";
 import profileimg from "../assets/profileimg.png";
 import chevronDown from "../assets/chevron-down.png";
 import chevronUp from "../assets/chevron-up.png";
+import BASE_URL from "../api";
 
 const ChildMyPage = () => {
   const navigation = useNavigation();
@@ -26,6 +29,32 @@ const ChildMyPage = () => {
   const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState("오전 9:00");
   const [isModalVisible, setModalVisible] = useState(false);
+  const [name, setName] = useState(""); // 이름 상태 추가
+  const [email, setEmail] = useState(""); // 이메일 상태 추가
+
+  // API 호출을 위한 useEffect
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken"); // authToken을 AsyncStorage에서 가져옵니다.
+        const response = await axios.get(`${BASE_URL}/api/mypage`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // 헤더에 토큰을 추가합니다.
+          },
+        });
+
+        // API 응답 데이터를 상태에 저장합니다.
+        setName(response.data.name);
+        setEmail(response.data.email);
+        setSelectedTime(response.data.pushNotificationTime);
+        setIsEnabled(response.data.pushStatus);
+      } catch (error) {
+        console.error("Error fetching data", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
 
@@ -90,8 +119,8 @@ const ChildMyPage = () => {
       </SafeAreaView>
       <View style={styles.profilecontainer}>
         <View>
-          <Text style={styles.nameText}>이은지</Text>
-          <Text style={styles.emailText}>cloning@gmail.com</Text>
+          <Text style={styles.nameText}>{name}</Text>
+          <Text style={styles.emailText}>{email}</Text>
         </View>
       </View>
       <View style={styles.infocontainer}>

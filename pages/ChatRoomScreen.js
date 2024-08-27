@@ -100,30 +100,39 @@ const ChatRoomScreen = ({ navigation, route }) => {
   const onSend = async (newMessages = []) => {
     try {
       const token = await getAuthToken();
-
+  
+      // 먼저 사용자가 보낸 메시지를 화면에 추가
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, newMessages)
       );
-      await axios.post(
-        `${BASE_URL}/api/chat/chatroom/${chatroomId}/message`,
-        { message: newMessages[0].text },
+  
+      // 서버에 메시지 전송
+      const response = await axios.post(
+        `${BASE_URL}/api/message`,
+        {
+          message: newMessages[0].text,
+          chatRoomId: chatroomId,
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      const response = await axios.get(`${BASE_URL}/api/chat/chats`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { roomid: chatroomId },
-      });
-
-      const chatMessages = processMessages(
-        response.data.messageList,
-        response.data.chatroomId,
-        response.data.date
-      );
-
+  
+      // 서버로부터 받은 응답 메시지를 화면에 추가
+      const serverResponseMessage = {
+        _id: `${chatroomId}-${newMessages[0]._id}-response`, // 고유 ID 생성
+        text: response.data.message, // 서버에서 받은 메시지
+        createdAt: moment(response.data.time, "HH:mm:ss").toDate(), // 서버에서 받은 시간
+        user: {
+          _id: 1,
+          name: "Parent AI",
+          avatar: profileimg, // Parent AI만 아바타 표시
+        },
+      };
+  
+      // 응답 메시지를 추가
       setMessages((previousMessages) =>
-        GiftedChat.append(previousMessages, chatMessages)
+        GiftedChat.append(previousMessages, serverResponseMessage)
       );
+  
     } catch (error) {
       Alert.alert(
         "Failed to send the message",
@@ -139,6 +148,20 @@ const ChatRoomScreen = ({ navigation, route }) => {
       textStyle={{ right: styles.textRight, left: styles.textLeft }}
     />
   );
+
+  const renderAvatar = (props) => {
+    // user._id가 0이면 사용자 메시지로, 아바타를 숨깁니다.
+    if (props.currentMessage.user._id === 0) {
+      return null; // 아바타를 렌더링하지 않음
+    }
+    // AI 메시지일 경우에는 아바타를 렌더링합니다.
+    return (
+      <Image
+        source={props.currentMessage.user.avatar} // 프로필 이미지 지정
+        style={styles.avatar}
+      />
+    );
+  };
 
   const renderSend = (props) => (
     <TouchableOpacity
@@ -200,6 +223,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         user={{ _id: 0 }}
         renderSend={renderSend}
         renderBubble={renderBubble}
+        renderAvatar={renderAvatar} // 아바타 렌더링 함수 추가
         messages={messages}
         renderInputToolbar={renderInputToolbar}
         renderDay={renderDay}
@@ -267,6 +291,11 @@ const styles = StyleSheet.create({
   timeText: {
     color: "#A7A7A7",
     fontSize: 10,
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
 });
 
