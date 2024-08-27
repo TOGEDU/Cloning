@@ -36,7 +36,7 @@ const TodayQuestion = () => {
           return;
         }
 
-        const response = await axios.get(`${BASE_URL}/api/dailyquestion`, {
+        const response = await axios.get(`${BASE_URL}/api/dailyquestion/today`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -45,9 +45,9 @@ const TodayQuestion = () => {
         const todayQuestion = response.data;
 
         if (todayQuestion && todayQuestion.question) {
-          setQuestion(todayQuestion.question);
           setQuestionId(todayQuestion.questionId);
-
+          setQuestion(todayQuestion.question);
+          
           if (todayQuestion.text) {
             setText(todayQuestion.text);
             setIsEditing(true);
