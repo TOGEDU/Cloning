@@ -11,6 +11,7 @@ import Record from "./pages/Record";
 import RecordingScreen from "./pages/RecordingScreen";
 import TodayQuestion from "./pages/TodayQuestion";
 import DiaryList from "./pages/DiaryList";
+import DiaryDetail from "./pages/DiaryDetail";
 import Diary from "./pages/Diary";
 import TodayQuestionList from "./pages/TodayQuestionList";
 import Splash from "./pages/Splash";
@@ -50,7 +51,6 @@ const headerlessRoutes = [
   "Album",
   "ImageView",
   "ChatRoomScreen",
-
 ];
 
 const footerlessRoutes = [
@@ -74,7 +74,7 @@ const footerlessRoutes = [
   "Album",
   "ImageView",
   "ChatRoomScreen",
-
+  "DiaryDetail",
 ];
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -160,6 +160,7 @@ const AppNavigator = () => (
     <Stack.Screen name="TodayQuestionList" component={TodayQuestionList} />
     <Stack.Screen name="MyPage" component={MyPage} />
     <Stack.Screen name="DiaryList" component={DiaryList} />
+    <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
     <Stack.Screen name="Diary" component={Diary} />
     <Stack.Screen name="RecordingScreen" component={RecordingScreen} />
     <Stack.Screen name="WriteFinish" component={WriteFinish} />

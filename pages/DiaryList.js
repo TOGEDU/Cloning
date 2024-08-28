@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Image, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, Image, ActivityIndicator } from "react-native"; // ActivityIndicator를 추가
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
@@ -67,6 +67,29 @@ const DiaryList = () => {
     fetchDiaryDates(year, month);
   }, []);
 
+  const checkDiaryExistence = async (date) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      console.log("Token for checking diary existence:", token); // 디버깅용 로그
+
+      const response = await axios.get(`${BASE_URL}/api/diary`, {
+        params: { date },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // 일기가 있으면 DiaryDetail
+      if (response.data && response.data.length > 0) {
+        navigation.navigate("DiaryDetail", { date });
+      } else {
+        // 일기가 없으면 Diary
+        navigation.navigate("Diary", { date });
+      }
+    } catch (error) {
+      console.error("Error checking diary existence:", error);
+      Alert.alert("오류", "일기 데이터를 확인하는 중 문제가 발생했습니다.");
+    }
+  };
+
   const getMarkedDates = () => {
     const today = new Date().toISOString().split("T")[0];
 
@@ -112,8 +135,9 @@ const DiaryList = () => {
             textSectionTitleColor: "rgba(138, 138, 138, 1)",
           }}
           onDayPress={(day) => {
+            console.log("Day pressed:", day.dateString);
             setSelectedDate(day.dateString);
-            navigation.navigate("Diary", { date: day.dateString });
+            checkDiaryExistence(day.dateString);
           }}
           hideExtraDays={true}
           monthFormat={"M월"}
