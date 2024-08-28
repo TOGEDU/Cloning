@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Image, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, Image, ActivityIndicator } from "react-native"; // ActivityIndicator를 추가
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
@@ -70,6 +70,8 @@ const DiaryList = () => {
   const checkDiaryExistence = async (date) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
+      console.log("Token for checking diary existence:", token); // 디버깅용 로그
+
       const response = await axios.get(`${BASE_URL}/api/diary`, {
         params: { date },
         headers: { Authorization: `Bearer ${token}` },
@@ -133,6 +135,7 @@ const DiaryList = () => {
             textSectionTitleColor: "rgba(138, 138, 138, 1)",
           }}
           onDayPress={(day) => {
+            console.log("Day pressed:", day.dateString);
             setSelectedDate(day.dateString);
             checkDiaryExistence(day.dateString);
           }}

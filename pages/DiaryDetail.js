@@ -5,6 +5,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
   Alert,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
@@ -21,16 +22,20 @@ const DiaryDetail = () => {
   const [selectedChild, setSelectedChild] = useState(null);
   const [childrenOptions, setChildrenOptions] = useState([]);
   const [diaryData, setDiaryData] = useState([]);
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
   useEffect(() => {
     const fetchDiaryDetail = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
+        console.log("Starting API Request...");
 
         const response = await axios.get(`${BASE_URL}/api/diary`, {
           params: { date: date },
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        console.log("API Response Data:", response.data);
 
         const childrenOptions = response.data.map((entry) => ({
           label: entry.childName,
@@ -39,7 +44,14 @@ const DiaryDetail = () => {
 
         setChildrenOptions(childrenOptions);
         setDiaryData(response.data);
+
+        // 첫 번째 자녀의 일기를 기본으로 선택
+        if (response.data.length > 0) {
+          setSelectedChild(response.data[0].diaryId);
+        }
       } catch (error) {
+        console.error("Error occurred:", error); // 오류 로그 추가
+
         if (error.response) {
           console.error("Error response data:", error.response.data);
           Alert.alert(
@@ -55,15 +67,27 @@ const DiaryDetail = () => {
           console.error("Error message:", error.message);
           Alert.alert("Error", "An unexpected error occurred.");
         }
+      } finally {
+        setLoading(false); // 로딩 완료 후 상태 변경
       }
     };
 
     fetchDiaryDetail();
   }, [date]);
 
+  useEffect(() => {
+    if (childrenOptions.length > 0) {
+      setSelectedChild(childrenOptions[0].value);
+    }
+  }, [childrenOptions]);
+
   const selectedDiary = diaryData.find(
     (entry) => entry.diaryId === selectedChild
   );
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <View style={styles.container}>
@@ -82,6 +106,7 @@ const DiaryDetail = () => {
           inputIOS: styles.picker,
           inputAndroid: styles.picker,
         }}
+        value={selectedChild}
       />
 
       {selectedDiary ? (
