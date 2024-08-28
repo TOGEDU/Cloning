@@ -51,7 +51,6 @@ const headerlessRoutes = [
   "Album",
   "ImageView",
   "ChatRoomScreen",
-
 ];
 
 const footerlessRoutes = [
@@ -75,7 +74,7 @@ const footerlessRoutes = [
   "Album",
   "ImageView",
   "ChatRoomScreen",
-
+  "DiaryDetail",
 ];
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
