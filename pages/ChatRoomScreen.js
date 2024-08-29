@@ -19,6 +19,7 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
+import { Audio } from "expo-av"; // expo-av 추가
 
 import BASE_URL from "../api";
 import burger from "../assets/burger.png";
@@ -32,10 +33,19 @@ const ChatRoomScreen = ({ navigation, route }) => {
   const { chatroomId, initialMessage } = route.params;
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sound, setSound] = useState(null); // 사운드 상태 추가
 
   useEffect(() => {
     fetchMessages();
   }, [chatroomId, initialMessage]);
+
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync(); // 컴포넌트가 언마운트될 때 사운드를 정리
+        }
+      : undefined;
+  }, [sound]);
 
   const getAuthToken = async () => {
     const token = await AsyncStorage.getItem("authToken");
@@ -97,15 +107,83 @@ const ChatRoomScreen = ({ navigation, route }) => {
     }
   };
 
+  const playSound = async (audioUri) => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: true }
+      );
+      setSound(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("오디오 재생 실패:", error);
+      Alert.alert(
+        "Failed to play sound",
+        "An error occurred while playing the sound."
+      );
+    }
+  };
+
+  const onBubbleLongPress = async (context, message) => {
+    try {
+      if (message.user._id === 1) {
+        // 상대방의 메시지일 경우에만 처리
+        const token = await getAuthToken();
+
+        console.log("길게 클릭된 메시지:", message.text);
+
+        console.log("API 요청 시작:", message.text);
+
+        const response = await axios.post(
+          "http://172.30.1.79:8000/synthesize", // ChildChat과 동일한 URL 사용
+          { text: message.text },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            responseType: "blob",
+            timeout: 180000,
+          }
+        );
+
+        console.log("API 응답 성공:", response);
+
+        const fileReader = new FileReader();
+        fileReader.onload = async () => {
+          const audioUri = fileReader.result;
+          await playSound(audioUri);
+        };
+        fileReader.onerror = (error) => {
+          console.error("FileReader 오류:", error);
+          Alert.alert(
+            "Failed to play sound",
+            "An error occurred while processing the audio file."
+          );
+        };
+        fileReader.readAsDataURL(response.data);
+      }
+    } catch (error) {
+      if (error.code === "ECONNABORTED") {
+        console.error("API 요청이 타임아웃되었습니다.", error);
+      } else {
+        console.error("API 요청 실패:", error);
+      }
+      Alert.alert(
+        "Failed to fetch the voice",
+        error.message || "An error occurred while fetching the voice."
+      );
+    }
+  };
+
   const onSend = async (newMessages = []) => {
     try {
       const token = await getAuthToken();
-  
+
       // 먼저 사용자가 보낸 메시지를 화면에 추가
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, newMessages)
       );
-  
+
       // 서버에 메시지 전송
       const response = await axios.post(
         `${BASE_URL}/api/message`,
@@ -115,7 +193,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
+
       // 서버로부터 받은 응답 메시지를 화면에 추가
       const serverResponseMessage = {
         _id: `${chatroomId}-${newMessages[0]._id}-response`, // 고유 ID 생성
@@ -127,12 +205,11 @@ const ChatRoomScreen = ({ navigation, route }) => {
           avatar: profileimg, // Parent AI만 아바타 표시
         },
       };
-  
+
       // 응답 메시지를 추가
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, serverResponseMessage)
       );
-  
     } catch (error) {
       Alert.alert(
         "Failed to send the message",
@@ -146,6 +223,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
       {...props}
       wrapperStyle={{ right: styles.bubbleRight, left: styles.bubbleLeft }}
       textStyle={{ right: styles.textRight, left: styles.textLeft }}
+      onLongPress={(context, message) => onBubbleLongPress(context, message)} // 길게 누르기 이벤트 핸들러 추가
     />
   );
 
