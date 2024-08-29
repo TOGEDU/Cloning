@@ -8,6 +8,8 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -139,6 +141,10 @@ const TodayQuestion = () => {
         console.log("Recording started");
       } else {
         console.error("Permission to access microphone is required!");
+        Alert.alert(
+          "Permission Denied",
+          "Permission to access microphone is required!"
+        );
       }
     } catch (err) {
       console.error("Failed to start recording", err);
@@ -146,12 +152,53 @@ const TodayQuestion = () => {
   };
 
   const stopRecording = async () => {
-    console.log("Stopping recording..");
-    setRecording(undefined);
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    console.log("Recording stopped and stored at", uri);
+    try {
+      console.log("Stopping recording...");
+  
+      // 녹음 중지 및 파일 언로드
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      setRecording(null);
+      console.log("Recording stopped and stored at", uri);
+  
+      // 서버로 녹음 파일 전송
+      const formData = new FormData();
+      formData.append("file", {
+        uri: Platform.OS === 'ios' ? uri.replace("file://", "") : uri,  // iOS와 Android의 파일 경로 처리
+        type: "audio/m4a",  // 파일 유형
+        name: "recording.m4a",  // 파일 이름
+      });
+  
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Token doesn't exist");
+        return;
+      }
+  
+      const response = await axios.post(`${BASE_URL}/api/diary/transcribe`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      console.log("Transcription result:", response.data);
+      
+      // 서버로부터 받은 텍스트를 TextInput에 설정
+      if (response.data.text) {
+        setText(response.data.text);
+      } else {
+        console.warn("No text received from the server.");
+      }
+    } catch (err) {
+      console.error("Failed to stop recording or send audio file", err);
+      Alert.alert("Error", "Failed to process the audio file.");
+    }
   };
+  
+  
+  
+  
 
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>

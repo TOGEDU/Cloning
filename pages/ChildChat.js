@@ -52,7 +52,7 @@ const ChildChat = ({ navigation }) => {
     setMessages([
       {
         _id: 1,
-        text: "채팅을 길게 클릭하면 부모님의 목소리를 들을 수 있습니다. 부모님 AI와 채팅을 나눠보세요.",
+        text: "채팅을 길게 클릭해요.",
         createdAt: new Date(),
         user: {
           _id: 2,
@@ -186,6 +186,59 @@ const ChildChat = ({ navigation }) => {
     }
   };
 
+<<<<<<< HEAD
+  const playVoiceMessage = async (text) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Auth token is missing or invalid");
+        Alert.alert("Authentication error", "Please log in again.");
+        return;
+      }
+
+      console.log("Sending request to synthesize voice for text:", text);
+
+      const response = await axios.post(
+        "http://172.30.1.71:8000/synthesize",
+        { text: text },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+          timeout: 120000, // 타임아웃을 2분으로 설정
+        }
+      );
+
+      console.log("Received response from API");
+
+      const blob = new Blob([response.data], { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+
+      const { sound } = await Audio.Sound.createAsync({ uri: url });
+      setSound(sound);
+      await sound.playAsync();
+
+      console.log("Audio playback started successfully");
+    } catch (error) {
+      if (error.code === "ECONNABORTED") {
+        Alert.alert(
+          "Timeout Error",
+          "The request took too long - please try again later."
+        );
+      } else {
+        console.error("Failed to fetch or play the voice message", error);
+        Alert.alert(
+          "Voice Playback Error",
+          error.message ||
+            "An error occurred while trying to play the voice message."
+        );
+      }
+    }
+  };
+
+=======
+>>>>>>> 985f5337810b3d286cdea0dbb8314a0bee58ed75
   const renderBubble = (props) => (
     <Bubble
       {...props}
