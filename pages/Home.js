@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   BoxText1: {
-    fontFamily: "NotoSans500",
+    fontFamily: "NotoSans700",
     fontSize: 20,
     textAlign: "right",
     marginTop: 26,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEEDFF",
     marginBottom: 100,
     paddingLeft: 32,
-    paddingTop: 19,
+    paddingTop: 20,
   },
   check: {
     width: 17,
@@ -316,13 +316,14 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 29,
+    marginTop: 20,
     gap: 27,
   },
   confirmBoxBottomList: {
     display: "flex",
     flexDirection: "row",
     gap: 5,
+    alignItems: 'center',
   },
 });
 
