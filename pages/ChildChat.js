@@ -26,7 +26,7 @@ const ChildChat = ({ navigation }) => {
     setMessages([
       {
         _id: 1,
-        text: "채팅을 길게 클릭하면 부모님의 목소리를 들을 수 있습니다. 부모님 AI와 채팅을 나눠보세요.",
+        text: "채팅을 길게 클릭해요.",
         createdAt: new Date(),
         user: {
           _id: 2,
@@ -100,7 +100,7 @@ const ChildChat = ({ navigation }) => {
       console.log("Sending request to synthesize voice for text:", text);
 
       const response = await axios.post(
-        "http://172.30.1.79:8000/synthesize",
+        "http://172.30.1.71:8000/synthesize",
         { text: text },
         {
           headers: {
