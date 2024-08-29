@@ -31,7 +31,6 @@ const DiaryDetail = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
 
   useEffect(() => {
     const fetchDiaryDetail = async () => {
@@ -56,7 +55,6 @@ const DiaryDetail = () => {
           setSelectedChild(firstDiary.diaryId);
           setTitle(firstDiary.title);
           setContent(firstDiary.content);
-          setImage({ uri: firstDiary.image.startsWith("http") ? firstDiary.image : `${BASE_URL}/${firstDiary.image}` });
         }
       } catch (error) {
         console.error("Error occurred:", error);
@@ -69,11 +67,28 @@ const DiaryDetail = () => {
     fetchDiaryDetail();
   }, [date]);
 
+  useEffect(() => {
+    if (selectedChild) {
+      const selectedDiary = diaryData.find(
+        (entry) => entry.diaryId === selectedChild
+      );
+
+      if (selectedDiary) {
+        setTitle(selectedDiary.title);
+        setContent(selectedDiary.content);
+      }
+    }
+  }, [selectedChild, diaryData]);
+
   const handleImagePicker = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Permission to access gallery is required!");
+      Alert.alert(
+        "Permission required",
+        "Permission to access gallery is required!"
+      );
       return;
     }
 
@@ -83,7 +98,16 @@ const DiaryDetail = () => {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      setImage(result.assets[0]);
+      const selectedImage = result.assets[0].uri;
+
+      setDiaryData((prevDiaryData) =>
+        prevDiaryData.map(
+          (entry) =>
+            entry.diaryId === selectedChild
+              ? { ...entry, image: selectedImage }
+              : entry 
+        )
+      );
     }
   };
 
@@ -91,14 +115,18 @@ const DiaryDetail = () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
 
+      const selectedDiary = diaryData.find(
+        (entry) => entry.diaryId === selectedChild
+      );
+
       const formData = new FormData();
       formData.append("diaryId", selectedChild);
       formData.append("title", title);
       formData.append("content", content);
 
-      if (image) {
+      if (selectedDiary.image) {
         formData.append("image", {
-          uri: image.uri,
+          uri: selectedDiary.image,
           type: "image/jpeg",
           name: "updated_image.jpg",
         });
@@ -124,7 +152,9 @@ const DiaryDetail = () => {
     }
   };
 
-  const selectedDiary = diaryData.find((entry) => entry.diaryId === selectedChild);
+  const selectedDiary = diaryData.find(
+    (entry) => entry.diaryId === selectedChild
+  );
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -137,7 +167,10 @@ const DiaryDetail = () => {
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => navigation.goBack()}
+        >
           <Svg width="44" height="44" viewBox="0 0 44 44" fill="none">
             <Path
               d="M12.8334 12.8333L31.1667 31.1666M12.8334 31.1666L31.1667 12.8333"
@@ -161,7 +194,9 @@ const DiaryDetail = () => {
 
         {isEditMode ? (
           <>
-            <Text style={[styles.title, isEditMode && styles.editModeMargin]}>제목</Text>
+            <Text style={[styles.title, isEditMode && styles.editModeMargin]}>
+              제목
+            </Text>
             <TextInput
               style={styles.input}
               value={title}
@@ -176,38 +211,68 @@ const DiaryDetail = () => {
               placeholder="내용을 입력하세요"
               multiline
             />
-            <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
-              {image ? (
-                <Image source={{ uri: image.uri }} style={styles.image} />
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={handleImagePicker}
+            >
+              {selectedChild &&
+              diaryData.find((entry) => entry.diaryId === selectedChild)
+                ?.image ? (
+                <Image
+                  source={{
+                    uri: diaryData.find(
+                      (entry) => entry.diaryId === selectedChild
+                    )?.image,
+                  }}
+                  style={styles.diaryImage}
+                />
               ) : (
                 <Text style={styles.imagePickerText}>+ 사진 추가</Text>
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.saveButton} onPress={handleUpdateDiary}>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleUpdateDiary}
+            >
               <Text style={styles.saveButtonText}>저장하기</Text>
             </TouchableOpacity>
           </>
         ) : (
-          selectedDiary && (
+          selectedChild && (
             <View style={styles.diaryContentContainer}>
-              <Text style={styles.dateText}>{selectedDiary.date}</Text>
-              <Text style={styles.title}>{selectedDiary.title}</Text>
-              {selectedDiary.image ? (
+              <Text style={styles.dateText}>
+                {
+                  diaryData.find((entry) => entry.diaryId === selectedChild)
+                    ?.date
+                }
+              </Text>
+              <Text style={styles.title}>
+                {
+                  diaryData.find((entry) => entry.diaryId === selectedChild)
+                    ?.title
+                }
+              </Text>
+              {selectedDiary?.image ? (
                 <Image
-                  source={{
-                    uri: selectedDiary.image.startsWith("http")
-                      ? selectedDiary.image
-                      : `${BASE_URL}/${selectedDiary.image}`,
-                  }}
+                  source={{ uri: selectedDiary.image }}
                   style={styles.diaryImage}
                 />
               ) : (
                 <Text style={styles.noImageText}>이미지가 없습니다.</Text>
               )}
-              <Text style={styles.content}>{selectedDiary.content}</Text>
+
+              <Text style={styles.content}>
+                {
+                  diaryData.find((entry) => entry.diaryId === selectedChild)
+                    ?.content
+                }
+              </Text>
               <View style={styles.editButtonContainer}>
-                <TouchableOpacity style={styles.editButton} onPress={() => setIsEditMode(true)}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => setIsEditMode(true)}
+                >
                   <Text style={styles.editButtonText}>수정하기</Text>
                 </TouchableOpacity>
               </View>
@@ -218,7 +283,6 @@ const DiaryDetail = () => {
     </TouchableWithoutFeedback>
   );
 };
-
 
 export default DiaryDetail;
 
@@ -347,7 +411,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: "#6369D4",
     paddingVertical: 10,
-
     paddingHorizontal: 20,
     borderRadius: 100,
   },
