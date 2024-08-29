@@ -13,6 +13,7 @@ import {
 import RNPickerSelect from "react-native-picker-select";
 import Svg, { Path } from "react-native-svg";
 import * as ImagePicker from "expo-image-picker";
+import { Audio } from "expo-av"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -25,6 +26,7 @@ const Diary = () => {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState(null);
   const [image, setImage] = useState(null);
+  const [recording, setRecording] = useState(null); 
   const [childrenOptions, setChildrenOptions] = useState([]);
 
   useEffect(() => {
@@ -99,7 +101,6 @@ const Diary = () => {
       });
 
       if (response.data.success === true) {
-        // Alert.alert("저장 성공", response.data.msg);
         navigation.replace("WriteFinish");
       } else if (response.data.success === false) {
         Alert.alert("저장 실패", response.data.msg);
@@ -110,7 +111,6 @@ const Diary = () => {
       if (error.response) {
         console.error("Error response data:", error.response.data);
         console.error("Error response status:", error.response.status);
-        // console.error("Error response headers:", error.response.headers);
       } else if (error.request) {
         console.error("Error request data:", error.request);
       } else {
@@ -139,6 +139,36 @@ const Diary = () => {
     if (!result.canceled && result.assets.length > 0) {
       setImage(result.assets[0]);
     }
+  };
+
+  const startRecording = async () => {
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission required", "Microphone access is required!");
+        return;
+      }
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      console.log("Starting recording...");
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      );
+      setRecording(recording);
+      console.log("Recording started");
+    } catch (err) {
+      console.error("Failed to start recording:", err);
+    }
+  };
+
+  const stopRecording = async () => {
+    console.log("Stopping recording...");
+    setRecording(undefined);
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
+    console.log("Recording stopped and stored at", uri);
   };
 
   const dismissKeyboard = () => {
@@ -197,9 +227,20 @@ const Diary = () => {
             <Text style={styles.imagePickerText}>+ 사진 추가</Text>
           )}
         </TouchableOpacity>
-        <TouchableOpacity style={styles.btn} onPress={handleSave}>
-          <Text style={styles.btnText}>기록하기</Text>
-        </TouchableOpacity>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.btn} onPress={handleSave}>
+            <Text style={styles.btnText}>기록하기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.recordButton}
+            onPress={recording ? stopRecording : startRecording}
+          >
+            <Text style={styles.btnText}>
+              {recording ? "녹음 중지" : "녹음 시작"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -259,7 +300,7 @@ const styles = StyleSheet.create({
   },
   contentInput: {
     width: 330,
-    height: 190,
+    height: 150,
     backgroundColor: "#F7F7F7",
     borderRadius: 5,
     paddingVertical: 15,
@@ -285,13 +326,19 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 5,
   },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+    gap: 10,
+  },
   btn: {
     width: 143,
     paddingHorizontal: 32,
     paddingVertical: 16,
     backgroundColor: "#6369D4",
     borderRadius: 100,
-    display: "flex",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 120,
@@ -301,5 +348,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "NotoSans600",
+  },
+  recordButton: {
+    width: 143,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    backgroundColor: "#FF6B6B",
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 120,
+    marginTop: 27,
   },
 });
