@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import BASE_URL from "../api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio } from "expo-av";
 
 const img = require("../assets/todayquestionimg.png");
 
@@ -21,6 +22,7 @@ const TodayQuestion = () => {
   const [question, setQuestion] = useState("");
   const [questionId, setQuestionId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [recording, setRecording] = useState(null);
   const navigation = useNavigation();
 
   const dismissKeyboard = () => {
@@ -36,23 +38,26 @@ const TodayQuestion = () => {
           return;
         }
 
-        const response = await axios.get(`${BASE_URL}/api/dailyquestion/today`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          `${BASE_URL}/api/dailyquestion/today`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const todayQuestion = response.data;
 
         if (todayQuestion && todayQuestion.question) {
           setQuestionId(todayQuestion.questionId);
           setQuestion(todayQuestion.question);
-          
+
           if (todayQuestion.text) {
             setText(todayQuestion.text);
             setIsEditing(true);
           }
-        } 
+        }
       } catch (error) {
         console.error("Error fetching question:", error);
         if (error.response) {
@@ -67,7 +72,6 @@ const TodayQuestion = () => {
   const handleWriteFinish = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      console.log("Token:", token);
       if (!token) {
         console.error("Token doesn't exist");
         return;
@@ -116,6 +120,39 @@ const TodayQuestion = () => {
     }
   };
 
+  const startRecording = async () => {
+    try {
+      console.log("Requesting permissions..");
+      const permission = await Audio.requestPermissionsAsync();
+
+      if (permission.status === "granted") {
+        console.log("Starting recording..");
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+        );
+        setRecording(recording);
+        console.log("Recording started");
+      } else {
+        console.error("Permission to access microphone is required!");
+      }
+    } catch (err) {
+      console.error("Failed to start recording", err);
+    }
+  };
+
+  const stopRecording = async () => {
+    console.log("Stopping recording..");
+    setRecording(undefined);
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
+    console.log("Recording stopped and stored at", uri);
+  };
+
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
       <View style={styles.container}>
@@ -144,6 +181,15 @@ const TodayQuestion = () => {
         <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
           <Text style={styles.btnText}>
             {isEditing ? "수정하기" : "기록하기"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.recordButton}
+          onPress={recording ? stopRecording : startRecording}
+        >
+          <Text style={styles.btnText}>
+            {recording ? "녹음 중지" : "녹음 시작"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -234,12 +280,24 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 120,
-    marginTop: 30,
+    marginBottom: 5,
+    marginTop: 15,
   },
   btnText: {
     color: "#fff",
     fontSize: 16,
     fontFamily: "NotoSans600",
+  },
+  recordButton: {
+    width: 143,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    backgroundColor: "#FF6B6B",
+    borderRadius: 100,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 70,
+    marginTop: 10,
   },
 });
