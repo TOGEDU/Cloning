@@ -9,8 +9,7 @@ import {
 } from "react-native-gifted-chat";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import BASE_URL from "../api";
+import { Audio } from "expo-av";
 
 import burger from "../assets/burger.png";
 import smallLogo from "../assets/smallLogo.png";
@@ -21,9 +20,9 @@ import sendIcon from "../assets/send.png";
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
+  const [sound, setSound] = useState(null);
 
   useEffect(() => {
-    // 초기 상태일 때 표시할 메시지 설정
     setMessages([
       {
         _id: 1,
@@ -36,7 +35,13 @@ const ChildChat = ({ navigation }) => {
         },
       },
     ]);
-  }, []);
+
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
 
   const onSend = async (newMessages = []) => {
     try {
@@ -49,10 +54,8 @@ const ChildChat = ({ navigation }) => {
 
       const sentMessage = newMessages[0];
 
-      // 콘솔에 로그 추가
       console.log("Sending message:", sentMessage.text);
 
-      // 새로운 채팅방 생성
       const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,12 +65,10 @@ const ChildChat = ({ navigation }) => {
         },
       });
 
-      // API 응답 확인
       console.log("API response:", response.data);
 
       const newChatroomId = response.data.chatroomId;
 
-      // 새로운 채팅방으로 이동, 사용자가 입력한 메시지를 포함하지 않음
       navigation.navigate("ChatRoomScreen", {
         chatroomId: newChatroomId,
       });
@@ -87,6 +88,56 @@ const ChildChat = ({ navigation }) => {
     }
   };
 
+  const playVoiceMessage = async (text) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Auth token is missing or invalid");
+        Alert.alert("Authentication error", "Please log in again.");
+        return;
+      }
+
+      console.log("Sending request to synthesize voice for text:", text);
+
+      const response = await axios.post(
+        "http://172.30.1.79:8000/synthesize",
+        { text: text },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+          timeout: 120000, // 타임아웃을 2분으로 설정
+        }
+      );
+
+      console.log("Received response from API");
+
+      const blob = new Blob([response.data], { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+
+      const { sound } = await Audio.Sound.createAsync({ uri: url });
+      setSound(sound);
+      await sound.playAsync();
+
+      console.log("Audio playback started successfully");
+    } catch (error) {
+      if (error.code === "ECONNABORTED") {
+        Alert.alert(
+          "Timeout Error",
+          "The request took too long - please try again later."
+        );
+      } else {
+        console.error("Failed to fetch or play the voice message", error);
+        Alert.alert(
+          "Voice Playback Error",
+          error.message ||
+            "An error occurred while trying to play the voice message."
+        );
+      }
+    }
+  };
+
   const renderBubble = (props) => (
     <Bubble
       {...props}
@@ -97,6 +148,11 @@ const ChildChat = ({ navigation }) => {
       textStyle={{
         right: styles.textRight,
         left: styles.textLeft,
+      }}
+      onLongPress={() => {
+        if (props.position === "left") {
+          playVoiceMessage(props.currentMessage.text);
+        }
       }}
     />
   );
