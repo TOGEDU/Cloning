@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
     //backgroundColor: "green",
   },
   nameText: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "bold",
     marginBottom: 2,
   },
