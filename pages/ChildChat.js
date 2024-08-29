@@ -9,6 +9,7 @@ import {
 } from "react-native-gifted-chat";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio } from "expo-av"; // expo-av 추가
 
 import BASE_URL from "../api";
 
@@ -19,11 +20,35 @@ import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
 
+// Axios request interceptor to log requests
+axios.interceptors.request.use(
+  function (config) {
+    console.log("API 요청이 서버로 전달됨:", config.url, config.data);
+    return config;
+  },
+  function (error) {
+    console.error("API 요청 전송 실패:", error);
+    return Promise.reject(error);
+  }
+);
+
+// Axios response interceptor to log responses
+axios.interceptors.response.use(
+  function (response) {
+    console.log("서버로부터 응답을 받음:", response);
+    return response;
+  },
+  function (error) {
+    console.error("서버 응답 실패:", error);
+    return Promise.reject(error);
+  }
+);
+
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
+  const [sound, setSound] = useState(null); // 사운드 상태 추가
 
   useEffect(() => {
-    // 초기 상태일 때 표시할 메시지 설정
     setMessages([
       {
         _id: 1,
@@ -38,6 +63,85 @@ const ChildChat = ({ navigation }) => {
     ]);
   }, []);
 
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync(); // 컴포넌트가 언마운트될 때 사운드를 정리
+        }
+      : undefined;
+  }, [sound]);
+
+  const playSound = async (audioUri) => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: true }
+      );
+      setSound(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("오디오 재생 실패:", error);
+      Alert.alert(
+        "Failed to play sound",
+        "An error occurred while playing the sound."
+      );
+    }
+  };
+
+  const onBubbleLongPress = async (context, message) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Auth token is missing or invalid");
+        Alert.alert("Authentication error", "Please log in again.");
+        return;
+      }
+
+      console.log("길게 클릭된 메시지:", message.text);
+
+      console.log("API 요청 시작:", message.text);
+
+      const response = await axios.post(
+        "http://172.30.1.79:8000/synthesize",
+        { text: message.text },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+          timeout: 180000,
+        }
+      );
+
+      console.log("API 응답 성공:", response);
+
+      // URL.createObjectURL 사용 대신 React Native의 File API로 변경
+      const fileReader = new FileReader();
+      fileReader.onload = async () => {
+        const audioUri = fileReader.result;
+        await playSound(audioUri);
+      };
+      fileReader.onerror = (error) => {
+        console.error("FileReader 오류:", error);
+        Alert.alert(
+          "Failed to play sound",
+          "An error occurred while processing the audio file."
+        );
+      };
+      fileReader.readAsDataURL(response.data);
+    } catch (error) {
+      if (error.code === "ECONNABORTED") {
+        console.error("API 요청이 타임아웃되었습니다.", error);
+      } else {
+        console.error("API 요청 실패:", error);
+      }
+      Alert.alert(
+        "Failed to fetch the voice",
+        error.message || "An error occurred while fetching the voice."
+      );
+    }
+  };
+
   const onSend = async (newMessages = []) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
@@ -48,11 +152,8 @@ const ChildChat = ({ navigation }) => {
       }
 
       const sentMessage = newMessages[0];
-
-      // 콘솔에 로그 추가
       console.log("Sending message:", sentMessage.text);
 
-      // 새로운 채팅방 생성
       const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,12 +163,10 @@ const ChildChat = ({ navigation }) => {
         },
       });
 
-      // API 응답 확인
       console.log("API response:", response.data);
 
       const newChatroomId = response.data.chatroomId;
 
-      // 새로운 채팅방으로 이동, 사용자가 입력한 메시지를 포함하지 않음
       navigation.navigate("ChatRoomScreen", {
         chatroomId: newChatroomId,
       });
@@ -98,6 +197,7 @@ const ChildChat = ({ navigation }) => {
         right: styles.textRight,
         left: styles.textLeft,
       }}
+      onLongPress={onBubbleLongPress}
     />
   );
 
