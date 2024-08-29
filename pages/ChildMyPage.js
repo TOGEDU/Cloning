@@ -249,11 +249,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginHorizontal: 40,
-    marginVertical: 10,
+    marginVertical: 30,
     alignItems: "center",
   },
   nameText: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "bold",
     marginBottom: 2,
   },
@@ -287,10 +287,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
-  chevronIcon: {
-    width: 20,
-    height: 20,
-  },
+
   timeDropdownContent: {
     marginTop: 10,
   },

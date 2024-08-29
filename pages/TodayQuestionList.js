@@ -176,10 +176,7 @@ const styles = StyleSheet.create({
     margin: 10,
     marginRight: 40,
   },
-  Qicon: {
-    width: 24,
-    height: 24,
-  },
+
   Aicon: {
     width: 24,
     height: 24,
