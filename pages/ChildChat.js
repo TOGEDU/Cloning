@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Alert,
+  LogBox,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   GiftedChat,
@@ -19,6 +26,14 @@ import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
+
+// 특정 경고 메시지를 무시하고 숨기기
+LogBox.ignoreLogs([
+  "Warning: Avatar: Support for defaultProps will be removed from function components in a future major release.",
+]);
+
+// 또는 모든 경고를 무시하기
+// LogBox.ignoreAllLogs();
 
 // Axios request interceptor to log requests
 axios.interceptors.request.use(
@@ -102,7 +117,7 @@ const ChildChat = ({ navigation }) => {
       console.log("API 요청 시작:", message.text);
 
       const response = await axios.post(
-        "http://172.30.1.8:8000/synthesize",
+        "http://172.20.10.3:8000/synthesize",
         { text: message.text },
         {
           headers: {
