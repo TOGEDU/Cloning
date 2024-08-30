@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 
 const img = require("../assets/todayquestionimg.png");
+const recordIcon = require("../assets/recordicon2.png");
 
 const TodayQuestion = () => {
   const [text, setText] = useState("");
@@ -154,37 +155,39 @@ const TodayQuestion = () => {
   const stopRecording = async () => {
     try {
       console.log("Stopping recording...");
-  
-      // 녹음 중지 및 파일 언로드
+
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecording(null);
       console.log("Recording stopped and stored at", uri);
-  
+
       // 서버로 녹음 파일 전송
       const formData = new FormData();
       formData.append("file", {
-        uri: Platform.OS === 'ios' ? uri.replace("file://", "") : uri,  // iOS와 Android의 파일 경로 처리
-        type: "audio/m4a",  // 파일 유형
-        name: "recording.m4a",  // 파일 이름
+        uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri, // iOS와 Android의 파일 경로 처리
+        type: "audio/m4a", // 파일 유형
+        name: "recording.m4a", // 파일 이름
       });
-  
+
       const token = await AsyncStorage.getItem("authToken");
       if (!token) {
         console.error("Token doesn't exist");
         return;
       }
-  
-      const response = await axios.post(`${BASE_URL}/api/diary/transcribe`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
+
+      const response = await axios.post(
+        `${BASE_URL}/api/diary/transcribe`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       console.log("Transcription result:", response.data);
-      
-      // 서버로부터 받은 텍스트를 TextInput에 설정
+
       if (response.data.text) {
         setText(response.data.text);
       } else {
@@ -195,10 +198,14 @@ const TodayQuestion = () => {
       Alert.alert("Error", "Failed to process the audio file.");
     }
   };
-  
-  
-  
-  
+
+  const toggleRecording = () => {
+    if (recording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
@@ -224,19 +231,17 @@ const TodayQuestion = () => {
             value={text}
             onChangeText={setText}
           />
+          <TouchableOpacity
+            style={styles.recordIconContainer}
+            onPress={toggleRecording}
+          >
+            <Image source={recordIcon} style={styles.recordIcon} />
+          </TouchableOpacity>
         </View>
+
         <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
           <Text style={styles.btnText}>
             {isEditing ? "수정하기" : "기록하기"}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.recordButton}
-          onPress={recording ? stopRecording : startRecording}
-        >
-          <Text style={styles.btnText}>
-            {recording ? "녹음 중지" : "녹음 시작"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -259,6 +264,7 @@ const styles = StyleSheet.create({
     width: "100%",
     display: "flex",
     alignItems: "center",
+    marginTop:-130,
   },
   title: {
     color: "#fff",
@@ -312,11 +318,21 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 18,
     paddingVertical: 18,
+    position: "relative",
   },
   answerInput: {
     color: "#AEAEAE",
     fontSize: 16,
     fontFamily: "NotoSans600",
+  },
+  recordIconContainer: {
+    position: "absolute",
+    right: 15,
+    bottom: 15,
+  },
+  recordIcon: {
+    width: 36,
+    height: 36,
   },
   btn: {
     width: 143,
@@ -334,17 +350,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "NotoSans600",
-  },
-  recordButton: {
-    width: 143,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    backgroundColor: "#FF6B6B",
-    borderRadius: 100,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 70,
-    marginTop: 10,
   },
 });

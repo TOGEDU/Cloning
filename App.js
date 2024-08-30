@@ -74,6 +74,7 @@ const footerlessRoutes = [
   "Album",
   "ImageView",
   "ChatRoomScreen",
+  "Diary",
   "DiaryDetail",
 ];
 const App = () => {

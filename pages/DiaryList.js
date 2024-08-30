@@ -18,11 +18,11 @@ const DiaryList = () => {
   const fetchDiaryDates = async (year, month) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      console.log("Retrieved Token:", token);
+      // console.log("Retrieved Token:", token);
 
       const formattedMonth = `${year}-${String(month).padStart(2, "0")}`;
 
-      console.log("Authorization Header:", `Bearer ${token}`);
+      // console.log("Authorization Header:", `Bearer ${token}`);
 
       const response = await axios.get(`${BASE_URL}/api/diary/calendar`, {
         params: { month: formattedMonth },
@@ -31,7 +31,7 @@ const DiaryList = () => {
         },
       });
 
-      console.log("API Response Data:", response.data);
+      // console.log("API Response Data:", response.data);
 
       const data = response.data.dateList || [];
       const marked = {};
@@ -41,7 +41,7 @@ const DiaryList = () => {
           if (item.count > 0) {
             marked[item.date] = {
               marked: true,
-              dotColor: "yellow",
+              dotColor: "#858AE8",
               activeOpacity: 0,
             };
           }
@@ -51,7 +51,7 @@ const DiaryList = () => {
       }
 
       setMarkedDates(marked);
-      console.log("Marked Dates:", marked);
+      // console.log("Marked Dates:", marked);
     } catch (error) {
       // console.error("Error fetching data:", error);
       // console.error("Error response:", error.response?.data);
@@ -70,7 +70,7 @@ const DiaryList = () => {
   const checkDiaryExistence = async (date) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      console.log("Token for checking diary existence:", token); // 디버깅용 로그
+      // console.log("Token for checking diary existence:", token); // 디버깅용 로그
 
       const response = await axios.get(`${BASE_URL}/api/diary`, {
         params: { date },
@@ -107,7 +107,10 @@ const DiaryList = () => {
         selected: true,
         customStyles: {
           container: styles.selectedContainer,
-          text: styles.selectedText,
+          text: {
+            ...styles.selectedText,
+            fontWeight: "bold",
+          },
         },
       };
     }

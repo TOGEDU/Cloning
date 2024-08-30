@@ -14,7 +14,7 @@ import {
 import RNPickerSelect from "react-native-picker-select";
 import Svg, { Path } from "react-native-svg";
 import * as ImagePicker from "expo-image-picker";
-import { Audio } from "expo-av"; 
+import { Audio } from "expo-av";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -22,15 +22,20 @@ import BASE_URL from "../api";
 
 const Diary = () => {
   const navigation = useNavigation();
-
-  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState(null);
+  const [category, setCategory] = useState("common");
   const [image, setImage] = useState(null);
-  const [recording, setRecording] = useState(null); 
+  const [recording, setRecording] = useState(null);
   const [childrenOptions, setChildrenOptions] = useState([]);
+  const [currentDate, setCurrentDate] = useState("");
 
   useEffect(() => {
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}년 ${
+      today.getMonth() + 1
+    }월 ${today.getDate()}일`;
+    setCurrentDate(formattedDate);
+
     const fetchChildren = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
@@ -75,7 +80,6 @@ const Diary = () => {
       const formData = new FormData();
 
       formData.append("date", today);
-      formData.append("title", title);
       formData.append("content", content);
 
       if (image) {
@@ -216,6 +220,14 @@ const Diary = () => {
     }
   };
 
+  const toggleRecording = () => {
+    if (recording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
   const dismissKeyboard = () => {
     Keyboard.dismiss();
   };
@@ -237,31 +249,33 @@ const Diary = () => {
           </Svg>
         </TouchableOpacity>
 
-        <RNPickerSelect
-          onValueChange={(value) => setCategory(value)}
-          items={childrenOptions}
-          placeholder={{ label: "자식 선택", value: null }}
-          style={{
-            inputIOS: styles.picker,
-            inputAndroid: styles.picker,
-          }}
-        />
+        <Text style={styles.dateText}>{currentDate}</Text>
 
-        <Text style={styles.title}>제목</Text>
-        <TextInput
-          style={styles.titleInput}
-          placeholder="일기의 제목을 적어주세요"
-          value={title}
-          onChangeText={setTitle}
-        />
-        <Text style={styles.contentTitle}>내용</Text>
-        <TextInput
-          style={styles.contentInput}
-          placeholder="일기의 내용을 적어주세요"
-          value={content}
-          onChangeText={setContent}
-          multiline
-        />
+        <View style={styles.pickerContainer}>
+          <RNPickerSelect
+            onValueChange={(value) => setCategory(value)}
+            items={childrenOptions}
+            value={category}
+            placeholder={{}}
+            style={{
+              inputIOS: styles.picker,
+              inputAndroid: styles.picker,
+              iconContainer: styles.iconContainer,
+            }}
+            useNativeAndroidPickerStyle={false}
+            Icon={() => (
+              <Svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                <Path
+                  d="M11 1L6 7L1 1"
+                  stroke="#6369D4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            )}
+          />
+        </View>
+
         <TouchableOpacity
           style={styles.imagePicker}
           onPress={handleImagePicker}
@@ -269,22 +283,37 @@ const Diary = () => {
           {image ? (
             <Image source={{ uri: image.uri }} style={styles.image} />
           ) : (
-            <Text style={styles.imagePickerText}>+ 사진 추가</Text>
+            <Image
+              source={require("../assets/photoicon.png")}
+              style={styles.photoIcon}
+            />
           )}
         </TouchableOpacity>
+
+        <View style={styles.contentBox}>
+          <TextInput
+            style={styles.contentInput}
+            placeholder="일기의 내용을 적어주세요"
+            placeholderTextColor="#838383"
+            value={content}
+            onChangeText={setContent}
+            multiline
+          />
+          <TouchableOpacity
+            style={styles.recordIconContainer}
+            onPress={toggleRecording}
+          >
+            <Image
+              source={require("../assets/recordicon.png")}
+              style={styles.recordIcon}
+            />
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.btn} onPress={handleSave}>
             <Text style={styles.btnText}>기록하기</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-          style={styles.recordButton}
-          onPress={recording ? stopRecording : startRecording}
-        >
-          <Text style={styles.btnText}>
-            {recording ? "녹음 중지" : "녹음 시작"}
-          </Text>
-        </TouchableOpacity>
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -307,69 +336,94 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 1,
   },
-  picker: {
-    marginLeft: 28,
+  dateText: {
+    marginTop: 100,
     color: "#838383",
-    marginBottom: 15,
-    fontSize: 13,
-    fontFamily: "NotoSans",
-    width: 100,
+    textAlign: "center",
+    fontFamily: "Noto Sans",
+    fontSize: 15,
+    fontStyle: "normal",
+    fontWeight: "400",
+    lineHeight: 19.36,
+    marginBottom: 16,
+  },
+  pickerContainer: {
+    width: 80,
     height: 32,
-    borderWidth: 1,
-    borderColor: "#CCCCCC",
     borderRadius: 20,
-    paddingHorizontal: 15,
-  },
-  title: {
-    fontSize: 24,
+    marginLeft: 30,
+    backgroundColor: "#EFF0FF",
+    justifyContent: "center",
     alignSelf: "flex-start",
-    marginLeft: 36,
-    fontFamily: "NotoSans",
-    marginBottom: 15,
   },
-  contentTitle: {
-    fontSize: 24,
-    alignSelf: "flex-start",
-    marginLeft: 36,
-    fontFamily: "NotoSans",
-    marginBottom: 15,
+  picker: {
+    width: "100%",
+    height: "100%",
+    flexShrink: 0,
+    borderRadius: 20,
+    backgroundColor: "#EFF0FF",
+    color: "#6369D4",
+    textAlign: "center",
+    fontFamily: "Noto Sans",
+    fontSize: 13,
+    fontWeight: "400",
+    lineHeight: 19.36,
+    paddingRight: 20,
   },
-  titleInput: {
-    height: 50,
-    width: 330,
-    borderRadius: 5,
-    marginBottom: 20,
-    backgroundColor: "#F7F7F7",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+  iconContainer: {
+    top: 12,
+    right: 10,
   },
   contentInput: {
-    width: 330,
-    height: 150,
-    backgroundColor: "#F7F7F7",
-    borderRadius: 5,
-    paddingVertical: 15,
+    flex: 1,
+    paddingVertical: 20,
     paddingHorizontal: 20,
+    fontSize: 14,
+    color: "#6369D4",
+    fontFamily: "Noto Sans",
+    fontWeight: "400",
+    lineHeight: 19.36,
+  },
+  contentBox: {
+    width: 330,
+    height: 299,
+    flexShrink: 0,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#6369D4",
+    marginTop: 28,
+    position: "relative",
+  },
+  recordIconContainer: {
+    position: "absolute",
+    right: 15,
+    bottom: 15,
+  },
+  recordIcon: {
+    width: 44,
+    height: 44,
   },
   imagePicker: {
     width: 330,
-    height: 140,
-    borderRadius: 5,
+    height: 128,
+    flexShrink: 0,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#CCC",
+    borderColor: "#6369D4",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 30,
-    backgroundColor: "#F7F7F7",
+    marginTop: 15,
+    backgroundColor: "#FFF",
   },
-  imagePickerText: {
-    color: "#838383",
-    fontSize: 12,
+  photoIcon: {
+    width: 52,
+    height: 52,
   },
   image: {
     width: "100%",
     height: "100%",
-    borderRadius: 5,
+    resizeMode: "cover",
+    borderRadius: 20,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -387,22 +441,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 120,
-    marginTop: 27,
+    marginTop: 28,
   },
   btnText: {
     color: "#fff",
     fontSize: 16,
     fontFamily: "NotoSans600",
-  },
-  recordButton: {
-    width: 143,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    backgroundColor: "#FF6B6B",
-    borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 120,
-    marginTop: 27,
   },
 });
