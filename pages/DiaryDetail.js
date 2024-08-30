@@ -35,8 +35,18 @@ const DiaryDetail = () => {
   const [content, setContent] = useState("");
   const [recording, setRecording] = useState(null);
   const [recordedUri, setRecordedUri] = useState("");
+  const [formattedDate, setFormattedDate] = useState("");
 
   useEffect(() => {
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${year}년 ${month}월 ${day}일`;
+    };
+
+    setFormattedDate(formatDate(new Date(date)));
+
     const fetchDiaryDetail = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
@@ -233,7 +243,7 @@ const DiaryDetail = () => {
           </Svg>
         </TouchableOpacity>
 
-        <Text style={styles.dateText}>{date}</Text>
+        <Text style={styles.dateText}>{formattedDate}</Text>
 
         <View style={styles.pickerContainer}>
           <RNPickerSelect
