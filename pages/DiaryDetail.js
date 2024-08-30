@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import photoIcon from "../assets/photoicon.png";
 import RNPickerSelect from "react-native-picker-select";
 import * as ImagePicker from "expo-image-picker";
 import Svg, { Path } from "react-native-svg";
@@ -18,6 +19,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import BASE_URL from "../api";
+import recordIcon from "../assets/recordicon.png";
+import { Audio } from "expo-av";
 
 const DiaryDetail = () => {
   const navigation = useNavigation();
@@ -29,11 +32,21 @@ const DiaryDetail = () => {
   const [diaryData, setDiaryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
+  const [recording, setRecording] = useState(null);
+  const [recordedUri, setRecordedUri] = useState("");
+  const [formattedDate, setFormattedDate] = useState("");
 
   useEffect(() => {
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${year}년 ${month}월 ${day}일`;
+    };
+
+    setFormattedDate(formatDate(new Date(date)));
+
     const fetchDiaryDetail = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
@@ -54,9 +67,7 @@ const DiaryDetail = () => {
         if (response.data.length > 0) {
           const firstDiary = response.data[0];
           setSelectedChild(firstDiary.diaryId);
-          setTitle(firstDiary.title);
           setContent(firstDiary.content);
-          setImage({ uri: firstDiary.image.startsWith("http") ? firstDiary.image : `${BASE_URL}/${firstDiary.image}` });
         }
       } catch (error) {
         console.error("Error occurred:", error);
@@ -69,11 +80,27 @@ const DiaryDetail = () => {
     fetchDiaryDetail();
   }, [date]);
 
+  useEffect(() => {
+    if (selectedChild) {
+      const selectedDiary = diaryData.find(
+        (entry) => entry.diaryId === selectedChild
+      );
+
+      if (selectedDiary) {
+        setContent(selectedDiary.content);
+      }
+    }
+  }, [selectedChild, diaryData]);
+
   const handleImagePicker = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Permission to access gallery is required!");
+      Alert.alert(
+        "Permission required",
+        "Permission to access gallery is required!"
+      );
       return;
     }
 
@@ -83,7 +110,15 @@ const DiaryDetail = () => {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      setImage(result.assets[0]);
+      const selectedImage = result.assets[0].uri;
+
+      setDiaryData((prevDiaryData) =>
+        prevDiaryData.map((entry) =>
+          entry.diaryId === selectedChild
+            ? { ...entry, image: selectedImage }
+            : entry
+        )
+      );
     }
   };
 
@@ -91,16 +126,27 @@ const DiaryDetail = () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
 
+      const selectedDiary = diaryData.find(
+        (entry) => entry.diaryId === selectedChild
+      );
+
       const formData = new FormData();
       formData.append("diaryId", selectedChild);
-      formData.append("title", title);
       formData.append("content", content);
 
-      if (image) {
+      if (selectedDiary.image) {
         formData.append("image", {
-          uri: image.uri,
+          uri: selectedDiary.image,
           type: "image/jpeg",
           name: "updated_image.jpg",
+        });
+      }
+
+      if (recordedUri) {
+        formData.append("audio", {
+          uri: recordedUri,
+          type: "audio/x-m4a",
+          name: "recording.m4a",
         });
       }
 
@@ -124,7 +170,53 @@ const DiaryDetail = () => {
     }
   };
 
-  const selectedDiary = diaryData.find((entry) => entry.diaryId === selectedChild);
+  const startRecording = async () => {
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission required", "Microphone access is required!");
+        return;
+      }
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      console.log("Starting recording...");
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      );
+      setRecording(recording);
+      console.log("Recording started");
+    } catch (err) {
+      console.error("Failed to start recording:", err);
+    }
+  };
+
+  const stopRecording = async () => {
+    console.log("Stopping recording...");
+    if (!recording) return;
+    try {
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      setRecordedUri(uri);
+      console.log("Recording stopped and stored at", uri);
+      setRecording(null);
+    } catch (error) {
+      console.error("Failed to stop recording:", error);
+    }
+  };
+
+  const toggleRecording = () => {
+    if (recording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  const selectedDiary = diaryData.find(
+    (entry) => entry.diaryId === selectedChild
+  );
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -137,7 +229,10 @@ const DiaryDetail = () => {
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => navigation.goBack()}
+        >
           <Svg width="44" height="44" viewBox="0 0 44 44" fill="none">
             <Path
               d="M12.8334 12.8333L31.1667 31.1666M12.8334 31.1666L31.1667 12.8333"
@@ -148,66 +243,100 @@ const DiaryDetail = () => {
           </Svg>
         </TouchableOpacity>
 
-        <RNPickerSelect
-          onValueChange={(value) => setSelectedChild(value)}
-          items={childrenOptions}
-          placeholder={{ label: "자식 선택", value: null }}
-          style={{
-            inputIOS: styles.picker,
-            inputAndroid: styles.picker,
-          }}
-          value={selectedChild}
-        />
+        <Text style={styles.dateText}>{formattedDate}</Text>
+
+        <View style={styles.pickerContainer}>
+          <RNPickerSelect
+            onValueChange={(value) => setSelectedChild(value)}
+            items={childrenOptions}
+            placeholder={{ label: "자식 선택", value: null }}
+            style={{
+              inputIOS: styles.picker,
+              inputAndroid: styles.picker,
+              iconContainer: styles.iconContainer,
+            }}
+            value={selectedChild}
+            Icon={() => (
+              <Svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                <Path
+                  d="M11 1L6 7L1 1"
+                  stroke="#CCCCCC"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            )}
+          />
+        </View>
 
         {isEditMode ? (
           <>
-            <Text style={[styles.title, isEditMode && styles.editModeMargin]}>제목</Text>
-            <TextInput
-              style={styles.input}
-              value={title}
-              onChangeText={setTitle}
-              placeholder="제목을 입력하세요"
-            />
-            <Text style={styles.contentTitle}>내용</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={content}
-              onChangeText={setContent}
-              placeholder="내용을 입력하세요"
-              multiline
-            />
-            <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
-              {image ? (
-                <Image source={{ uri: image.uri }} style={styles.image} />
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={handleImagePicker}
+            >
+              {selectedChild &&
+              diaryData.find((entry) => entry.diaryId === selectedChild)
+                ?.image ? (
+                <Image
+                  source={{
+                    uri: diaryData.find(
+                      (entry) => entry.diaryId === selectedChild
+                    )?.image,
+                  }}
+                  style={styles.diaryImage}
+                />
               ) : (
-                <Text style={styles.imagePickerText}>+ 사진 추가</Text>
+                <Image source={photoIcon} style={styles.photoIcon} />
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.saveButton} onPress={handleUpdateDiary}>
+            <View style={styles.textAreaContainer}>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={content}
+                onChangeText={setContent}
+                placeholder="내용을 입력하세요"
+                multiline
+              />
+              <TouchableOpacity
+                style={styles.recordIconContainer}
+                onPress={toggleRecording}
+              >
+                <Image source={recordIcon} style={styles.recordIcon} />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleUpdateDiary}
+            >
               <Text style={styles.saveButtonText}>저장하기</Text>
             </TouchableOpacity>
           </>
         ) : (
-          selectedDiary && (
+          selectedChild && (
             <View style={styles.diaryContentContainer}>
-              <Text style={styles.dateText}>{selectedDiary.date}</Text>
-              <Text style={styles.title}>{selectedDiary.title}</Text>
-              {selectedDiary.image ? (
+              {selectedDiary?.image ? (
                 <Image
-                  source={{
-                    uri: selectedDiary.image.startsWith("http")
-                      ? selectedDiary.image
-                      : `${BASE_URL}/${selectedDiary.image}`,
-                  }}
+                  source={{ uri: selectedDiary.image }}
                   style={styles.diaryImage}
                 />
               ) : (
                 <Text style={styles.noImageText}>이미지가 없습니다.</Text>
               )}
-              <Text style={styles.content}>{selectedDiary.content}</Text>
+
+              <Text style={styles.content}>
+                {
+                  diaryData.find((entry) => entry.diaryId === selectedChild)
+                    ?.content
+                }
+              </Text>
               <View style={styles.editButtonContainer}>
-                <TouchableOpacity style={styles.editButton} onPress={() => setIsEditMode(true)}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => setIsEditMode(true)}
+                >
                   <Text style={styles.editButtonText}>수정하기</Text>
                 </TouchableOpacity>
               </View>
@@ -218,7 +347,6 @@ const DiaryDetail = () => {
     </TouchableWithoutFeedback>
   );
 };
-
 
 export default DiaryDetail;
 
@@ -234,86 +362,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     padding: 10,
   },
-  picker: {
-    marginLeft: 28,
-    color: "#838383",
-    marginBottom: 15,
-    fontSize: 13,
-    fontFamily: "NotoSans",
-    width: 77,
-    height: 32,
-    borderWidth: 1,
-    borderColor: "#CCCCCC",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-  },
-  diaryContentContainer: {
-    alignItems: "flex-start",
-    width: "100%",
-    paddingHorizontal: 36,
-  },
-  editModeMargin: {
-    marginLeft: 28,
-  },
-  title: {
-    color: "#000",
-    fontFamily: "Noto Sans",
-    fontSize: 24,
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: "normal",
-    alignSelf: "flex-start",
-    marginBottom: 15,
-  },
-  contentTitle: {
-    color: "#000",
-    fontFamily: "Noto Sans",
-    fontSize: 24,
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: "normal",
-    alignSelf: "flex-start",
-    marginBottom: 15,
-    marginLeft: 28,
-  },
-  input: {
-    height: 50,
-    width: 330,
-    borderRadius: 5,
-    marginBottom: 20,
-    backgroundColor: "#F7F7F7",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-  },
-  textArea: {
-    height: 190,
-    textAlignVertical: "top",
-  },
-  imagePicker: {
-    width: 330,
-    height: 140,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#CCC",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 30,
-    backgroundColor: "#F7F7F7",
-  },
-  imagePickerText: {
-    color: "#838383",
-    fontSize: 12,
-  },
-  diaryImage: {
-    width: 329,
-    height: 189.455,
-    borderRadius: 5,
-    marginBottom: 15,
-  },
-  noImageText: {
-    color: "#838383",
-    fontSize: 16,
-  },
   dateText: {
     color: "#838383",
     textAlign: "center",
@@ -323,6 +371,105 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     lineHeight: 19.36,
     marginBottom: 10,
+  },
+  pickerContainer: {
+    width: 77,
+    height: 32,
+    borderRadius: 20,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    justifyContent: "center",
+    alignSelf: "flex-start",
+    marginTop: 10,
+    marginLeft: 30,
+    marginBottom: 28,
+  },
+  picker: {
+    width: "100%",
+    height: "100%",
+    color: "#838383",
+    textAlign: "center",
+    fontFamily: "Noto Sans",
+    fontSize: 13,
+    fontWeight: "400",
+    lineHeight: 19.36,
+    paddingRight: 20,
+  },
+  iconContainer: {
+    top: 10,
+    right: 10,
+  },
+  diaryContentContainer: {
+    alignItems: "flex-start",
+    width: "100%",
+    paddingHorizontal: 36,
+  },
+  editModeMargin: {
+    marginLeft: 28,
+  },
+
+  input: {
+    height: 50,
+    width: 330,
+    borderRadius: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+  textAreaContainer: {
+    width: 330,
+    height: 299,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#6369D4",
+    marginTop: 28,
+    position: "relative",
+    justifyContent: "center",
+  },
+  textArea: {
+    flex: 1,
+    padding: 15,
+    paddingRight: 50,
+    textAlignVertical: "top",
+  },
+  content: {
+    height: 195,
+    width: 324,
+    marginTop: 28,
+  },
+  recordIconContainer: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+  },
+  recordIcon: {
+    width: 44,
+    height: 44,
+  },
+  imagePicker: {
+    width: 330,
+    height: 128,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#6369D4",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  photoIcon: {
+    width: 52,
+    height: 52,
+  },
+  imagePickerText: {
+    color: "#838383",
+    fontSize: 12,
+  },
+  diaryImage: {
+    width: 330,
+    height: 128,
+    borderRadius: 20,
+  },
+  noImageText: {
+    color: "#838383",
+    fontSize: 16,
   },
   editButtonContainer: {
     marginTop: 130,
@@ -341,18 +488,23 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     color: "#fff",
+    fontFamily: "NotoSans600",
     fontSize: 16,
   },
   saveButton: {
-    marginTop: 20,
-    backgroundColor: "#6369D4",
-    paddingVertical: 10,
-
-    paddingHorizontal: 20,
+    marginTop: 28,
+    display: "flex",
+    width: 143,
+    padding: 16,
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 12,
     borderRadius: 100,
+    backgroundColor: "#6369D4",
   },
   saveButtonText: {
     color: "#fff",
+    fontFamily: "NotoSans600",
     fontSize: 16,
   },
 });
