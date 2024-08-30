@@ -107,7 +107,7 @@ const ChildMyPage = () => {
     <View style={styles.container}>
       <SafeAreaView style={styles.headerContainer} edges={["top"]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.navigate("ChildChat")}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image source={back} style={styles.icon} />
           </TouchableOpacity>
           <View style={styles.headerlogo}>
