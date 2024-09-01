@@ -9,7 +9,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Keyboard,
-  Platform
+  Platform,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import Svg, { Path } from "react-native-svg";
@@ -19,6 +19,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import BASE_URL from "../api";
+import stopIcon from "../assets/stopicon.png";
 
 const Diary = () => {
   const navigation = useNavigation();
@@ -188,9 +189,9 @@ const Diary = () => {
       // 서버로 녹음 파일 전송
       const formData = new FormData();
       formData.append("file", {
-        uri: Platform.OS === 'ios' ? uri.replace("file://", "") : uri,  // iOS와 Android의 파일 경로 처리
-        type: "audio/m4a",  // 파일 유형
-        name: "recording.m4a",  // 파일 이름
+        uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri, // iOS와 Android의 파일 경로 처리
+        type: "audio/m4a", // 파일 유형
+        name: "recording.m4a", // 파일 이름
       });
 
       const token = await AsyncStorage.getItem("authToken");
@@ -199,15 +200,19 @@ const Diary = () => {
         return;
       }
 
-      const response = await axios.post(`${BASE_URL}/api/diary/transcribe`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post(
+        `${BASE_URL}/api/diary/transcribe`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       console.log("Transcription result:", response.data);
-      
+
       // 서버로부터 받은 텍스트를 TextInput에 설정
       if (response.data.text) {
         setContent(response.data.text);
@@ -304,7 +309,9 @@ const Diary = () => {
             onPress={toggleRecording}
           >
             <Image
-              source={require("../assets/recordicon.png")}
+              source={
+                recording ? stopIcon : require("../assets/recordicon.png")
+              } 
               style={styles.recordIcon}
             />
           </TouchableOpacity>
