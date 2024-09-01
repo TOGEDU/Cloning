@@ -321,6 +321,7 @@ const DiaryDetail = () => {
                 <Image
                   source={{ uri: selectedDiary.image }}
                   style={styles.diaryImage}
+                  resizeMode="contain"
                 />
               ) : (
                 <Text style={styles.noImageText}>이미지가 없습니다.</Text>
@@ -464,7 +465,7 @@ const styles = StyleSheet.create({
   },
   diaryImage: {
     width: 330,
-    height: 128,
+    height: null,
     borderRadius: 20,
   },
   noImageText: {
