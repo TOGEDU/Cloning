@@ -75,7 +75,12 @@ const Diary = () => {
   const handleSave = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-
+      if (!token) {
+        console.error("Token doesn't exist");
+        Alert.alert("Error", "로그인이 필요합니다.");
+        return;
+      }
+      
       const today = new Date().toISOString().split("T")[0];
 
       const formData = new FormData();
