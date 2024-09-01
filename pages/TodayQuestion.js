@@ -294,6 +294,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     marginTop: -47,
+    paddingHorizontal: 10,
+  
   },
   middleText: {
     fontSize: 18,
