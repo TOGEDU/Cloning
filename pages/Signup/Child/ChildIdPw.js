@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import BASE_URL from "../../../api";
 
 const ChildIdPw = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -26,6 +27,21 @@ const ChildIdPw = () => {
   const [emailCheckMessage, setEmailCheckMessage] = useState("");
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchName = async () => {
+      try {
+        const storedName = await AsyncStorage.getItem("name");
+        if (storedName) {
+          setName(storedName);
+        }
+      } catch (error) {
+        console.error("Failed to fetch name from AsyncStorage", error);
+      }
+    };
+
+    fetchName();
+  }, []);
 
   const handleBack = () => {
     navigation.goBack();
