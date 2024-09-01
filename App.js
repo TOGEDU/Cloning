@@ -36,6 +36,7 @@ import ChildMyPage from "./pages/ChildMyPage";
 import Album from "./pages/Album";
 import ImageView from "./pages/ImageView";
 import ChatRoomScreen from "./pages/ChatRoomScreen";
+import Introduce from "./pages/Introduce";
 import { AuthContext, AuthProvider } from "./AuthContext";
 const Stack = createStackNavigator();
 
@@ -51,6 +52,7 @@ const headerlessRoutes = [
   "Album",
   "ImageView",
   "ChatRoomScreen",
+  "Introduce",
 ];
 
 const footerlessRoutes = [
@@ -76,6 +78,7 @@ const footerlessRoutes = [
   "ChatRoomScreen",
   "Diary",
   "DiaryDetail",
+  "Introduce",
 ];
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -169,6 +172,7 @@ const AppNavigator = () => (
     <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
     <Stack.Screen name="Album" component={Album} />
     <Stack.Screen name="ImageView" component={ImageView} />
+    <Stack.Screen name="Introduce" component={Introduce} />
     <Stack.Screen
       name="ChatRoomScreen"
       component={ChatRoomScreen}
