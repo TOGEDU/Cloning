@@ -50,7 +50,7 @@ axios.interceptors.request.use(
 // Axios response interceptor to log responses
 axios.interceptors.response.use(
   function (response) {
-    console.log("서버로부터 응답을 받음:", response);
+    // console.log("서버로부터 응답을 받음:", response);
     return response;
   },
   function (error) {

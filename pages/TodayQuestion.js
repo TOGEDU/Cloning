@@ -19,6 +19,7 @@ import { Audio } from "expo-av";
 
 const img = require("../assets/todayquestionimg.png");
 const recordIcon = require("../assets/recordicon2.png");
+const stopIcon = require("../assets/stopicon2.png");
 
 const TodayQuestion = () => {
   const [text, setText] = useState("");
@@ -235,7 +236,10 @@ const TodayQuestion = () => {
             style={styles.recordIconContainer}
             onPress={toggleRecording}
           >
-            <Image source={recordIcon} style={styles.recordIcon} />
+            <Image
+              source={recording ? stopIcon : recordIcon}
+              style={styles.recordIcon}
+            />
           </TouchableOpacity>
         </View>
 
@@ -264,7 +268,7 @@ const styles = StyleSheet.create({
     width: "100%",
     display: "flex",
     alignItems: "center",
-    marginTop:-130,
+    marginTop: -130,
   },
   title: {
     color: "#fff",
@@ -294,8 +298,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     marginTop: -47,
-    paddingHorizontal: 10,
-  
+    paddingHorizontal: 40,
   },
   middleText: {
     fontSize: 18,
