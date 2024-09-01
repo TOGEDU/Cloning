@@ -9,6 +9,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Keyboard,
+  Platform
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import Svg, { Path } from "react-native-svg";
@@ -147,32 +148,76 @@ const Diary = () => {
 
   const startRecording = async () => {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission required", "Microphone access is required!");
-        return;
+      console.log("Requesting permissions..");
+      const permission = await Audio.requestPermissionsAsync();
+
+      if (permission.status === "granted") {
+        console.log("Starting recording..");
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+        );
+        setRecording(recording);
+        console.log("Recording started");
+      } else {
+        console.error("Permission to access microphone is required!");
+        Alert.alert(
+          "Permission Denied",
+          "Permission to access microphone is required!"
+        );
       }
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-      console.log("Starting recording...");
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      setRecording(recording);
-      console.log("Recording started");
     } catch (err) {
-      console.error("Failed to start recording:", err);
+      console.error("Failed to start recording", err);
     }
   };
 
   const stopRecording = async () => {
-    console.log("Stopping recording...");
-    setRecording(undefined);
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    console.log("Recording stopped and stored at", uri);
+    try {
+      console.log("Stopping recording...");
+
+      // 녹음 중지 및 파일 언로드
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      setRecording(null);
+      console.log("Recording stopped and stored at", uri);
+
+      // 서버로 녹음 파일 전송
+      const formData = new FormData();
+      formData.append("file", {
+        uri: Platform.OS === 'ios' ? uri.replace("file://", "") : uri,  // iOS와 Android의 파일 경로 처리
+        type: "audio/m4a",  // 파일 유형
+        name: "recording.m4a",  // 파일 이름
+      });
+
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Token doesn't exist");
+        return;
+      }
+
+      const response = await axios.post(`${BASE_URL}/api/diary/transcribe`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Transcription result:", response.data);
+      
+      // 서버로부터 받은 텍스트를 TextInput에 설정
+      if (response.data.text) {
+        setContent(response.data.text);
+      } else {
+        console.warn("No text received from the server.");
+      }
+    } catch (err) {
+      console.error("Failed to stop recording or send audio file", err);
+      Alert.alert("Error", "Failed to process the audio file.");
+    }
   };
 
   const toggleRecording = () => {
