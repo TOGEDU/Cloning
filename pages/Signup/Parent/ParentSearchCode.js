@@ -42,6 +42,7 @@ const ParentSearchCode = () => {
       const data = response.data;
       if (data.success) {
         setIsValidCode(true);
+        await AsyncStorage.setItem("name", JSON.stringify(data.name));
         await AsyncStorage.setItem("parentId", JSON.stringify(data.parentId));
         console.log("Success:", data);
       } else {
