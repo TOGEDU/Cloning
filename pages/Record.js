@@ -5,12 +5,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  LogBox,
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BASE_URL from "../api"; // BASE_URL을 불러옵니다.
+
+// 이 코드를 추가하여 경고 메시지를 무시합니다.
+LogBox.ignoreLogs([
+  "Non-serializable values were found in the navigation state",
+]);
 
 const Record = () => {
   const [progress, setProgress] = useState(0); // 초기 진행률을 0으로 설정합니다.
@@ -81,7 +87,9 @@ const Record = () => {
               {() => (
                 <View style={styles.progressTextContainer}>
                   <Text style={styles.progressText}>{progress}%</Text>
-                  <Text style={styles.progressSubText}>잘하고 계세요!</Text>
+                  <Text style={styles.progressSubText}>
+                    {progress === 0 ? "시작해봐요!" : "잘하고 계세요"}
+                  </Text>
                 </View>
               )}
             </AnimatedCircularProgress>
@@ -147,7 +155,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   progressSubText: {
-    fontSize: 13,
+    fontSize: 14,
+    color: "#6369D4",
     fontFamily: "Noto Sans",
   },
   recordingItem: {

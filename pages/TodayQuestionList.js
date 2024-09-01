@@ -177,8 +177,5 @@ const styles = StyleSheet.create({
     marginRight: 40,
   },
 
-  Aicon: {
-    width: 24,
-    height: 24,
-  },
+  Aicon: {},
 });
