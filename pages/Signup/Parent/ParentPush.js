@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, LogBox } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import ModalDropdown from "react-native-modal-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+LogBox.ignoreLogs([
+  'initialScrollIndex "-1" is not valid (list has 18 items)',
+]);
 const ParentPush = () => {
   const [selectedTime, setSelectedTime] = useState("08:00:00");
   const navigation = useNavigation();
