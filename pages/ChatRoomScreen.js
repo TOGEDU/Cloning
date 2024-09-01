@@ -135,7 +135,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         console.log("API 요청 시작:", message.text);
 
         const response = await axios.post(
-          "http://172.30.1.79:8000/synthesize", // ChildChat과 동일한 URL 사용
+          "http://172.20.10.3:8000/synthesize", // ChildChat과 동일한 URL 사용
           { text: message.text },
           {
             headers: {
