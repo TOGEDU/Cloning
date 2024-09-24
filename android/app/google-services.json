@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "781502570421",
+    "project_id": "cloning-195cf",
+    "storage_bucket": "cloning-195cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:781502570421:android:9679072e4165a5ea9003fc",
+        "android_client_info": {
+          "package_name": "com.cloning"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJG3iEQhs7h_m1QuNmp7uTDhfo2RWXlfM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
