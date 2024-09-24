@@ -319,9 +319,8 @@ const DiaryDetail = () => {
             <View style={styles.diaryContentContainer}>
               {selectedDiary?.image ? (
                 <Image
-                  source={{ uri: selectedDiary.image }}
+                  source={{ uri: selectedDiary?.image }}
                   style={styles.diaryImage}
-                  resizeMode="contain"
                 />
               ) : (
                 <Text style={styles.noImageText}>이미지가 없습니다.</Text>
@@ -465,7 +464,7 @@ const styles = StyleSheet.create({
   },
   diaryImage: {
     width: 330,
-    height: null,
+    height: 128,
     borderRadius: 20,
   },
   noImageText: {

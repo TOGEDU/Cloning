@@ -10,6 +10,7 @@ import {
   Keyboard,
   Alert,
   Platform,
+  
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -229,6 +230,7 @@ const TodayQuestion = () => {
             placeholder="답변을 입력해 주세요"
             placeholderTextColor="#AEAEAE"
             multiline
+            scrollEnabled 
             value={text}
             onChangeText={setText}
           />
