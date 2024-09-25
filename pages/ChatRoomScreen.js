@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   Text,
+  ActivityIndicator, // 추가
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -34,6 +35,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sound, setSound] = useState(null); // 사운드 상태 추가
+  const [loadingVoice, setLoadingVoice] = useState(false); // 음성 로딩 상태 추가
 
   useEffect(() => {
     fetchMessages();
@@ -114,6 +116,10 @@ const ChatRoomScreen = ({ navigation, route }) => {
         { shouldPlay: true }
       );
       setSound(sound);
+
+      // 음성 재생이 시작되면 로딩 스피너를 종료
+      setLoadingVoice(false);
+
       await sound.playAsync();
     } catch (error) {
       console.error("오디오 재생 실패:", error);
@@ -121,6 +127,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         "Failed to play sound",
         "An error occurred while playing the sound."
       );
+      setLoadingVoice(false); // 실패 시에도 로딩 스피너 끄기
     }
   };
 
@@ -130,12 +137,11 @@ const ChatRoomScreen = ({ navigation, route }) => {
         // 상대방의 메시지일 경우에만 처리
         const token = await getAuthToken();
 
-        console.log("길게 클릭된 메시지:", message.text);
-
-        console.log("API 요청 시작:", message.text);
+        // API 호출 시작 시 로딩 스피너 표시
+        setLoadingVoice(true);
 
         const response = await axios.post(
-          "http://172.30.1.54:8000/synthesize", // ChildChat과 동일한 URL 사용
+          "http://172.20.75.246:8000/synthesize", // ChildChat과 동일한 URL 사용
           { text: message.text },
           {
             headers: {
@@ -146,12 +152,10 @@ const ChatRoomScreen = ({ navigation, route }) => {
           }
         );
 
-        console.log("API 응답 성공:", response);
-
         const fileReader = new FileReader();
         fileReader.onload = async () => {
           const audioUri = fileReader.result;
-          await playSound(audioUri);
+          await playSound(audioUri); // 음성 재생 시작
         };
         fileReader.onerror = (error) => {
           console.error("FileReader 오류:", error);
@@ -159,19 +163,17 @@ const ChatRoomScreen = ({ navigation, route }) => {
             "Failed to play sound",
             "An error occurred while processing the audio file."
           );
+          setLoadingVoice(false); // 오류 발생 시 로딩 스피너 종료
         };
         fileReader.readAsDataURL(response.data);
       }
     } catch (error) {
-      if (error.code === "ECONNABORTED") {
-        console.error("API 요청이 타임아웃되었습니다.", error);
-      } else {
-        console.error("API 요청 실패:", error);
-      }
+      console.error("API 요청 실패:", error);
       Alert.alert(
         "Failed to fetch the voice",
         error.message || "An error occurred while fetching the voice."
       );
+      setLoadingVoice(false); // 오류 발생 시 로딩 스피너 종료
     }
   };
 
@@ -284,6 +286,11 @@ const ChatRoomScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {loadingVoice && ( // 로딩 상태가 true일 때 로딩 스피너 표시
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#586EE3" />
+        </View>
+      )}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Image source={burger} style={styles.burger} />
@@ -315,6 +322,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.2)", // 약간의 투명도 추가
+    zIndex: 1,
   },
   header: {
     flexDirection: "row",
