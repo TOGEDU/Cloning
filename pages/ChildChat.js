@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  ActivityIndicator, // 로딩스피너 추가
   LogBox,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -62,6 +63,7 @@ axios.interceptors.response.use(
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [sound, setSound] = useState(null); // 사운드 상태 추가
+  const [loadingVoice, setLoadingVoice] = useState(false); // 음성 로딩 상태 추가
 
   useEffect(() => {
     setMessages([
@@ -93,6 +95,10 @@ const ChildChat = ({ navigation }) => {
         { shouldPlay: true }
       );
       setSound(sound);
+
+      // 음성 재생이 시작되면 로딩 스피너를 종료
+      setLoadingVoice(false);
+
       await sound.playAsync();
     } catch (error) {
       console.error("오디오 재생 실패:", error);
@@ -100,6 +106,7 @@ const ChildChat = ({ navigation }) => {
         "Failed to play sound",
         "An error occurred while playing the sound."
       );
+      setLoadingVoice(false); // 실패 시에도 로딩 스피너 끄기
     }
   };
 
@@ -116,8 +123,11 @@ const ChildChat = ({ navigation }) => {
 
       console.log("API 요청 시작:", message.text);
 
+      // API 요청 시 로딩 스피너를 활성화
+      setLoadingVoice(true);
+
       const response = await axios.post(
-        "http://192.168.35.231:8000/synthesize",
+        "http://172.20.75.246:8000/synthesize",
         { text: message.text },
         {
           headers: {
@@ -130,11 +140,10 @@ const ChildChat = ({ navigation }) => {
 
       console.log("API 응답 성공:", response);
 
-      // URL.createObjectURL 사용 대신 React Native의 File API로 변경
       const fileReader = new FileReader();
       fileReader.onload = async () => {
         const audioUri = fileReader.result;
-        await playSound(audioUri);
+        await playSound(audioUri); // 음성 재생 시작
       };
       fileReader.onerror = (error) => {
         console.error("FileReader 오류:", error);
@@ -142,6 +151,7 @@ const ChildChat = ({ navigation }) => {
           "Failed to play sound",
           "An error occurred while processing the audio file."
         );
+        setLoadingVoice(false); // 오류 발생 시 로딩 스피너 종료
       };
       fileReader.readAsDataURL(response.data);
     } catch (error) {
@@ -154,6 +164,7 @@ const ChildChat = ({ navigation }) => {
         "Failed to fetch the voice",
         error.message || "An error occurred while fetching the voice."
       );
+      setLoadingVoice(false); // 오류 발생 시 로딩 스피너 종료
     }
   };
 
@@ -235,6 +246,11 @@ const ChildChat = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      {loadingVoice && ( // 로딩 상태가 true일 때 로딩 스피너 표시
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#586EE3" />
+        </View>
+      )}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Image source={burger} style={styles.burger} />
@@ -263,6 +279,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.2)", // 약간의 투명도 추가
+    zIndex: 1,
   },
   header: {
     flexDirection: "row",
