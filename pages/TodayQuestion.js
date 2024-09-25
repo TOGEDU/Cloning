@@ -8,19 +8,25 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import BASE_URL from "../api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio } from "expo-av";
 
 const img = require("../assets/todayquestionimg.png");
+const recordIcon = require("../assets/recordicon2.png");
+const stopIcon = require("../assets/stopicon2.png");
 
 const TodayQuestion = () => {
   const [text, setText] = useState("");
   const [question, setQuestion] = useState("");
   const [questionId, setQuestionId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [recording, setRecording] = useState(null);
   const navigation = useNavigation();
 
   const dismissKeyboard = () => {
@@ -36,23 +42,26 @@ const TodayQuestion = () => {
           return;
         }
 
-        const response = await axios.get(`${BASE_URL}/api/dailyquestion`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          `${BASE_URL}/api/dailyquestion/today`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const todayQuestion = response.data;
 
         if (todayQuestion && todayQuestion.question) {
-          setQuestion(todayQuestion.question);
           setQuestionId(todayQuestion.questionId);
+          setQuestion(todayQuestion.question);
 
           if (todayQuestion.text) {
             setText(todayQuestion.text);
             setIsEditing(true);
           }
-        } 
+        }
       } catch (error) {
         console.error("Error fetching question:", error);
         if (error.response) {
@@ -67,7 +76,6 @@ const TodayQuestion = () => {
   const handleWriteFinish = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      console.log("Token:", token);
       if (!token) {
         console.error("Token doesn't exist");
         return;
@@ -116,6 +124,90 @@ const TodayQuestion = () => {
     }
   };
 
+  const startRecording = async () => {
+    try {
+      console.log("Requesting permissions..");
+      const permission = await Audio.requestPermissionsAsync();
+
+      if (permission.status === "granted") {
+        console.log("Starting recording..");
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+        );
+        setRecording(recording);
+        console.log("Recording started");
+      } else {
+        console.error("Permission to access microphone is required!");
+        Alert.alert(
+          "Permission Denied",
+          "Permission to access microphone is required!"
+        );
+      }
+    } catch (err) {
+      console.error("Failed to start recording", err);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      console.log("Stopping recording...");
+
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      setRecording(null);
+      console.log("Recording stopped and stored at", uri);
+
+      // 서버로 녹음 파일 전송
+      const formData = new FormData();
+      formData.append("file", {
+        uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri, // iOS와 Android의 파일 경로 처리
+        type: "audio/m4a", // 파일 유형
+        name: "recording.m4a", // 파일 이름
+      });
+
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Token doesn't exist");
+        return;
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/api/diary/transcribe`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Transcription result:", response.data);
+
+      if (response.data.text) {
+        setText(response.data.text);
+      } else {
+        console.warn("No text received from the server.");
+      }
+    } catch (err) {
+      console.error("Failed to stop recording or send audio file", err);
+      Alert.alert("Error", "Failed to process the audio file.");
+    }
+  };
+
+  const toggleRecording = () => {
+    if (recording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
       <View style={styles.container}>
@@ -140,7 +232,17 @@ const TodayQuestion = () => {
             value={text}
             onChangeText={setText}
           />
+          <TouchableOpacity
+            style={styles.recordIconContainer}
+            onPress={toggleRecording}
+          >
+            <Image
+              source={recording ? stopIcon : recordIcon}
+              style={styles.recordIcon}
+            />
+          </TouchableOpacity>
         </View>
+
         <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
           <Text style={styles.btnText}>
             {isEditing ? "수정하기" : "기록하기"}
@@ -166,6 +268,7 @@ const styles = StyleSheet.create({
     width: "100%",
     display: "flex",
     alignItems: "center",
+    marginTop: -130,
   },
   title: {
     color: "#fff",
@@ -195,6 +298,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     marginTop: -47,
+    paddingHorizontal: 40,
   },
   middleText: {
     fontSize: 18,
@@ -219,11 +323,21 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 18,
     paddingVertical: 18,
+    position: "relative",
   },
   answerInput: {
     color: "#AEAEAE",
     fontSize: 16,
     fontFamily: "NotoSans600",
+  },
+  recordIconContainer: {
+    position: "absolute",
+    right: 15,
+    bottom: 15,
+  },
+  recordIcon: {
+    width: 36,
+    height: 36,
   },
   btn: {
     width: 143,
@@ -234,8 +348,8 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 120,
-    marginTop: 30,
+    marginBottom: 5,
+    marginTop: 15,
   },
   btnText: {
     color: "#fff",

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Alert,
+  LogBox,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   GiftedChat,
@@ -7,9 +14,9 @@ import {
   Send,
   InputToolbar,
 } from "react-native-gifted-chat";
-import { Audio } from "expo-av";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio } from "expo-av"; // expo-av 추가
 
 import BASE_URL from "../api";
 
@@ -19,11 +26,42 @@ import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
-import testVoice from "../assets/testvoice.wav";
+
+// 특정 경고 메시지를 무시하고 숨기기
+LogBox.ignoreLogs([
+  "Warning: Avatar: Support for defaultProps will be removed from function components in a future major release.",
+]);
+
+// 또는 모든 경고를 무시하기
+// LogBox.ignoreAllLogs();
+
+// Axios request interceptor to log requests
+axios.interceptors.request.use(
+  function (config) {
+    console.log("API 요청이 서버로 전달됨:", config.url, config.data);
+    return config;
+  },
+  function (error) {
+    console.error("API 요청 전송 실패:", error);
+    return Promise.reject(error);
+  }
+);
+
+// Axios response interceptor to log responses
+axios.interceptors.response.use(
+  function (response) {
+    // console.log("서버로부터 응답을 받음:", response);
+    return response;
+  },
+  function (error) {
+    console.error("서버 응답 실패:", error);
+    return Promise.reject(error);
+  }
+);
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
-  const [chatroomId, setChatroomId] = useState(null);
+  const [sound, setSound] = useState(null); // 사운드 상태 추가
 
   useEffect(() => {
     setMessages([
@@ -40,6 +78,85 @@ const ChildChat = ({ navigation }) => {
     ]);
   }, []);
 
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync(); // 컴포넌트가 언마운트될 때 사운드를 정리
+        }
+      : undefined;
+  }, [sound]);
+
+  const playSound = async (audioUri) => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: true }
+      );
+      setSound(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("오디오 재생 실패:", error);
+      Alert.alert(
+        "Failed to play sound",
+        "An error occurred while playing the sound."
+      );
+    }
+  };
+
+  const onBubbleLongPress = async (context, message) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("Auth token is missing or invalid");
+        Alert.alert("Authentication error", "Please log in again.");
+        return;
+      }
+
+      console.log("길게 클릭된 메시지:", message.text);
+
+      console.log("API 요청 시작:", message.text);
+
+      const response = await axios.post(
+        "http://192.168.35.231:8000/synthesize",
+        { text: message.text },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+          timeout: 180000,
+        }
+      );
+
+      console.log("API 응답 성공:", response);
+
+      // URL.createObjectURL 사용 대신 React Native의 File API로 변경
+      const fileReader = new FileReader();
+      fileReader.onload = async () => {
+        const audioUri = fileReader.result;
+        await playSound(audioUri);
+      };
+      fileReader.onerror = (error) => {
+        console.error("FileReader 오류:", error);
+        Alert.alert(
+          "Failed to play sound",
+          "An error occurred while processing the audio file."
+        );
+      };
+      fileReader.readAsDataURL(response.data);
+    } catch (error) {
+      if (error.code === "ECONNABORTED") {
+        console.error("API 요청이 타임아웃되었습니다.", error);
+      } else {
+        console.error("API 요청 실패:", error);
+      }
+      Alert.alert(
+        "Failed to fetch the voice",
+        error.message || "An error occurred while fetching the voice."
+      );
+    }
+  };
+
   const onSend = async (newMessages = []) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
@@ -50,57 +167,24 @@ const ChildChat = ({ navigation }) => {
       }
 
       const sentMessage = newMessages[0];
+      console.log("Sending message:", sentMessage.text);
 
-      // 1. 사용자에게 보낸 메시지를 즉시 화면에 표시
-      setMessages((previousMessages) =>
-        GiftedChat.append(previousMessages, newMessages)
-      );
+      const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          prompt: sentMessage.text,
+        },
+      });
 
-      if (!chatroomId) {
-        // 2. 새로운 채팅방 생성
-        const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            prompt: sentMessage.text,
-          },
-        });
+      console.log("API response:", response.data);
 
-        const newChatroomId = response.data.chatroomId;
-        setChatroomId(newChatroomId);
+      const newChatroomId = response.data.chatroomId;
 
-        const receivedMessages = response.data.messageList.map(
-          (msg, index) => ({
-            _id: `${newChatroomId}-${index}`,
-            text: msg.message,
-            createdAt: new Date(), // 이 부분을 실제 응답에 포함된 시간으로 변경 가능
-            user: {
-              _id: msg.role === 1 ? 2 : 1,
-              name: msg.role === 1 ? "Parent AI" : "You",
-              avatar: msg.role === 1 ? profileimg : null,
-            },
-          })
-        );
-
-        // 3. 서버에서 받은 메시지를 화면에 추가
-        setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, receivedMessages)
-        );
-      } else {
-        // 4. 기존 채팅방에 메시지 추가 (추가적인 POST 요청이 있을 경우 처리)
-        await axios.post(
-          `${BASE_URL}/api/chat/chatroom/${chatroomId}/message`,
-          {
-            message: sentMessage.text,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
+      navigation.navigate("ChatRoomScreen", {
+        chatroomId: newChatroomId,
+      });
     } catch (error) {
       if (error.response && error.response.status === 401) {
         Alert.alert(
@@ -117,42 +201,6 @@ const ChildChat = ({ navigation }) => {
     }
   };
 
-  const playVoiceMessage = async () => {
-    const soundObject = new Audio.Sound();
-    try {
-      await soundObject.loadAsync(testVoice);
-      await soundObject.playAsync();
-
-      soundObject.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          soundObject.unloadAsync();
-        }
-      });
-    } catch (error) {
-      console.log("Failed to play the sound", error);
-    }
-  };
-
-  const handleLongPress = (context, message) => {
-    if (message.user._id === 2) {
-      playVoiceMessage();
-    } else {
-      const options = ["Copy Text", "Cancel"];
-      const cancelButtonIndex = options.length - 1;
-      context.actionSheet().showActionSheetWithOptions(
-        {
-          options,
-          cancelButtonIndex,
-        },
-        (buttonIndex) => {
-          if (buttonIndex === 0) {
-            Clipboard.setString(message.text);
-          }
-        }
-      );
-    }
-  };
-
   const renderBubble = (props) => (
     <Bubble
       {...props}
@@ -164,7 +212,7 @@ const ChildChat = ({ navigation }) => {
         right: styles.textRight,
         left: styles.textLeft,
       }}
-      onLongPress={() => handleLongPress(props.context, props.currentMessage)}
+      onLongPress={onBubbleLongPress}
     />
   );
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Image, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, Image, ActivityIndicator } from "react-native"; // ActivityIndicator를 추가
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
@@ -18,11 +18,11 @@ const DiaryList = () => {
   const fetchDiaryDates = async (year, month) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      console.log("Retrieved Token:", token);
+      // console.log("Retrieved Token:", token);
 
       const formattedMonth = `${year}-${String(month).padStart(2, "0")}`;
 
-      console.log("Authorization Header:", `Bearer ${token}`);
+      // console.log("Authorization Header:", `Bearer ${token}`);
 
       const response = await axios.get(`${BASE_URL}/api/diary/calendar`, {
         params: { month: formattedMonth },
@@ -31,7 +31,7 @@ const DiaryList = () => {
         },
       });
 
-      console.log("API Response Data:", response.data);
+      // console.log("API Response Data:", response.data);
 
       const data = response.data.dateList || [];
       const marked = {};
@@ -41,7 +41,7 @@ const DiaryList = () => {
           if (item.count > 0) {
             marked[item.date] = {
               marked: true,
-              dotColor: "yellow",
+              dotColor: "#858AE8",
               activeOpacity: 0,
             };
           }
@@ -51,7 +51,7 @@ const DiaryList = () => {
       }
 
       setMarkedDates(marked);
-      console.log("Marked Dates:", marked);
+      // console.log("Marked Dates:", marked);
     } catch (error) {
       // console.error("Error fetching data:", error);
       // console.error("Error response:", error.response?.data);
@@ -66,6 +66,29 @@ const DiaryList = () => {
     const month = new Date().getMonth() + 1;
     fetchDiaryDates(year, month);
   }, []);
+
+  const checkDiaryExistence = async (date) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      // console.log("Token for checking diary existence:", token); // 디버깅용 로그
+
+      const response = await axios.get(`${BASE_URL}/api/diary`, {
+        params: { date },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // 일기가 있으면 DiaryDetail
+      if (response.data && response.data.length > 0) {
+        navigation.navigate("DiaryDetail", { date });
+      } else {
+        // 일기가 없으면 Diary
+        navigation.navigate("Diary", { date });
+      }
+    } catch (error) {
+      console.error("Error checking diary existence:", error);
+      Alert.alert("오류", "일기 데이터를 확인하는 중 문제가 발생했습니다.");
+    }
+  };
 
   const getMarkedDates = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -84,7 +107,10 @@ const DiaryList = () => {
         selected: true,
         customStyles: {
           container: styles.selectedContainer,
-          text: styles.selectedText,
+          text: {
+            ...styles.selectedText,
+            fontWeight: "bold",
+          },
         },
       };
     }
@@ -112,8 +138,9 @@ const DiaryList = () => {
             textSectionTitleColor: "rgba(138, 138, 138, 1)",
           }}
           onDayPress={(day) => {
+            console.log("Day pressed:", day.dateString);
             setSelectedDate(day.dateString);
-            navigation.navigate("Diary", { date: day.dateString });
+            checkDiaryExistence(day.dateString);
           }}
           hideExtraDays={true}
           monthFormat={"M월"}

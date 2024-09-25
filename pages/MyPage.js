@@ -29,49 +29,52 @@ const MyPage = () => {
   const [profile, setProfile] = useState({
     name: "",
     email: "",
+    profileImage: null,
     pushStatus: false,
   });
   const [isEnabled, setIsEnabled] = useState(false);
+  const [refresh, setRefresh] = useState(false); // 마이페이지를 다시 렌더링하기 위한 상태
+
+  const fetchData = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const response = await axios.get(`${BASE_URL}/api/mypage`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = response.data;
+
+      setProfile({
+        name: data.name,
+        email: data.email,
+        profileImage: data.profileImage,
+        pushStatus: data.pushStatus,
+      });
+
+      const hours = parseInt(data.pushNotificationTime.split(":")[0], 10);
+      const period = hours >= 12 ? "오후" : "오전";
+      const formattedHours = hours > 12 ? hours - 12 : hours;
+      setSelectedTime(`${period} ${formattedHours}:00`);
+
+      setChildren(data.childList.map((child) => child.name));
+
+      setIsEnabled(data.pushStatus);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = await AsyncStorage.getItem("authToken");
-
-        if (!token) {
-          console.error("No token found");
-          return;
-        }
-
-        const response = await axios.get(`${BASE_URL}/api/mypage`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = response.data;
-
-        setProfile({
-          name: data.name,
-          email: data.email,
-          pushStatus: data.pushStatus,
-        });
-
-        const hours = parseInt(data.pushNotificationTime.split(":")[0], 10);
-        const period = hours >= 12 ? "오후" : "오전";
-        const formattedHours = hours > 12 ? hours - 12 : hours;
-        setSelectedTime(`${period} ${formattedHours}:00`);
-
-        setChildren(data.childList.map((child) => child.name));
-
-        setIsEnabled(data.pushStatus);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
     fetchData();
-  }, []);
+  }, [refresh]); // refresh 상태가 바뀔 때마다 데이터를 다시 불러옴
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -94,7 +97,6 @@ const MyPage = () => {
         console.error("No token found");
         return;
       }
-      console.log("토큰 확인:", token);
 
       const response = await axios.get(`${BASE_URL}/api/mypage`, {
         headers: {
@@ -144,7 +146,6 @@ const MyPage = () => {
   const toggleSwitch = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      console.log("Token:", token);
 
       if (!token) {
         console.error("No token found");
@@ -167,7 +168,6 @@ const MyPage = () => {
           },
         }
       );
-      console.log("Push status updated:", response.data);
 
       Alert.alert("알림", "푸시 알림 상태 변경 완료");
     } catch (error) {
@@ -186,6 +186,7 @@ const MyPage = () => {
       }
     }
   };
+
   const toggleTimeDropdown = () => {
     setTimeDropdownOpen(!timeDropdownOpen);
   };
@@ -223,7 +224,6 @@ const MyPage = () => {
           },
         }
       );
-      console.log("Push time updated:", response.data);
 
       Alert.alert("알림", "알림 시간이 변경되었습니다.");
     } catch (error) {
@@ -271,7 +271,8 @@ const MyPage = () => {
       );
 
       if (response.status === 200) {
-        Alert.alert("성공", "프로필 사진 변경 완료");
+        // 서버에서 받은 최종 URL로 프로필 이미지 업데이트
+        setRefresh((prev) => !prev); // refresh 상태를 변경하여 마이페이지 리렌더링
       } else {
         Alert.alert("오류", "프로필 사진 변경에 실패했습니다.");
       }
@@ -378,7 +379,12 @@ const MyPage = () => {
           <Text style={styles.emailText}>{profile.email}</Text>
         </View>
         <TouchableOpacity onPress={handleImageSelect}>
-          <Image source={profileimg} style={styles.profileImage} />
+          <Image
+            source={
+              profile.profileImage ? { uri: profile.profileImage } : profileimg
+            }
+            style={styles.profileImage}
+          />
         </TouchableOpacity>
       </View>
       <View style={styles.infocontainer}>
@@ -479,10 +485,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 40,
     marginVertical: 10,
     alignItems: "center",
-    //backgroundColor: "green",
   },
   nameText: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "bold",
     marginBottom: 2,
   },
@@ -490,27 +495,27 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 14,
   },
-
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#eee", // 기본 배경색 설정
+  },
   infocontainer: {
     flex: 4.5,
-    //height: 1000,
     backgroundColor: "#858AE8",
     borderRadius: 30,
     paddingTop: 30,
-    //paddingBottom: 70,
   },
-
   scrollview: {
     borderRadius: 30,
     marginHorizontal: 20,
   },
-
   childinfo: {
     backgroundColor: "#EEEDFF",
     borderRadius: 30,
     paddingHorizontal: 40,
     paddingVertical: 20,
-    //marginHorizontal: 20,
   },
   dropdownHeader: {
     flexDirection: "row",
@@ -522,7 +527,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
-
   dropdownContent: {
     marginTop: 10,
     alignItems: "center",
@@ -555,7 +559,6 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "#fff",
   },
-
   notificationContainer: {
     backgroundColor: "#fff",
     flexDirection: "row",
@@ -565,7 +568,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 40,
     paddingVertical: 20,
-    //marginHorizontal: 20,
   },
   notificationText: {
     fontSize: 20,
@@ -579,18 +581,15 @@ const styles = StyleSheet.create({
   notificationSwitch: {
     marginLeft: 10,
   },
-
   notificationtimeContainer: {
     backgroundColor: "#fff",
     marginTop: 20,
     borderRadius: 30,
     paddingHorizontal: 40,
     paddingVertical: 20,
-    //marginHorizontal: 20,
   },
   timeDropdownContent: {
     marginTop: 10,
-    //alignItems: "center",
   },
   timeOption: {
     paddingVertical: 8,
@@ -598,13 +597,8 @@ const styles = StyleSheet.create({
   timeOptionText: {
     fontSize: 18,
   },
-
   logoutButton: {
-    //backgroundColor: "#FF6347",
-    //borderRadius: 10,
-    //paddingVertical: 12,
     alignItems: "center",
-    //marginVertical: 80,
     marginTop: 30,
     marginBottom: 80,
   },

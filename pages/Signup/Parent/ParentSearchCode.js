@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     position: "absolute",
     right: 30,
-    bottom: 360,
+    bottom: 350,
   },
   validText: {
     marginRight: 5,

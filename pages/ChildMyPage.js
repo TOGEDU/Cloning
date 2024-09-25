@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,13 +11,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import back from "../assets/back.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
 import mypagew from "../assets/mypagew.png";
-import profileimg from "../assets/profileimg.png";
 import chevronDown from "../assets/chevron-down.png";
 import chevronUp from "../assets/chevron-up.png";
+import BASE_URL from "../api";
 
 const ChildMyPage = () => {
   const navigation = useNavigation();
@@ -26,6 +28,41 @@ const ChildMyPage = () => {
   const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState("오전 9:00");
   const [isModalVisible, setModalVisible] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        const response = await axios.get(`${BASE_URL}/api/mypage`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const formattedTime = convertTimeFormat(
+          response.data.pushNotificationTime
+        );
+        setName(response.data.name);
+        setEmail(response.data.email);
+        setSelectedTime(formattedTime);
+        setIsEnabled(response.data.pushStatus);
+      } catch (error) {
+        console.error("Error fetching data", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const convertTimeFormat = (time) => {
+    const [hour, minute] = time.split(":");
+    const hourInt = parseInt(hour, 10);
+    const period = hourInt < 12 ? "오전" : "오후";
+    const formattedHour = hourInt % 12 === 0 ? 12 : hourInt % 12;
+    return `${period} ${formattedHour}:${minute}`;
+  };
 
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
 
@@ -33,9 +70,29 @@ const ChildMyPage = () => {
     setTimeDropdownOpen(!timeDropdownOpen);
   };
 
-  const handleTimeSelect = (time) => {
+  const handleTimeSelect = async (time) => {
     setSelectedTime(time);
     setTimeDropdownOpen(false);
+
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const formattedTime = time.replace("오전 ", "").replace("오후 ", ""); // API에 맞게 시간을 포맷팅합니다.
+
+      const response = await axios.put(
+        `${BASE_URL}/api/mypage/push-time`,
+        null,
+        {
+          params: { pushNotificationTime: formattedTime },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Push time updated:", response.data);
+    } catch (error) {
+      console.error("Error updating notification time", error);
+    }
   };
 
   const handleLogout = () => {
@@ -54,7 +111,6 @@ const ChildMyPage = () => {
   const handleConfirmDelete = () => {
     console.log("탈퇴하기");
     setModalVisible(false);
-    // 탈퇴 로직 추가
   };
 
   const timeOptions = [
@@ -78,7 +134,7 @@ const ChildMyPage = () => {
     <View style={styles.container}>
       <SafeAreaView style={styles.headerContainer} edges={["top"]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.navigate("ChildChat")}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image source={back} style={styles.icon} />
           </TouchableOpacity>
           <View style={styles.headerlogo}>
@@ -90,8 +146,8 @@ const ChildMyPage = () => {
       </SafeAreaView>
       <View style={styles.profilecontainer}>
         <View>
-          <Text style={styles.nameText}>이은지</Text>
-          <Text style={styles.emailText}>cloning@gmail.com</Text>
+          <Text style={styles.nameText}>{name}</Text>
+          <Text style={styles.emailText}>{email}</Text>
         </View>
       </View>
       <View style={styles.infocontainer}>
@@ -111,7 +167,7 @@ const ChildMyPage = () => {
             <View>
               <Text style={styles.notificationText}>푸시 알림 켜기</Text>
               <Text style={styles.notificationSubText}>
-                매일 오늘의 질문을 받아보세요
+                특별한 날 부모님의 연락을 받아보세요
               </Text>
             </View>
             <Switch
@@ -202,7 +258,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
   },
   headerContainer: {
-    backgroundColor: "#FFF", // Header background color
+    backgroundColor: "#FFF",
   },
   header: {
     flexDirection: "row",
@@ -220,11 +276,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginHorizontal: 40,
-    marginVertical: 10,
+    marginVertical: 30,
     alignItems: "center",
   },
   nameText: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "bold",
     marginBottom: 2,
   },
@@ -258,10 +314,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
-  chevronIcon: {
-    width: 20,
-    height: 20,
-  },
+
   timeDropdownContent: {
     marginTop: 10,
   },
