@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Text,
   View,
@@ -6,15 +6,15 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-} from "react-native";
-import axios from "axios";
-import { AuthContext } from "../AuthContext";
-import todayQListImage from "../assets/todayQList.png";
-import QImage from "../assets/Qimage.png";
-import AImage from "../assets/Aimage.png";
-import downIcon from "../assets/chevron-down.png";
-import upIcon from "../assets/chevron-up.png";
-import BASE_URL from "../api";
+} from 'react-native';
+import axios from 'axios';
+import { AuthContext } from '../AuthContext';
+import todayQListImage from '../assets/todayQList.png';
+import QImage from '../assets/Qimage.png';
+import AImage from '../assets/Aimage.png';
+import downIcon from '../assets/chevron-down.png';
+import upIcon from '../assets/chevron-up.png';
+import BASE_URL from '../api';
 
 const TodayQuestionList = () => {
   const [expandedId, setExpandedId] = useState(null);
@@ -25,7 +25,7 @@ const TodayQuestionList = () => {
     const fetchData = async () => {
       try {
         if (!authToken) {
-          console.error("Token not available");
+          console.error('Token not available');
           return;
         }
 
@@ -35,15 +35,15 @@ const TodayQuestionList = () => {
           },
         });
 
-        console.log("API response:", response.data);
+        console.log('API response:', response.data);
 
         if (response.data) {
           setQuestionData(response.data);
         } else {
-          console.error("Error during response:", response.data);
+          console.error('Error during response:', response.data);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       }
     };
 
@@ -106,51 +106,51 @@ export default TodayQuestionList;
 const styles = StyleSheet.create({
   fullcontainer: {
     paddingTop: 27,
-    backgroundColor: "#F7F8FF",
+    backgroundColor: '#F7F8FF',
     flex: 1,
   },
   container: {
     marginBottom: 75,
   },
   titleContainer: {
-    position: "relative",
+    position: 'relative',
     paddingLeft: 35,
     marginBottom: 20,
   },
   title: {
     fontSize: 25,
-    fontFamily: "NotoSans900",
+    fontFamily: 'NotoSans900',
     lineHeight: 28 * 1.12,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontFamily: "NotoSans",
+    fontFamily: 'NotoSans',
     lineHeight: 28 * 1.12,
     fontSize: 14,
-    color: "#838383",
+    color: '#838383',
     marginBottom: 10,
   },
   image: {
-    position: "absolute",
+    position: 'absolute',
     left: 240,
     top: 9,
   },
   questionContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     marginHorizontal: 20,
     padding: 15,
     marginBottom: 15,
     borderRadius: 20,
   },
   questionDate: {
-    fontFamily: "NotoSans",
+    fontFamily: 'NotoSans',
     fontSize: 12,
-    color: "#838383",
+    color: '#838383',
     marginLeft: 30,
   },
   questionContent: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   icon: {
     width: 16,
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   questionText: {
-    fontFamily: "NotoSans",
+    fontFamily: 'NotoSans',
     fontSize: 15,
     lineHeight: 20,
     flex: 1,
@@ -166,11 +166,11 @@ const styles = StyleSheet.create({
   },
   answerContainer: {
     marginTop: 10,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   answerText: {
-    fontFamily: "NotoSans",
+    fontFamily: 'NotoSans',
     fontSize: 15,
     lineHeight: 20,
     margin: 10,

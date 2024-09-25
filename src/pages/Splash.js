@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 const Splash = ({ navigation }) => {
   useEffect(() => {
     setTimeout(() => {
-      navigation.replace("Login");
+      navigation.replace('Login');
     }, 2000); // 2초 후 로그인 화면으로 이동
   }, [navigation]);
 
@@ -19,19 +19,19 @@ const Splash = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#858AE8",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#858AE8',
   },
   text: {
     fontSize: 18,
-    color: "#fff",
-    fontFamily: "NotoSans",
+    color: '#fff',
+    fontFamily: 'NotoSans',
   },
   logo: {
     fontSize: 66,
-    fontFamily: "LuckiestGuy-Regular",
-    color: "#fff",
+    fontFamily: 'LuckiestGuy-Regular',
+    color: '#fff',
   },
 });
 
