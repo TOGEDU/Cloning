@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable quotes */
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,24 +9,51 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import BASE_URL from "../api";
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
+import BASE_URL from '../api';
 
-import back from "../assets/back.png";
-import smallLogo from "../assets/smallLogo.png";
-import logotext from "../assets/logotext.png";
-import pencil from "../assets/pencil.png";
+// 이미지 import
+import back from '../../assets/back.png';
+import smallLogo from '../../assets/smallLogo.png';
+import logotext from '../../assets/logotext.png';
+import pencil from '../../assets/pencil.png';
 
-const ChatList = ({ navigation }) => {
-  const [chatList, setChatList] = useState([]);
+// 타입 정의
+type RootStackParamList = {
+  ChatList: undefined;
+  ChatRoomScreen: {chatroomId: number; messageList: any[]};
+  ChildChat: {initial: boolean};
+};
+
+type ChatListScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'ChatList'
+>;
+
+interface ChatItem {
+  id: number;
+  summary: string;
+  date: string;
+}
+
+const ChatList: React.FC = () => {
+  const navigation = useNavigation<ChatListScreenNavigationProp>();
+  const [chatList, setChatList] = useState<ChatItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChatList = async () => {
       try {
-        const token = await AsyncStorage.getItem("authToken");
+        const token = await AsyncStorage.getItem('authToken');
+        if (!token) {
+          console.error('Failed to get auth token');
+          return;
+        }
+
         const response = await axios.get(`${BASE_URL}/api/chat/rooms`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -33,7 +61,7 @@ const ChatList = ({ navigation }) => {
         });
         setChatList(response.data.chatList);
       } catch (error) {
-        console.error("Failed to fetch chat list:", error);
+        console.error('Failed to fetch chat list:', error);
       } finally {
         setLoading(false);
       }
@@ -43,25 +71,30 @@ const ChatList = ({ navigation }) => {
   }, []);
 
   // 채팅방 조회 함수
-  const handleChatRoomPress = async (roomid) => {
+  const handleChatRoomPress = async (roomId: number) => {
     try {
-      const token = await AsyncStorage.getItem("authToken");
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        console.error('Failed to get auth token');
+        return;
+      }
+
       const response = await axios.get(`${BASE_URL}/api/chat/chats`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         params: {
-          roomid: roomid, // 요청 파라미터에 roomid 전달
+          roomid: roomId, // 요청 파라미터에 roomid 전달
         },
       });
 
       // 채팅방 데이터를 가져온 후 ChatRoomScreen 화면으로 이동
-      navigation.navigate("ChatRoomScreen", {
+      navigation.navigate('ChatRoomScreen', {
         chatroomId: response.data.chatroomId,
         messageList: response.data.messageList,
       });
     } catch (error) {
-      console.error("Failed to fetch chat room:", error);
+      console.error('Failed to fetch chat room:', error);
     }
   };
 
@@ -75,7 +108,7 @@ const ChatList = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.headerContainer} edges={["top"]}>
+      <SafeAreaView style={styles.headerContainer}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image source={back} style={styles.back} />
@@ -86,17 +119,16 @@ const ChatList = ({ navigation }) => {
           </View>
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate("ChildChat", {
+              navigation.navigate('ChildChat', {
                 initial: true,
               })
-            }
-          >
+            }>
             <Image source={pencil} style={styles.pencilIcon} />
           </TouchableOpacity>
         </View>
         <ScrollView>
           <View style={styles.listcontainer}>
-            {chatList.map((chat) => (
+            {chatList.map(chat => (
               <TouchableOpacity
                 key={chat.id}
                 onPress={() => handleChatRoomPress(chat.id)} // 리스트 아이템을 눌렀을 때 채팅방 조회 함수 호출
@@ -119,21 +151,21 @@ const ChatList = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
   },
   headerContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   headerlogo: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   listcontainer: {
     paddingHorizontal: 20,
@@ -141,27 +173,27 @@ const styles = StyleSheet.create({
   },
   list: {
     borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    borderBottomColor: '#ccc',
     paddingVertical: 32,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   textContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
   },
   listtext: {
     fontSize: 16,
   },
   listsubtext: {
     fontSize: 16,
-    color: "#BDBDBD",
+    color: '#BDBDBD',
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

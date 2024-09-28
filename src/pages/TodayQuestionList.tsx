@@ -9,16 +9,23 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../AuthContext';
-import todayQListImage from '../assets/todayQList.png';
-import QImage from '../assets/Qimage.png';
-import AImage from '../assets/Aimage.png';
-import downIcon from '../assets/chevron-down.png';
-import upIcon from '../assets/chevron-up.png';
+import todayQListImage from '../../assets/todayQList.png';
+import QImage from '../../assets/Qimage.png';
+import AImage from '../../assets/Aimage.png';
+import downIcon from '../../assets/chevron-down.png';
+import upIcon from '../../assets/chevron-up.png';
 import BASE_URL from '../api';
 
-const TodayQuestionList = () => {
-  const [expandedId, setExpandedId] = useState(null);
-  const [questionData, setQuestionData] = useState([]);
+interface QuestionItem {
+  questionId: number;
+  date: string;
+  question: string;
+  text: string;
+}
+
+const TodayQuestionList: React.FC = () => {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [questionData, setQuestionData] = useState<QuestionItem[]>([]);
   const { authToken } = useContext(AuthContext);
 
   useEffect(() => {
@@ -50,7 +57,7 @@ const TodayQuestionList = () => {
     fetchData();
   }, [authToken]);
 
-  const toggleExpand = (id) => {
+  const toggleExpand = (id: number) => {
     setExpandedId((prevId) => (prevId === id ? null : id));
   };
 
@@ -176,6 +183,5 @@ const styles = StyleSheet.create({
     margin: 10,
     marginRight: 40,
   },
-
   Aicon: {},
 });

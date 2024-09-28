@@ -1,58 +1,60 @@
-import React, { useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import { useNavigation } from "@react-navigation/native";
-import ModalDropdown from "react-native-modal-dropdown";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import ModalDropdown from 'react-native-modal-dropdown';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ParentPush = () => {
-  const [selectedTime, setSelectedTime] = useState("08:00:00");
-  const navigation = useNavigation();
+const ParentPush: React.FC = () => {
+  const [selectedTime, setSelectedTime] = useState<string>('08:00:00');
+  const navigation = useNavigation<NavigationProp<any>>();
 
   const handleBack = () => {
     navigation.goBack();
   };
+
   const handleNext = async () => {
     try {
-      await AsyncStorage.setItem("pushNotificationTime", selectedTime);
-      navigation.navigate("ParentChildInfo");
+      await AsyncStorage.setItem('pushNotificationTime', selectedTime);
+      navigation.navigate('ParentChildInfo');
     } catch (error) {
-      console.error("Error saving data", error);
+      console.error('Error saving data', error);
     }
   };
-  const times = [
-    "06:00:00",
-    "07:00:00",
-    "08:00:00",
-    "09:00:00",
-    "10:00:00",
-    "11:00:00",
-    "12:00:00",
-    "13:00:00",
-    "14:00:00",
-    "15:00:00",
-    "16:00:00",
-    "17:00:00",
-    "18:00:00",
-    "19:00:00",
-    "20:00:00",
-    "21:00:00",
-    "22:00:00",
-    "23:00:00",
+
+  const times: string[] = [
+    '06:00:00',
+    '07:00:00',
+    '08:00:00',
+    '09:00:00',
+    '10:00:00',
+    '11:00:00',
+    '12:00:00',
+    '13:00:00',
+    '14:00:00',
+    '15:00:00',
+    '16:00:00',
+    '17:00:00',
+    '18:00:00',
+    '19:00:00',
+    '20:00:00',
+    '21:00:00',
+    '22:00:00',
+    '23:00:00',
   ];
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>기록을 도와드릴게요.</Text>
       <Text style={styles.subtitle}>
-        매일 전송될 푸시알림 시간을 {"\n"}설정해 주세요.{" "}
+        매일 전송될 푸시알림 시간을 {'\n'}설정해 주세요.{' '}
       </Text>
       <View style={styles.lineContainer}>
-        <View style={styles.lineColor}></View>
-        <View style={styles.lineColor}></View>
-        <View style={styles.lineColor}></View>
-        <View style={styles.lineColor}></View>
-        <View style={styles.line}></View>
+        <View style={styles.lineColor} />
+        <View style={styles.lineColor} />
+        <View style={styles.lineColor} />
+        <View style={styles.lineColor} />
+        <View style={styles.line} />
       </View>
       <View style={styles.inputContainer}>
         <ModalDropdown
@@ -61,11 +63,11 @@ const ParentPush = () => {
           style={styles.dropdown}
           textStyle={styles.dropdownText}
           dropdownStyle={styles.dropdownStyle}
-          dropdownTextStyle={styles.dropdownText}
-          onSelect={(index, value) => setSelectedTime(value)}
+          onSelect={(index: number, value: string | number) =>
+            setSelectedTime(value as string)
+          }
         />
         <Svg
-          xmlns="http://www.w3.org/2000/svg"
           width="30"
           height="30"
           viewBox="0 0 30 30"
@@ -93,48 +95,47 @@ export default ParentPush;
 const styles = StyleSheet.create({
   container: {
     paddingTop: 70,
-    alignItems: "center",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    backgroundColor: '#fff',
     flex: 1,
   },
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontFamily: "NotoSans700",
-    alignSelf: "flex-start",
+    fontFamily: 'NotoSans700',
+    alignSelf: 'flex-start',
   },
   subtitle: {
     fontSize: 20,
     marginTop: 23,
-    textAlign: "center",
-    alignSelf: "flex-start",
-    textAlign: "left",
-    fontFamily: "NotoSans500",
+    alignSelf: 'flex-start',
+    textAlign: 'left',
+    fontFamily: 'NotoSans500',
     marginLeft: 33,
   },
   lineContainer: {
     marginTop: 50,
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   lineColor: {
     width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
   },
   line: {
     width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#DADBF5",
+    backgroundColor: '#DADBF5',
   },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 44,
-    backgroundColor: "#F6F6F6",
+    backgroundColor: '#F6F6F6',
     borderRadius: 15,
     width: 350,
     height: 54,
@@ -142,28 +143,28 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: "100%",
+    height: '100%',
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontFamily: "NotoSans500",
-    justifyContent: "center",
+    fontFamily: 'NotoSans500',
+    justifyContent: 'center',
   },
   dropdown: {
     flex: 1,
-    height: "100%",
-    justifyContent: "center",
+    height: '100%',
+    justifyContent: 'center',
   },
   dropdownStyle: {
     width: 350,
-    height: "auto",
+    height: 'auto',
     maxHeight: 200,
     borderRadius: 15,
-    backgroundColor: "#E3E3E3",
+    backgroundColor: '#E3E3E3',
   },
   dropdownText: {
     fontSize: 16,
-    fontFamily: "NotoSans500",
+    fontFamily: 'NotoSans500',
     paddingLeft: 10,
     paddingRight: 10,
   },
@@ -172,35 +173,35 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   backBtn: {
-    backgroundColor: "#ABB0FE",
+    backgroundColor: '#ABB0FE',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 109,
   },
   backBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
   nextBtn: {
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 31,
   },
   nextBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
 });

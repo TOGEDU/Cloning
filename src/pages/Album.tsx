@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable quotes */
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,30 +8,42 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import smallLogo from "../assets/smallLogo.png";
-import logotext from "../assets/logotext.png";
+import smallLogo from '../../fonts';
+import logotext from '../../assets/logotext.png';
+import BASE_URL from '../api';
 
-import BASE_URL from "../api";
+// Navigation 및 이미지 타입 정의
+type RootStackParamList = {
+  Album: undefined;
+  ImageView: {imageSource: string; date: string};
+};
 
-const Album = () => {
-  const navigation = useNavigation();
-  const [images, setImages] = useState([]);
+type AlbumNavigationProp = ReturnType<typeof useNavigation>;
+
+interface ImageData {
+  imgUrl: string;
+  date: string;
+}
+
+const Album: React.FC = () => {
+  const navigation = useNavigation<AlbumNavigationProp>();
+  const [images, setImages] = useState<ImageData[]>([]);
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const authToken = await AsyncStorage.getItem("authToken");
+        const authToken = await AsyncStorage.getItem('authToken');
         if (!authToken) {
-          console.error("No auth token found");
+          console.error('No auth token found');
           return;
         }
 
-        console.log("Fetching images with token:", authToken);
+        console.log('Fetching images with token:', authToken);
 
         const response = await axios.get(`${BASE_URL}/api/gallery`, {
           headers: {
@@ -38,20 +51,20 @@ const Album = () => {
           },
         });
 
-        console.log("API response:", response.data);
+        console.log('API response:', response.data);
 
-        const { photoList } = response.data;
+        const {photoList} = response.data;
         setImages(photoList);
       } catch (error) {
-        console.error("Error fetching images:", error);
+        console.error('Error fetching images:', error);
       }
     };
 
     fetchImages();
   }, []);
 
-  const handleImagePress = (image) => {
-    navigation.navigate("ImageView", {
+  const handleImagePress = (image: ImageData) => {
+    navigation.navigate('ImageView', {
       imageSource: image.imgUrl,
       date: image.date,
     });
@@ -59,7 +72,7 @@ const Album = () => {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.headerContainer} edges={["top"]}>
+      <SafeAreaView style={styles.headerContainer} edges={['top']}>
         <View style={styles.header}>
           <Image source={smallLogo} style={styles.smallLogo} />
           <Image source={logotext} style={styles.logotext} />
@@ -72,10 +85,9 @@ const Album = () => {
             images.map((image, index) => (
               <TouchableOpacity
                 key={index}
-                onPress={() => handleImagePress(image)}
-              >
+                onPress={() => handleImagePress(image)}>
                 <Image
-                  source={{ uri: image.imgUrl }}
+                  source={{uri: image.imgUrl}}
                   style={styles.imagePlaceholder}
                 />
               </TouchableOpacity>
@@ -92,12 +104,12 @@ const Album = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 10,
   },
   scrollView: {
@@ -106,19 +118,19 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   imageContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   imagePlaceholder: {
     width: 110,
     height: 110,
-    backgroundColor: "#ccc",
+    backgroundColor: '#ccc',
     marginBottom: 15,
   },
   noImagesText: {
-    textAlign: "center",
-    color: "#888",
+    textAlign: 'center',
+    color: '#888',
     fontSize: 16,
     marginTop: 20,
   },

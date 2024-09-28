@@ -1,25 +1,33 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import { useNavigation } from "@react-navigation/native";
+/* eslint-disable react-native/no-inline-styles */
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
-const ChildSignup = () => {
-  const [isChecked, setIsChecked] = useState(false);
-  const [termsChecked, setTermsChecked] = useState({
+interface TermsChecked {
+  serviceTerms: boolean;
+  privacyPolicy: boolean;
+  marketingConsent: boolean;
+  additionalTerms: boolean;
+}
+
+const ChildSignup: React.FC = () => {
+  const [isChecked, setIsChecked] = useState<boolean>(false); // boolean 타입 지정
+  const [termsChecked, setTermsChecked] = useState<TermsChecked>({
     serviceTerms: false,
     privacyPolicy: false,
     marketingConsent: false,
     additionalTerms: false,
   });
-  const [isVisible, setIsVisible] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
+  const [isVisible, setIsVisible] = useState<boolean>(false); // boolean 타입 지정
+  const [modalTitle, setModalTitle] = useState<string>(''); // string 타입 지정
 
-  const handleDetailPress = (title) => {
+  const navigation = useNavigation<NavigationProp<any>>(); // 네비게이션 타입 지정
+
+  const handleDetailPress = (title: string) => {
     setModalTitle(title);
     setIsVisible(true);
   };
-
-  const navigation = useNavigation();
 
   const handleCheck = () => {
     setIsChecked(!isChecked);
@@ -31,16 +39,17 @@ const ChildSignup = () => {
     });
   };
 
-  const handleTermsClick = (term) => {
+  const handleTermsClick = (term: keyof TermsChecked) => {
     setTermsChecked((prevTermsChecked) => ({
       ...prevTermsChecked,
       [term]: !prevTermsChecked[term],
     }));
   };
+
   const allTermsAgreed = Object.values(termsChecked).every(Boolean);
 
   const handleNext = () => {
-    navigation.navigate("ChildSearchCode");
+    navigation.navigate('ChildSearchCode');
   };
 
   const handleCloseModal = () => {
@@ -50,95 +59,85 @@ const ChildSignup = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
-        환영합니다!{"\n"}TOGEDU에 가입하시려면{"\n"}약관에 동의해 주세요.
+        환영합니다!{'\n'}TOGEDU에 가입하시려면{'\n'}약관에 동의해 주세요.
       </Text>
       <View style={styles.lineContainer}>
-        <View style={styles.lineColor}></View>
-        <View style={styles.line}></View>
-        <View style={styles.line}></View>
-        <View style={styles.line}></View>
+        <View style={styles.lineColor} />
+        <View style={styles.line} />
+        <View style={styles.line} />
+        <View style={styles.line} />
       </View>
       <TouchableOpacity onPress={handleCheck} style={styles.agree}>
         <Svg
-          xmlns="http://www.w3.org/2000/svg"
           width="25"
           height="25"
           viewBox="0 0 25 25"
-          fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
+          fill={termsChecked.privacyPolicy ? '#6369D4' : '#7D7C7C'}
         >
           <Path
             d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-            fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
+            fill={termsChecked.privacyPolicy ? '#6369D4' : '#7D7C7C'}
           />
         </Svg>
-        <Text style={styles.agreeText}>
-          약관 전체 동의하기 (선택 동의 포함)
-        </Text>
+        <Text style={styles.agreeText}>약관 전체 동의하기 (선택 동의 포함)</Text>
       </TouchableOpacity>
       <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("privacyPolicy")}>
+        <TouchableOpacity onPress={() => handleTermsClick('privacyPolicy')}>
           <Svg
-            xmlns="http://www.w3.org/2000/svg"
             width="25"
             height="25"
             viewBox="0 0 25 25"
-            fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
+            fill={termsChecked.privacyPolicy ? '#6369D4' : '#7D7C7C'}
           >
             <Path
               d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.privacyPolicy ? "#6369D4" : "#7D7C7C"}
+              fill={termsChecked.privacyPolicy ? '#6369D4' : '#7D7C7C'}
             />
           </Svg>
         </TouchableOpacity>
         <View style={styles.detailContainer}>
-          <Text style={styles.text}>
-            [필수] CLONING 이용 약관
-          </Text>
+          <Text style={styles.text}>[필수] CLONING 이용 약관</Text>
           <TouchableOpacity
-            onPress={() => handleDetailPress("TOGEDU 이용 약관")}
+            onPress={() => handleDetailPress('TOGEDU 이용 약관')}
           >
             <Text style={styles.detailText}>자세히</Text>
           </TouchableOpacity>
         </View>
       </View>
       <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("marketingConsent")}>
+        <TouchableOpacity onPress={() => handleTermsClick('marketingConsent')}>
           <Svg
-            xmlns="http://www.w3.org/2000/svg"
             width="25"
             height="25"
             viewBox="0 0 25 25"
-            fill={termsChecked.marketingConsent ? "#6369D4" : "#7D7C7C"}
+            fill={termsChecked.marketingConsent ? '#6369D4' : '#7D7C7C'}
           >
             <Path
               d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.marketingConsent ? "#6369D4" : "#7D7C7C"}
+              fill={termsChecked.marketingConsent ? '#6369D4' : '#7D7C7C'}
             />
           </Svg>
         </TouchableOpacity>
         <View style={styles.detailContainer}>
-          <Text style={styles.text}>
-            [필수] 개인정보 수집 및 이용 동의
-          </Text>
+          <Text style={styles.text}>[필수] 개인정보 수집 및 이용 동의</Text>
           <TouchableOpacity
-            onPress={() => handleDetailPress("개인정보 수집 및 이용 동의")}
+            onPress={() => handleDetailPress('개인정보 수집 및 이용 동의')}
           >
             <Text style={styles.detailText}>자세히</Text>
           </TouchableOpacity>
         </View>
       </View>
       <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("additionalTerms")}>
+        <TouchableOpacity onPress={() => handleTermsClick('additionalTerms')}>
           <Svg
-            xmlns="http://www.w3.org/2000/svg"
             width="25"
             height="25"
             viewBox="0 0 25 25"
-            fill={termsChecked.additionalTerms ? "#6369D4" : "#7D7C7C"}
+            fill={termsChecked.additionalTerms ? '#6369D4' : '#7D7C7C'}
           >
             <Path
               d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.additionalTerms ? "#6369D4" : "#7D7C7C"}
+              fill={termsChecked.additionalTerms ? '#6369D4' : '#7D7C7C'}
             />
           </Svg>
         </TouchableOpacity>
@@ -147,26 +146,23 @@ const ChildSignup = () => {
         </View>
       </View>
       <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("serviceTerms")}>
+        <TouchableOpacity onPress={() => handleTermsClick('serviceTerms')}>
           <Svg
-            xmlns="http://www.w3.org/2000/svg"
             width="25"
             height="25"
             viewBox="0 0 25 25"
-            fill={termsChecked.serviceTerms ? "#6369D4" : "#7D7C7C"}
+            fill={termsChecked.serviceTerms ? '#6369D4' : '#7D7C7C'}
           >
             <Path
               d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.serviceTerms ? "#6369D4" : "#7D7C7C"}
+              fill={termsChecked.serviceTerms ? '#6369D4' : '#7D7C7C'}
             />
           </Svg>
         </TouchableOpacity>
         <View style={styles.detailContainer}>
-          <Text style={styles.text}>
-            [선택] 개인정보 수집 및 이용 동의
-          </Text>
+          <Text style={styles.text}>[선택] 개인정보 수집 및 이용 동의</Text>
           <TouchableOpacity
-            onPress={() => handleDetailPress("개인정보 수집 및 이용 동의")}
+            onPress={() => handleDetailPress('개인정보 수집 및 이용 동의')}
           >
             <Text style={styles.detailText}>자세히</Text>
           </TouchableOpacity>
@@ -180,7 +176,7 @@ const ChildSignup = () => {
         }}
         style={[
           styles.nextBtn,
-          !allTermsAgreed && { backgroundColor: "#E3E3E3" },
+          !allTermsAgreed && { backgroundColor: '#E3E3E3' },
         ]}
         disabled={!allTermsAgreed}
       >
@@ -202,7 +198,6 @@ const ChildSignup = () => {
                 style={styles.modalIcon}
               >
                 <Svg
-                  xmlns="http://www.w3.org/2000/svg"
                   width="17"
                   height="17"
                   viewBox="0 0 17 17"
@@ -227,17 +222,17 @@ export default ChildSignup;
 const styles = StyleSheet.create({
   container: {
     paddingTop: 70,
-    alignItems: "center",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    backgroundColor: '#fff',
     flex: 1,
   },
   title: {
     fontSize: 30,
-    fontFamily: "NotoSans700",
+    fontFamily: 'NotoSans700',
   },
   lineContainer: {
     marginTop: 50,
-    flexDirection: "row",
+    flexDirection: 'row',
     marginBottom: 50,
   },
   lineColor: {
@@ -245,18 +240,18 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
   },
   line: {
     width: 68,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#DADBF5",
+    backgroundColor: '#DADBF5',
   },
   agree: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 28,
   },
   radioButton: {
@@ -264,83 +259,83 @@ const styles = StyleSheet.create({
     height: 35,
     borderRadius: 35 / 2,
     borderWidth: 2,
-    borderColor: "#6369D4",
-    justifyContent: "center",
-    alignItems: "center",
+    borderColor: '#6369D4',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   agreeText: {
     fontSize: 20,
-    fontFamily: "NotoSans600",
+    fontFamily: 'NotoSans600',
     marginLeft: 9,
   },
   textContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
     marginBottom: 16,
     marginLeft: 40,
   },
   detailContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   text: {
     fontSize: 15,
-    color: "#4F4F4F",
+    color: '#4F4F4F',
     marginLeft: 11,
-    fontFamily: "NotoSans500",
+    fontFamily: 'NotoSans500',
   },
   detailText: {
-    textDecorationLine: "underline",
+    textDecorationLine: 'underline',
     marginLeft: 5,
-    color: "#4F4F4F",
-    fontFamily: "NotoSans500",
+    color: '#4F4F4F',
+    fontFamily: 'NotoSans500',
   },
   nextBtn: {
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 31,
   },
   nextBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: 350,
     height: 600,
-    backgroundColor: "#fff",
-    alignItems: "center",
+    backgroundColor: '#fff',
+    alignItems: 'center',
   },
   modalTitle: {
     width: 350,
     height: 80,
-    backgroundColor: "#6369D4",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
+    backgroundColor: '#6369D4',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   modalTitleText: {
-    color: "white",
+    color: 'white',
     fontSize: 20,
-    fontFamily: "NotoSans600",
-    textAlign: "center",
+    fontFamily: 'NotoSans600',
+    textAlign: 'center',
   },
   modalIcon: {
-    position: "absolute",
+    position: 'absolute',
     right: 24,
   },
 });

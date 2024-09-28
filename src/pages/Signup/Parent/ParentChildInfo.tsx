@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,16 +7,20 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
-} from "react-native";
-import Svg, { Path } from "react-native-svg";
-import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import BASE_URL from "../../../api";
+} from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import BASE_URL from '../../../api';
 
-const ParentChildInfo = () => {
-  const [children, setChildren] = useState([{ name: "" }]);
-  const navigation = useNavigation();
+interface Child {
+  name: string;
+}
+
+const ParentChildInfo: React.FC = () => {
+  const [children, setChildren] = useState<Child[]>([{ name: '' }]); // 배열에 대한 타입 지정
+  const navigation = useNavigation<NavigationProp<any>>(); // 네비게이션 타입 지정
 
   const handleBack = () => {
     navigation.goBack();
@@ -24,47 +28,44 @@ const ParentChildInfo = () => {
 
   const handleNext = async () => {
     try {
-      const parentId = await AsyncStorage.getItem("parentId");
-      const email = await AsyncStorage.getItem("email");
-      const password = await AsyncStorage.getItem("password");
+      const parentId = await AsyncStorage.getItem('parentId');
+      const email = await AsyncStorage.getItem('email');
+      const password = await AsyncStorage.getItem('password');
       const pushNotificationTime = await AsyncStorage.getItem(
-        "pushNotificationTime"
+        'pushNotificationTime'
       );
       const childNameList = children.map((child) => ({ name: child.name }));
-      console.log("parentId:", parentId);
-      console.log("Email:", email);
-      console.log("Password:", password);
-      console.log("pushTime: ", pushNotificationTime);
-      console.log("child:", childNameList);
-      const response = await axios.post(
-        `${BASE_URL}/api/sign/parent/sign-up`,
+      console.log('parentId:', parentId);
+      console.log('Email:', email);
+      console.log('Password:', password);
+      console.log('pushTime: ', pushNotificationTime);
+      console.log('child:', childNameList);
 
-        {
-          parentId: parentId,
-          name: "사용자",
-          email: email,
-          password: password,
-          childNameList: childNameList,
-          pushNotificationTime: pushNotificationTime,
-        }
-      );
+      const response = await axios.post(`${BASE_URL}/api/sign/parent/sign-up`, {
+        parentId: parentId,
+        name: '사용자',
+        email: email,
+        password: password,
+        childNameList: childNameList,
+        pushNotificationTime: pushNotificationTime,
+      });
 
       if (response.data.success) {
-        navigation.navigate("SignupFinish");
+        navigation.navigate('SignupFinish');
         console.log(response);
       } else {
-        console.error("Signup failed:", response.data.msg);
+        console.error('Signup failed:', response.data.msg);
       }
     } catch (error) {
-      console.error("Error during signup:", error);
+      console.error('Error during signup:', error);
     }
   };
 
   const handleAddChild = () => {
-    setChildren([...children, { name: "" }]);
+    setChildren([...children, { name: '' }]);
   };
 
-  const handleNameChange = (text, index) => {
+  const handleNameChange = (text: string, index: number) => {
     const newChildren = [...children];
     newChildren[index].name = text;
     setChildren(newChildren);
@@ -78,11 +79,11 @@ const ParentChildInfo = () => {
           자녀마다 다르게 조언을 해 줄 수 있어요.
         </Text>
         <View style={styles.lineContainer}>
-          <View style={styles.lineColor}></View>
-          <View style={styles.lineColor}></View>
-          <View style={styles.lineColor}></View>
-          <View style={styles.lineColor}></View>
-          <View style={styles.lineColor}></View>
+          <View style={styles.lineColor} />
+          <View style={styles.lineColor} />
+          <View style={styles.lineColor} />
+          <View style={styles.lineColor} />
+          <View style={styles.lineColor} />
         </View>
         {children.map((child, index) => (
           <View key={index} style={styles.inputContainer}>
@@ -99,7 +100,6 @@ const ParentChildInfo = () => {
           onPress={handleAddChild}
         >
           <Svg
-            xmlns="http://www.w3.org/2000/svg"
             width="16"
             height="16"
             viewBox="0 0 16 16"
@@ -130,28 +130,27 @@ export default ParentChildInfo;
 const styles = StyleSheet.create({
   container: {
     paddingTop: 70,
-    alignItems: "center",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    backgroundColor: '#fff',
     flex: 1,
   },
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontFamily: "NotoSans700",
-    alignSelf: "flex-start",
+    fontFamily: 'NotoSans700',
+    alignSelf: 'flex-start',
   },
   subtitle: {
     fontSize: 20,
     marginTop: 23,
-    textAlign: "center",
-    alignSelf: "flex-start",
-    textAlign: "left",
-    fontFamily: "NotoSans500",
+    alignSelf: 'flex-start',
+    textAlign: 'left',
+    fontFamily: 'NotoSans500',
     marginLeft: 33,
   },
   lineContainer: {
     marginTop: 50,
-    flexDirection: "row",
+    flexDirection: 'row',
     marginBottom: 50,
   },
   lineColor: {
@@ -159,19 +158,19 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
   },
   line: {
     width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#DADBF5",
+    backgroundColor: '#DADBF5',
   },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F6F6F6",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F6F6F6',
     borderRadius: 15,
     width: 350,
     height: 54,
@@ -180,56 +179,56 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: "100%",
+    height: '100%',
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontFamily: "NotoSans500",
+    fontFamily: 'NotoSans500',
   },
   inputIconRight: {
     opacity: 0.5,
   },
   addChildContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 20,
   },
   addChildText: {
     marginLeft: 10,
     fontSize: 16,
-    fontFamily: "NotoSans500",
-    color: "#7D7C7C",
+    fontFamily: 'NotoSans500',
+    color: '#7D7C7C',
   },
   backBtn: {
-    backgroundColor: "#ABB0FE",
+    backgroundColor: '#ABB0FE',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 109,
   },
   backBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
   nextBtn: {
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 31,
   },
   nextBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
 });

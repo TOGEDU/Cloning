@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 
-const logoImg = require('../assets/logo.png');
+const logoImg = require('../../assets/logo.png');
 
 interface HeaderProps {
   backgroundColor: string;

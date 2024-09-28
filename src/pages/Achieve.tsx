@@ -1,24 +1,48 @@
-import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Image } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import BASE_URL from "../api";
+/* eslint-disable curly */
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from 'react';
+import { Text, View, StyleSheet, Image } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BASE_URL from '../api';
 
-const images = {
-  월: require("../assets/mon.png"),
-  화: require("../assets/tue.png"),
-  수: require("../assets/wed.png"),
-  목: require("../assets/thu.png"),
-  금: require("../assets/fri.png"),
-  토: require("../assets/sat.png"),
-  일: require("../assets/sun.png"),
+// 이미지 객체 타입 정의
+const images: Record<string, any> = {
+  월: require('../../assets/mon.png'),
+  화: require('../../assets/tue.png'),
+  수: require('../../assets/wed.png'),
+  목: require('../../assets/thu.png'),
+  금: require('../../assets/fri.png'),
+  토: require('../../assets/sat.png'),
+  일: require('../../assets/sun.png'),
 };
 
-const days = ["월", "화", "수", "목", "금", "토", "일"];
+// 요일 배열
+const days = ['월', '화', '수', '목', '금', '토', '일'] as const;
 
-const Achieve = () => {
-  const [data, setData] = useState({
+// API 응답 타입 정의
+interface BadgeData {
+  date: string;
+  badge: boolean;
+}
+
+interface DayBadgeStatus {
+  badge: boolean;
+}
+
+interface BadgeState {
+  월: DayBadgeStatus;
+  화: DayBadgeStatus;
+  수: DayBadgeStatus;
+  목: DayBadgeStatus;
+  금: DayBadgeStatus;
+  토: DayBadgeStatus;
+  일: DayBadgeStatus;
+}
+
+const Achieve: React.FC = () => {
+  const [data, setData] = useState<BadgeState>({
     월: { badge: false },
     화: { badge: false },
     수: { badge: false },
@@ -31,33 +55,31 @@ const Achieve = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = await AsyncStorage.getItem("authToken");
-        if (!token) throw new Error("No token found");
+        const token = await AsyncStorage.getItem('authToken');
+        if (!token) throw new Error('No token found');
 
-        const response = await axios.get(`${BASE_URL}/api/stat`, {
+        const response = await axios.get<BadgeData[]>(`${BASE_URL}/api/stat`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        console.log("API Response:", response.data);
+        console.log('API Response:', response.data);
 
         const apiData = response.data;
-        const updatedData = { ...data };
+        const updatedData: BadgeState = { ...data };
 
-        apiData.forEach((item) => {
+        apiData.forEach(item => {
           const date = new Date(item.date);
-          const dayIndex = (date.getDay() + 6) % 7;
-          const dayKey = days[dayIndex];
+          const dayIndex = (date.getDay() + 6) % 7; // 0: Sunday -> 6: Saturday, so adjust
+          const dayKey = days[dayIndex] as keyof BadgeState; // Cast to keyof BadgeState
           updatedData[dayKey] = { badge: item.badge };
         });
 
         setData(updatedData);
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          console.error("Unauthorized: Invalid token");
-        } else {
-          console.error("Error fetching data:", error);
+        if (error instanceof Error) {
+          console.error(error.message);
         }
       }
     };
@@ -67,18 +89,16 @@ const Achieve = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.t1}>기록현황을{"\n"}확인해 보세요</Text>
+      <Text style={styles.t1}>기록현황을{'\n'}확인해 보세요</Text>
       <Text style={styles.t2}>
-        육아일기와 오늘의 질문을 모두 작성하면{"\n"}배지를 획득할 수 있습니다
+        육아일기와 오늘의 질문을 모두 작성하면{'\n'}배지를 획득할 수 있습니다
       </Text>
       <Svg
-        xmlns="http://www.w3.org/2000/svg"
         width="365"
         height="285"
         viewBox="0 0 365 285"
         fill="none"
-        style={styles.svg}
-      >
+        style={styles.svg}>
         <Path
           d="M81.7344 3.99943H277.735C277.735 3.99943 338.532 3.00185 356.734 54.5004C374.937 105.999 324.235 141.999 324.235 141.999H35.2344C35.2344 141.999 -7.94623 181.999 7.23479 231.499C22.4158 280.999 81.7344 280.999 81.7344 280.999H277.735"
           stroke="#FBA38F"
@@ -88,8 +108,11 @@ const Achieve = () => {
       </Svg>
       <View style={styles.circleContainer}>
         {days.map((day, index) => (
-          <View key={day} style={[styles.circle, styles[`circle${index}`]]}>
-            {data[day].badge ? (
+          <View
+            key={day}
+            style={[styles.circle, styles[`circle${index}` as keyof typeof styles]]} // Cast to keyof typeof styles
+          >
+            {data[day as keyof BadgeState].badge ? (
               <Image
                 source={images[day]}
                 style={styles.image}
@@ -110,43 +133,43 @@ export default Achieve;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     paddingTop: 40,
     flex: 1,
   },
   t1: {
     fontSize: 30,
-    fontFamily: "NotoSans600",
+    fontFamily: 'NotoSans600',
     marginLeft: 33,
   },
   t2: {
-    color: "#838383",
+    color: '#838383',
     fontSize: 15,
     marginLeft: 33,
     marginTop: 8,
   },
   svg: {
-    position: "absolute",
+    position: 'absolute',
     top: 254,
     left: 15,
   },
   circleContainer: {
-    position: "relative",
+    position: 'relative',
     marginTop: 100,
     height: 400,
   },
   circle: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyCircle: {
     width: 89,
     height: 89,
     borderRadius: 100,
-    backgroundColor: "#F2F2F2",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#F2F2F2',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
     width: 89,
@@ -154,7 +177,7 @@ const styles = StyleSheet.create({
   },
   dayText: {
     marginTop: 5,
-    color: "#838383",
+    color: '#838383',
   },
   circle0: {
     // 월

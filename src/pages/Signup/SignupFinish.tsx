@@ -1,56 +1,56 @@
 import React from 'react';
-import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 
-const img = require('../../assets/clap.png');
-
+// 네비게이션 스택의 타입을 정의합니다.
 type RootStackParamList = {
-  Home: undefined;
+  Login: undefined;
 };
 
-type WriteFinishScreenNavigationProp = StackNavigationProp<
+type ParentChildInfoScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  'Home'
+  'Login'
 >;
 
-const WriteFinish: React.FC = () => {
-  const navigation = useNavigation<WriteFinishScreenNavigationProp>();
+const img = require('../../assets/signupfinish.png');
 
-  const handleFinishPress = () => {
-    // 작성완료 로직 추가
-    navigation.replace('Home');
+const ParentChildInfo: React.FC = () => {
+  const navigation = useNavigation<ParentChildInfoScreenNavigationProp>();
+
+  const handleLoginPress = () => {
+    navigation.navigate('Login');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>기록 완료!!</Text>
+      <Text style={styles.title}>회원가입 완료!!</Text>
       <Image source={img} style={styles.img} />
-      <TouchableOpacity style={styles.nextBtn} onPress={handleFinishPress}>
-        <Text style={styles.nextBtnText}>홈으로 가기</Text>
+      <TouchableOpacity style={styles.nextBtn} onPress={handleLoginPress}>
+        <Text style={styles.nextBtnText}>로그인하러 가기</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-export default WriteFinish;
+export default ParentChildInfo;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
+    paddingTop: 152,
     alignItems: 'center',
     backgroundColor: '#ABB0FE',
+    flex: 1,
   },
   title: {
-    fontSize: 32,
-    color: '#fff',
+    fontSize: 30,
     fontFamily: 'NotoSans600',
+    color: '#fff',
     marginBottom: 50,
   },
   img: {
-    width: 280,
-    height: 300,
+    width: 133,
+    height: 341,
   },
   nextBtn: {
     backgroundColor: '#6369D4',

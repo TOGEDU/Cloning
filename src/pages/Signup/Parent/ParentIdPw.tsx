@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-shadow */
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,36 +8,36 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
-} from "react-native";
-import Svg, { Path } from "react-native-svg";
-import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import BASE_URL from "../../../api";
+} from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BASE_URL from '../../../api';
 
-const ParentIdPw = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordConfirmError, setPasswordConfirmError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [emailCheckMessage, setEmailCheckMessage] = useState("");
+const ParentIdPw: React.FC = () => {
+  const [name, setName] = useState<string>(''); // name 타입 지정
+  const [email, setEmail] = useState<string>(''); // email 타입 지정
+  const [password, setPassword] = useState<string>(''); // password 타입 지정
+  const [passwordConfirm, setPasswordConfirm] = useState<string>(''); // password 확인 타입 지정
+  const [emailError, setEmailError] = useState<string>(''); // 에러 메시지 타입
+  const [passwordError, setPasswordError] = useState<string>(''); // 에러 메시지 타입
+  const [passwordConfirmError, setPasswordConfirmError] = useState<string>(''); // 에러 메시지 타입
+  const [showPassword, setShowPassword] = useState<boolean>(false); // 비밀번호 표시 여부
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState<boolean>(false); // 비밀번호 확인 표시 여부
+  const [emailCheckMessage, setEmailCheckMessage] = useState<string>(''); // 이메일 체크 메시지
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<any>>(); // 네비게이션 타입 지정
 
   useEffect(() => {
     const fetchName = async () => {
       try {
-        const storedName = await AsyncStorage.getItem("name");
+        const storedName = await AsyncStorage.getItem('name');
         if (storedName) {
           setName(storedName);
         }
       } catch (error) {
-        console.error("Failed to fetch name from AsyncStorage", error);
+        console.error('Failed to fetch name from AsyncStorage', error);
       }
     };
 
@@ -46,94 +47,87 @@ const ParentIdPw = () => {
   const handleBack = () => {
     navigation.goBack();
   };
+
   const handleNext = async () => {
     if (validateAll()) {
       try {
-        await AsyncStorage.setItem("email", email);
-        await AsyncStorage.setItem("password", password);
-        navigation.navigate("ParentPush");
+        await AsyncStorage.setItem('email', email);
+        await AsyncStorage.setItem('password', password);
+        navigation.navigate('ParentPush');
       } catch (error) {
-        console.error("Error saving data", error);
+        console.error('Error saving data', error);
       }
     }
   };
 
   const handleEmailCheck = async () => {
-    setEmailCheckMessage("");
-    setEmailError("");
+    setEmailCheckMessage('');
+    setEmailError('');
 
-    if (email === "") {
-      setEmailError("이메일을 입력해 주세요.");
+    if (email === '') {
+      setEmailError('이메일을 입력해 주세요.');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setEmailError("올바른 이메일 형식이 아닙니다.");
+      setEmailError('올바른 이메일 형식이 아닙니다.');
       return;
     }
 
     try {
-      const response = await axios.get(
-        `${BASE_URL}/api/sign/emailduplicationcheck`,
-
-        {
-          params: { id: 3, email: email },
-        }
-      );
+      const response = await axios.get(`${BASE_URL}/api/sign/emailduplicationcheck`, {
+        params: { id: 3, email: email },
+      });
 
       const data = response.data;
 
       if (!data.success) {
-        setEmailError("이미 가입된 이메일입니다.");
+        setEmailError('이미 가입된 이메일입니다.');
       } else {
-        setEmailCheckMessage("사용 가능한 이메일입니다.");
+        setEmailCheckMessage('사용 가능한 이메일입니다.');
       }
     } catch (error) {
-      setEmailError("이메일 확인 중 오류가 발생");
+      setEmailError('이메일 확인 중 오류가 발생했습니다.');
     }
   };
 
-  const validateEmail = (email) => {
+  const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setEmailError("올바른 이메일 형식이 아닙니다.");
+      setEmailError('올바른 이메일 형식이 아닙니다.');
       return false;
     }
-    setEmailError("");
+    setEmailError('');
     return true;
   };
 
-  const validatePassword = (password) => {
-    const passwordRegex =
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
     if (password.length < 6) {
-      setPasswordError("비밀번호는 6자리 이상이어야 합니다.");
+      setPasswordError('비밀번호는 6자리 이상이어야 합니다.');
       return false;
     } else if (!passwordRegex.test(password)) {
-      setPasswordError("비밀번호는 영어, 특수문자, 숫자가 섞여 있어야 합니다.");
+      setPasswordError('비밀번호는 영어, 특수문자, 숫자가 섞여 있어야 합니다.');
       return false;
     }
-    setPasswordError("");
+    setPasswordError('');
     return true;
   };
 
-  const validatePasswordConfirm = (password, passwordConfirm) => {
+  const validatePasswordConfirm = (password: string, passwordConfirm: string): boolean => {
     if (password !== passwordConfirm) {
-      setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
+      setPasswordConfirmError('비밀번호가 일치하지 않습니다.');
       return false;
     }
-    setPasswordConfirmError("");
+    setPasswordConfirmError('');
     return true;
   };
 
-  const validateAll = () => {
+  const validateAll = (): boolean => {
     const emailValid = validateEmail(email);
     const passwordValid = validatePassword(password);
-    const passwordConfirmValid = validatePasswordConfirm(
-      password,
-      passwordConfirm
-    );
+    const passwordConfirmValid = validatePasswordConfirm(password, passwordConfirm);
 
     return emailValid && passwordValid && passwordConfirmValid;
   };
@@ -143,14 +137,14 @@ const ParentIdPw = () => {
       <View style={styles.container}>
         <Text style={styles.title}>{name}님 반갑습니다!</Text>
         <Text style={styles.subtitle}>
-          TOGEDU에 로그인할 때 사용할 {"\n"}이메일과 비밀번호를 입력해 주세요.
+          TOGEDU에 로그인할 때 사용할 {'\n'}이메일과 비밀번호를 입력해 주세요.
         </Text>
         <View style={styles.lineContainer}>
-          <View style={styles.lineColor}></View>
-          <View style={styles.lineColor}></View>
-          <View style={styles.lineColor}></View>
-          <View style={styles.line}></View>
-          <View style={styles.line}></View>
+          <View style={styles.lineColor} />
+          <View style={styles.lineColor} />
+          <View style={styles.lineColor} />
+          <View style={styles.line} />
+          <View style={styles.line} />
         </View>
         <View
           style={[
@@ -200,7 +194,6 @@ const ParentIdPw = () => {
             style={styles.inputIconRight}
           >
             <Svg
-              xmlns="http://www.w3.org/2000/svg"
               width="20"
               height="20"
               viewBox="0 0 20 20"
@@ -248,7 +241,6 @@ const ParentIdPw = () => {
             style={styles.inputIconRight}
           >
             <Svg
-              xmlns="http://www.w3.org/2000/svg"
               width="20"
               height="20"
               viewBox="0 0 20 20"
@@ -291,28 +283,27 @@ export default ParentIdPw;
 const styles = StyleSheet.create({
   container: {
     paddingTop: 70,
-    alignItems: "center",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    backgroundColor: '#fff',
     flex: 1,
   },
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontFamily: "NotoSans700",
-    alignSelf: "flex-start",
+    fontFamily: 'NotoSans700',
+    alignSelf: 'flex-start',
   },
   subtitle: {
     fontSize: 20,
     marginTop: 23,
-    textAlign: "center",
-    fontFamily: "NotoSans500",
-    alignSelf: "flex-start",
-    textAlign: "left",
+    fontFamily: 'NotoSans500',
+    alignSelf: 'flex-start',
+    textAlign: 'left',
     marginLeft: 33,
   },
   lineContainer: {
     marginTop: 50,
-    flexDirection: "row",
+    flexDirection: 'row',
     marginBottom: 50,
   },
   lineColor: {
@@ -320,19 +311,19 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
   },
   line: {
     width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#DADBF5",
+    backgroundColor: '#DADBF5',
   },
   emailInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F6F6F6",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F6F6F6',
     borderRadius: 15,
     width: 350,
     height: 54,
@@ -340,9 +331,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F6F6F6",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F6F6F6',
     borderRadius: 15,
     width: 350,
     height: 54,
@@ -352,76 +343,75 @@ const styles = StyleSheet.create({
 
   input: {
     flex: 1,
-    height: "100%",
+    height: '100%',
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 16,
-    fontFamily: "NotoSans500",
+    fontFamily: 'NotoSans500',
   },
   emailCheckButton: {
-    backgroundColor: "#ABB0FE",
+    backgroundColor: '#ABB0FE',
     borderRadius: 15,
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
   emailCheckButtonText: {
     fontSize: 14,
-    color: "#000",
-    fontFamily: "NotoSans600",
+    color: '#000',
+    fontFamily: 'NotoSans600',
     opacity: 0.5,
   },
   inputIconRight: {
     opacity: 0.5,
   },
   backBtn: {
-    backgroundColor: "#ABB0FE",
+    backgroundColor: '#ABB0FE',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 109,
   },
   backBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
   nextBtn: {
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 31,
   },
   nextBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
   errorText: {
-    color: "red",
+    color: 'red',
     marginBottom: 25,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     marginLeft: 33,
-    fontFamily: "NotoSans500",
+    fontFamily: 'NotoSans500',
   },
   successText: {
-    color: "green",
-    fontFamily: "NotoSans500",
-
+    color: 'green',
+    fontFamily: 'NotoSans500',
     marginBottom: 25,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     marginLeft: 33,
   },
   inputError: {
-    borderColor: "red",
+    borderColor: 'red',
     borderWidth: 2,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,65 +7,70 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
-} from "react-native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import BASE_URL from "../../../api";
-import Svg, { Path, G, ClipPath, Rect, Defs } from "react-native-svg";
-import { useNavigation } from "@react-navigation/native";
+} from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Svg, { Path, G, ClipPath, Rect, Defs } from 'react-native-svg';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const ParentSearchCode = () => {
-  const [text, setText] = useState("");
-  const [isValidCode, setIsValidCode] = useState(false);
-  const navigation = useNavigation();
+type RootStackParamList = {
+  ParentIdPw: undefined;
+};
+
+const BASE_URL = 'YOUR_API_URL';
+
+const ParentSearchCode: React.FC = () => {
+  const [text, setText] = useState<string>('');
+  const [isValidCode, setIsValidCode] = useState<boolean | null>(null);
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleBack = () => {
     navigation.goBack();
   };
 
-  const handleChangeText = (inputText) => {
+  const handleChangeText = (inputText: string) => {
     setText(inputText);
     setIsValidCode(null);
   };
+
   const handleNext = () => {
-    navigation.navigate("ParentIdPw");
+    navigation.navigate('ParentIdPw');
   };
+
   const handleSearch = async () => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/api/sign/parent/verification`,
-        {
-          params: { parentCode: text },
-          timeout: 5000,
-        }
-      );
+      const response = await axios.get(`${BASE_URL}/api/sign/parent/verification`, {
+        params: { parentCode: text },
+        timeout: 5000,
+      });
       const data = response.data;
       if (data.success) {
         setIsValidCode(true);
-        await AsyncStorage.setItem("name", JSON.stringify(data.name));
-        await AsyncStorage.setItem("parentId", JSON.stringify(data.parentId));
-        console.log("Success:", data);
+        await AsyncStorage.setItem('name', JSON.stringify(data.name));
+        await AsyncStorage.setItem('parentId', JSON.stringify(data.parentId));
+        console.log('Success:', data);
       } else {
         setIsValidCode(false);
-        console.log("Failed:", data);
+        console.log('Failed:', data);
       }
-    } catch (error) {
+    } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        console.error("Axios error:", error.message);
+        console.error('Axios error:', error.message);
         if (error.response) {
-          console.error("Response data:", error.response.data);
-          console.error("Response status:", error.response.status);
-          console.error("Response headers:", error.response.headers);
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+          console.error('Response headers:', error.response.headers);
         } else if (error.request) {
-          console.error("Request data:", error.request);
-          if (error.message === "Network Error") {
-            console.error("CORS 에러일 가능성이 있습니다.");
+          console.error('Request data:', error.request);
+          if (error.message === 'Network Error') {
+            console.error('CORS 에러일 가능성이 있습니다.');
           }
         } else {
-          console.error("Error message:", error.message);
+          console.error('Error message:', error.message);
         }
       } else {
-        console.error("Unknown error:", error);
+        console.error('Unknown error:', error);
       }
       setIsValidCode(false);
     }
@@ -76,14 +81,14 @@ const ParentSearchCode = () => {
       <View style={styles.container}>
         <Text style={styles.title}>코드를 입력해 주세요.</Text>
         <Text style={styles.subtitle}>
-          보험에 가입할 때 받은 고유 코드를 {"\n"}입력해 주세요.
+          보험에 가입할 때 받은 고유 코드를 {'\n'}입력해 주세요.
         </Text>
         <View style={styles.lineContainer}>
-          <View style={styles.lineColor}></View>
-          <View style={styles.lineColor}></View>
-          <View style={styles.line}></View>
-          <View style={styles.line}></View>
-          <View style={styles.line}></View>
+          <View style={styles.lineColor} />
+          <View style={styles.lineColor} />
+          <View style={styles.line} />
+          <View style={styles.line} />
+          <View style={styles.line} />
         </View>
         <View style={styles.inputContainer}>
           <TextInput
@@ -94,7 +99,6 @@ const ParentSearchCode = () => {
           />
           <TouchableOpacity onPress={handleSearch}>
             <Svg
-              xmlns="http://www.w3.org/2000/svg"
               width="30"
               height="30"
               viewBox="0 0 30 30"
@@ -108,20 +112,19 @@ const ParentSearchCode = () => {
             </Svg>
           </TouchableOpacity>
         </View>
-        {isValidCode !== null && text.trim() !== "" && (
+        {isValidCode !== null && text.trim() !== '' && (
           <View style={styles.validContainer}>
             <Text style={styles.validText}>
-              {isValidCode ? "확인되었습니다." : "유효하지 않은 코드입니다."}
+              {isValidCode ? '확인되었습니다.' : '유효하지 않은 코드입니다.'}
             </Text>
             {isValidCode ? (
               <Svg
-                xmlns="http://www.w3.org/2000/svg"
                 width="19"
                 height="19"
                 viewBox="0 0 19 19"
                 fill="none"
               >
-                <G clip-path="url(#clip0_176_4540)">
+                <G clipPath="url(#clip0_176_4540)">
                   <Path
                     d="M9.5 0C10.3721 0 11.2132 0.111328 12.0234 0.333984C12.8337 0.556641 13.5882 0.878255 14.2871 1.29883C14.986 1.7194 15.6261 2.21419 16.2075 2.7832C16.7889 3.35221 17.2868 3.99235 17.7012 4.70361C18.1156 5.41488 18.4341 6.17253 18.6567 6.97656C18.8794 7.7806 18.9938 8.62175 19 9.5C19 10.3721 18.8887 11.2132 18.666 12.0234C18.4434 12.8337 18.1217 13.5882 17.7012 14.2871C17.2806 14.986 16.7858 15.6261 16.2168 16.2075C15.6478 16.7889 15.0076 17.2868 14.2964 17.7012C13.5851 18.1156 12.8275 18.4341 12.0234 18.6567C11.2194 18.8794 10.3783 18.9938 9.5 19C8.62793 19 7.78678 18.8887 6.97656 18.666C6.16634 18.4434 5.41178 18.1217 4.71289 17.7012C4.014 17.2806 3.37386 16.7858 2.79248 16.2168C2.2111 15.6478 1.71322 15.0076 1.29883 14.2964C0.88444 13.5851 0.565918 12.8275 0.343262 12.0234C0.120605 11.2194 0.0061849 10.3783 0 9.5C0 8.62793 0.111328 7.78678 0.333984 6.97656C0.556641 6.16634 0.878255 5.41178 1.29883 4.71289C1.7194 4.014 2.21419 3.37386 2.7832 2.79248C3.35221 2.2111 3.99235 1.71322 4.70361 1.29883C5.41488 0.88444 6.17253 0.565918 6.97656 0.343262C7.7806 0.120605 8.62175 0.0061849 9.5 0ZM15.0942 6.35498L13.8325 5.09326L7.71875 11.207L5.16748 8.65576L3.90576 9.91748L7.71875 13.7305L15.0942 6.35498Z"
                     fill="#4ECB71"
@@ -135,7 +138,6 @@ const ParentSearchCode = () => {
               </Svg>
             ) : (
               <Svg
-                xmlns="http://www.w3.org/2000/svg"
                 width="19"
                 height="19"
                 viewBox="0 0 19 19"
@@ -165,104 +167,102 @@ export default ParentSearchCode;
 const styles = StyleSheet.create({
   container: {
     paddingTop: 70,
-    alignItems: "center",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    backgroundColor: '#fff',
     flex: 1,
   },
   title: {
     fontSize: 30,
     marginLeft: 33,
-    fontFamily: "NotoSans700",
-    alignSelf: "flex-start",
+    fontFamily: 'NotoSans700',
+    alignSelf: 'flex-start',
   },
   subtitle: {
     fontSize: 20,
     marginTop: 23,
-    textAlign: "center",
-    alignSelf: "flex-start",
-    textAlign: "left",
-    fontFamily: "NotoSans500",
+    alignSelf: 'flex-start',
+    textAlign: 'left',
+    fontFamily: 'NotoSans500',
     marginLeft: 33,
   },
   lineContainer: {
     marginTop: 50,
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   lineColor: {
     width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
   },
   line: {
     width: 55,
     height: 4,
     borderRadius: 10,
     marginHorizontal: 4,
-    backgroundColor: "#DADBF5",
+    backgroundColor: '#DADBF5',
   },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 44,
-    backgroundColor: "#F6F6F6",
+    backgroundColor: '#F6F6F6',
     borderRadius: 15,
     width: 350,
     height: 54,
-    position: "relative",
+    position: 'relative',
     paddingHorizontal: 16,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    fontFamily: "NotoSans500",
+    fontFamily: 'NotoSans500',
   },
-
   inputIconRight: {
     opacity: 0.5,
   },
   backBtn: {
-    backgroundColor: "#ABB0FE",
+    backgroundColor: '#ABB0FE',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 109,
   },
   backBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
   validContainer: {
-    flexDirection: "row",
-    position: "absolute",
+    flexDirection: 'row',
+    position: 'absolute',
     right: 30,
     bottom: 350,
   },
   validText: {
     marginRight: 5,
     fontSize: 16,
-    fontFamily: "NotoSans500",
+    fontFamily: 'NotoSans500',
   },
   nextBtn: {
-    backgroundColor: "#6369D4",
+    backgroundColor: '#6369D4',
     width: 245,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 31,
   },
   nextBtnText: {
     fontSize: 15,
-    fontFamily: "NotoSans600",
-    color: "#fff",
+    fontFamily: 'NotoSans600',
+    color: '#fff',
   },
 });

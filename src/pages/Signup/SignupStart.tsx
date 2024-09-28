@@ -1,15 +1,30 @@
+/* eslint-disable quotes */
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+// 네비게이션 스택의 타입을 정의합니다.
+type RootStackParamList = {
+  ParentSignup: undefined;
+  ChildSignup: undefined;
+};
+
+// 네비게이션 타입을 정의합니다.
+type SignupStartScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "ParentSignup"
+>;
 
 const happy = require("../../assets/happyparent.png");
 
-const SignupStart = () => {
-  const navigation = useNavigation();
+const SignupStart: React.FC = () => {
+  const navigation = useNavigation<SignupStartScreenNavigationProp>();
 
   const navigateToParentSignup = () => {
     navigation.navigate("ParentSignup");
   };
+
   const navigateToChildSignup = () => {
     navigation.navigate("ChildSignup");
   };
