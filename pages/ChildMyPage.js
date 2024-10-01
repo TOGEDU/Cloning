@@ -8,6 +8,7 @@ import {
   ScrollView,
   Switch,
   Modal,
+  Alert, // Alert를 추가
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -64,7 +65,33 @@ const ChildMyPage = () => {
     return `${period} ${formattedHour}:${minute}`;
   };
 
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  // 푸시 알림 상태 변경 API 호출 함수
+  const toggleSwitch = async () => {
+    const newStatus = !isEnabled;
+    setIsEnabled(newStatus);
+
+    try {
+      const authToken = await AsyncStorage.getItem("authToken");
+      const response = await axios.put(
+        `${BASE_URL}/api/mypage/push-status`,
+        { pushStatus: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data) {
+        // 푸시 상태 변경 성공 알림
+        Alert.alert("알림", "푸시 알림 상태 변경 완료");
+      }
+    } catch (error) {
+      console.error("푸시 알림 상태 변경 중 오류 발생:", error);
+      Alert.alert("오류", "푸시 알림 상태 변경 중 오류가 발생했습니다.");
+    }
+  };
 
   const toggleTimeDropdown = () => {
     setTimeDropdownOpen(!timeDropdownOpen);
@@ -95,9 +122,38 @@ const ChildMyPage = () => {
     }
   };
 
-  const handleLogout = () => {
-    console.log("로그아웃");
-    navigation.navigate("Login");
+  // 로그아웃 처리 함수
+  const handleLogout = async () => {
+    try {
+      const authToken = await AsyncStorage.getItem("authToken");
+      const response = await axios.post(
+        `${BASE_URL}/api/sign/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        console.log(response.data.msg);
+        // JWT 토큰 삭제
+        await AsyncStorage.removeItem("authToken");
+        // 로그아웃 성공 알림
+        Alert.alert("로그아웃 완료", response.data.msg, [
+          { text: "확인", onPress: () => navigation.navigate("Login") },
+        ]);
+      } else {
+        console.error("로그아웃 실패:", response.data.msg);
+        // 로그아웃 실패 알림
+        Alert.alert("로그아웃 실패", response.data.msg);
+      }
+    } catch (error) {
+      console.error("로그아웃 중 오류 발생:", error);
+      // 로그아웃 오류 알림
+      Alert.alert("로그아웃 오류", "로그아웃 중 오류가 발생했습니다.");
+    }
   };
 
   const handleAlbumPress = () => {
@@ -108,8 +164,34 @@ const ChildMyPage = () => {
     setModalVisible(!isModalVisible);
   };
 
-  const handleConfirmDelete = () => {
-    console.log("탈퇴하기");
+  // 회원 탈퇴 처리 함수
+  const handleConfirmDelete = async () => {
+    try {
+      const authToken = await AsyncStorage.getItem("authToken");
+      const response = await axios.delete(`${BASE_URL}/api/sign/resign`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (response.data.success) {
+        console.log(response.data.msg);
+        // JWT 토큰 삭제
+        await AsyncStorage.removeItem("authToken");
+        // 탈퇴 성공 알림
+        Alert.alert("탈퇴 완료", response.data.msg, [
+          { text: "확인", onPress: () => navigation.navigate("Login") },
+        ]);
+      } else {
+        console.error("탈퇴 실패:", response.data.msg);
+        // 탈퇴 실패 알림
+        Alert.alert("탈퇴 실패", response.data.msg);
+      }
+    } catch (error) {
+      console.error("탈퇴 중 오류 발생:", error);
+      // 탈퇴 오류 알림
+      Alert.alert("탈퇴 오류", "탈퇴 중 오류가 발생했습니다.");
+    }
     setModalVisible(false);
   };
 
@@ -174,7 +256,7 @@ const ChildMyPage = () => {
               trackColor={{ false: "#767577", true: "#79B669" }}
               thumbColor={isEnabled ? "#f4f3f4" : "#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
-              onValueChange={toggleSwitch}
+              onValueChange={toggleSwitch} // 스위치 변경 시 API 호출
               value={isEnabled}
               style={styles.notificationSwitch}
             />
@@ -364,6 +446,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 6,
     paddingHorizontal: 10,
+    backgroundColor: "#858AE8", // 버튼 배경색 추가
     alignItems: "center",
   },
   logoutButtonText: {
@@ -413,6 +496,10 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: "white",
     fontSize: 16,
+  },
+  chevronIcon: {
+    width: 20,
+    height: 20,
   },
 });
 
