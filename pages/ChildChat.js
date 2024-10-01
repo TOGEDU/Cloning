@@ -127,7 +127,7 @@ const ChildChat = ({ navigation }) => {
       setLoadingVoice(true);
 
       const response = await axios.post(
-        "http://172.20.75.246:8000/synthesize",
+        "http://192.168.0.189:8000/synthesize",
         { text: message.text },
         {
           headers: {
