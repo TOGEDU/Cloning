@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/no-unstable-nested-components */
 import React, {useState, useEffect} from 'react';
 import {
@@ -10,19 +11,17 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Keyboard,
-  Platform,
 } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import Svg, {Path} from 'react-native-svg';
-import * as ImagePicker from 'expo-image-picker';
-import {Audio, AVPlaybackStatus} from 'expo-av';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
 import axios from 'axios';
 import BASE_URL from '../api';
 import stopIcon from '../../assets/stopicon.png';
+import {launchImageLibrary} from 'react-native-image-picker';
 
-// 타입 정의
 interface ChildOption {
   label: string;
   value: string | number;
@@ -32,10 +31,14 @@ const Diary: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const [content, setContent] = useState<string>('');
   const [category, setCategory] = useState<string | number>('common');
-  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [image, setImage] = useState<any>(null);
+  const [recording, setRecording] = useState<boolean>(false);
+  const [audioPath, setAudioPath] = useState<string | null>(null);
   const [childrenOptions, setChildrenOptions] = useState<ChildOption[]>([]);
   const [currentDate, setCurrentDate] = useState<string>('');
+
+  // 오디오 녹음 플레이어 초기화
+  const audioRecorderPlayer = new AudioRecorderPlayer();
 
   useEffect(() => {
     const today = new Date();
@@ -100,9 +103,17 @@ const Diary: React.FC = () => {
       if (image) {
         formData.append('image', {
           uri: image.uri,
-          type: 'image/jpeg',
+          type: image.type,
           name: '사진.jpg',
-        } as any); // FormData 사용 시 타입 캐스팅
+        } as any);
+      }
+
+      if (audioPath) {
+        formData.append('audio', {
+          uri: audioPath,
+          type: 'audio/m4a',
+          name: 'recording.m4a',
+        });
       }
 
       if (category === 'common') {
@@ -119,118 +130,54 @@ const Diary: React.FC = () => {
       });
 
       if (response.data.success === true) {
-        navigation.replace('WriteFinish');
+        navigation.navigate('WriteFinish'); // replace 대신 navigate 사용
       } else if (response.data.success === false) {
         Alert.alert('저장 실패', response.data.msg);
       } else {
         Alert.alert('저장 실패', '일기 저장에 실패했습니다.');
       }
     } catch (error: any) {
-      if (error.response) {
-        console.error('Error response data:', error.response.data);
-        console.error('Error response status:', error.response.status);
-      } else if (error.request) {
-        console.error('Error request data:', error.request);
-      } else {
-        console.error('Error message:', error.message);
+      console.error('Error message:', error.message);
+    }
+  };
+
+  const handleImagePicker = () => {
+    launchImageLibrary({mediaType: 'photo'}, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.error('ImagePicker Error: ', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        setImage(response.assets[0]); // 이미지 설정
       }
-    }
-  };
-
-  const handleImagePicker = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permissionResult.granted) {
-      Alert.alert(
-        'Permission required',
-        'Permission to access gallery is required!',
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
     });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setImage(result.assets[0]);
-    }
   };
 
+  // 오디오 녹음 시작
   const startRecording = async () => {
     try {
-      console.log('Requesting permissions..');
-      const permission = await Audio.requestPermissionsAsync();
-
-      if (permission.status === 'granted') {
-        console.log('Starting recording..');
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-        });
-
-        const {recording} = await Audio.Recording.createAsync(
-          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY,
-        );
-        setRecording(recording);
-        console.log('Recording started');
-      } else {
-        console.error('Permission to access microphone is required!');
-        Alert.alert(
-          'Permission Denied',
-          'Permission to access microphone is required!',
-        );
-      }
+      const result = await audioRecorderPlayer.startRecorder();
+      audioRecorderPlayer.addRecordBackListener((e: any) => {
+        console.log('Recording...', e.currentPosition);
+        return;
+      });
+      setRecording(true); // 녹음 시작 상태 업데이트
+      console.log('Recording started at:', result);
     } catch (err) {
       console.error('Failed to start recording', err);
     }
   };
 
+  // 오디오 녹음 종료
   const stopRecording = async () => {
     try {
-      console.log('Stopping recording...');
-
-      await recording?.stopAndUnloadAsync();
-      const uri = recording?.getURI();
-      setRecording(null);
-      console.log('Recording stopped and stored at', uri);
-
-      const formData = new FormData();
-      formData.append('file', {
-        uri: Platform.OS === 'ios' ? uri?.replace('file://', '') : uri,
-        type: 'audio/m4a',
-        name: 'recording.m4a',
-      });
-
-      const token = await AsyncStorage.getItem('authToken');
-      if (!token) {
-        console.error("Token doesn't exist");
-        return;
-      }
-
-      const response = await axios.post(
-        `${BASE_URL}/api/diary/transcribe`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      console.log('Transcription result:', response.data);
-
-      if (response.data.text) {
-        setContent(response.data.text);
-      } else {
-        console.warn('No text received from the server.');
-      }
+      const result = await audioRecorderPlayer.stopRecorder();
+      audioRecorderPlayer.removeRecordBackListener();
+      setAudioPath(result); // 녹음 파일 경로 저장
+      setRecording(false); // 녹음 종료 상태 업데이트
+      console.log('Recording stopped, file saved at:', result);
     } catch (err) {
-      console.error('Failed to stop recording or send audio file', err);
-      Alert.alert('Error', 'Failed to process the audio file.');
+      console.error('Failed to stop recording', err);
     }
   };
 
@@ -296,7 +243,7 @@ const Diary: React.FC = () => {
             <Image source={{uri: image.uri}} style={styles.image} />
           ) : (
             <Image
-              source={require('../assets/photoicon.png')}
+              source={require('../../assets/photoicon.png')}
               style={styles.photoIcon}
             />
           )}
@@ -316,7 +263,7 @@ const Diary: React.FC = () => {
             onPress={toggleRecording}>
             <Image
               source={
-                recording ? stopIcon : require('../assets/recordicon.png')
+                recording ? stopIcon : require('../../assets/recordicon.png')
               }
               style={styles.recordIcon}
             />

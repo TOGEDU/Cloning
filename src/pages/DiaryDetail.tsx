@@ -1,7 +1,7 @@
 /* eslint-disable curly */
 /* eslint-disable react/no-unstable-nested-components */
-/* eslint-disable no-shadow */
-import React, { useState, useEffect } from 'react';
+
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -14,19 +14,18 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
-import photoIcon from '../assets/photoicon.png';
+import photoIcon from '../../assets/photoicon.png';
 import RNPickerSelect from 'react-native-picker-select';
-import * as ImagePicker from 'expo-image-picker';
-import Svg, { Path } from 'react-native-svg';
+import {launchImageLibrary} from 'react-native-image-picker';
+import Svg, {Path} from 'react-native-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import axios from 'axios';
-import BASE_URL from '../api';
 import recordIcon from '../../assets/recordicon.png';
-import { Audio, AVPlaybackStatus } from 'expo-av';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player'; // 변경된 부분
+import BASE_URL from '../api';
 
-// 타입 정의
-type DiaryDetailRouteProp = RouteProp<{ params: { date: string } }, 'params'>;
+type DiaryDetailRouteProp = RouteProp<{params: {date: string}}, 'params'>;
 interface DiaryEntry {
   diaryId: number;
   childName: string;
@@ -37,23 +36,26 @@ interface DiaryEntry {
 const DiaryDetail: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<DiaryDetailRouteProp>();
-  const { date } = route.params;
+  const {date} = route.params;
 
   const [selectedChild, setSelectedChild] = useState<number | null>(null);
-  const [childrenOptions, setChildrenOptions] = useState<{ label: string; value: number }[]>([]);
+  const [childrenOptions, setChildrenOptions] = useState<
+    {label: string; value: number}[]
+  >([]);
   const [diaryData, setDiaryData] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [content, setContent] = useState('');
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [recording, setRecording] = useState(false); // 변경
   const [recordedUri, setRecordedUri] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
+  const audioRecorderPlayer = new AudioRecorderPlayer(); // 추가
 
   useEffect(() => {
-    const formatDate = (date: Date): string => {
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
+    const formatDate = (inputDate: Date): string => {
+      const year = inputDate.getFullYear();
+      const month = inputDate.getMonth() + 1;
+      const day = inputDate.getDate();
       return `${year}년 ${month}월 ${day}일`;
     };
 
@@ -64,17 +66,20 @@ const DiaryDetail: React.FC = () => {
         const token = await AsyncStorage.getItem('authToken');
         if (!token) throw new Error('Token not found');
 
-        const response = await axios.get<DiaryEntry[]>(`${BASE_URL}/api/diary`, {
-          params: { date },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get<DiaryEntry[]>(
+          `${BASE_URL}/api/diary`,
+          {
+            params: {date},
+            headers: {Authorization: `Bearer ${token}`},
+          },
+        );
 
-        const childrenOptions = response.data.map(entry => ({
+        const formattedChildrenOptions = response.data.map(entry => ({
           label: entry.childName,
           value: entry.diaryId,
         }));
+        setChildrenOptions(formattedChildrenOptions);
 
-        setChildrenOptions(childrenOptions);
         setDiaryData(response.data);
 
         if (response.data.length > 0) {
@@ -95,7 +100,9 @@ const DiaryDetail: React.FC = () => {
 
   useEffect(() => {
     if (selectedChild !== null) {
-      const selectedDiary = diaryData.find(entry => entry.diaryId === selectedChild);
+      const selectedDiary = diaryData.find(
+        entry => entry.diaryId === selectedChild,
+      );
       if (selectedDiary) {
         setContent(selectedDiary.content);
       }
@@ -103,28 +110,27 @@ const DiaryDetail: React.FC = () => {
   }, [selectedChild, diaryData]);
 
   const handleImagePicker = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const options: any = {
+      mediaType: 'photo',
+      quality: 1, // 0.0 ~ 1.0 사이의 값
+    };
 
-    if (!permissionResult.granted) {
-      Alert.alert('Permission required', 'Permission to access gallery is required!');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.error('ImagePicker Error: ', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        const selectedImage = response.assets[0].uri;
+        setDiaryData(prevDiaryData =>
+          prevDiaryData.map(entry =>
+            entry.diaryId === selectedChild
+              ? {...entry, image: selectedImage}
+              : entry,
+          ),
+        );
+      }
     });
-
-    if (!result.canceled && result.assets.length > 0) {
-      const selectedImage = result.assets[0].uri;
-      setDiaryData(prevDiaryData =>
-        prevDiaryData.map(entry =>
-          entry.diaryId === selectedChild
-            ? { ...entry, image: selectedImage }
-            : entry,
-        ),
-      );
-    }
   };
 
   const handleUpdateDiary = async () => {
@@ -132,7 +138,9 @@ const DiaryDetail: React.FC = () => {
       const token = await AsyncStorage.getItem('authToken');
       if (!token) throw new Error('Token not found');
 
-      const selectedDiary = diaryData.find(entry => entry.diaryId === selectedChild);
+      const selectedDiary = diaryData.find(
+        entry => entry.diaryId === selectedChild,
+      );
       if (!selectedDiary) return;
 
       const formData = new FormData();
@@ -177,34 +185,26 @@ const DiaryDetail: React.FC = () => {
 
   const startRecording = async () => {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission required', 'Microphone access is required!');
-        return;
-      }
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      const result = await audioRecorderPlayer.startRecorder();
+      setRecording(true);
+      console.log('Recording started at: ', result);
+      audioRecorderPlayer.addRecordBackListener(e => {
+        console.log('Recording...', e.currentPosition);
       });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY,
-      );
-      setRecording(recording);
     } catch (err) {
       console.error('Failed to start recording:', err);
     }
   };
 
   const stopRecording = async () => {
-    if (!recording) return;
     try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      setRecordedUri(uri || '');
-      setRecording(null);
-    } catch (error) {
-      console.error('Failed to stop recording:', error);
+      const result = await audioRecorderPlayer.stopRecorder();
+      audioRecorderPlayer.removeRecordBackListener();
+      setRecordedUri(result);
+      setRecording(false);
+      console.log('Recording stopped, file saved at:', result);
+    } catch (err) {
+      console.error('Failed to stop recording:', err);
     }
   };
 
@@ -221,12 +221,16 @@ const DiaryDetail: React.FC = () => {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
-  const selectedDiary = diaryData.find(entry => entry.diaryId === selectedChild);
+  const selectedDiary = diaryData.find(
+    entry => entry.diaryId === selectedChild,
+  );
 
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => navigation.goBack()}>
           <Svg width="44" height="44" viewBox="0 0 44 44" fill="none">
             <Path
               d="M12.8334 12.8333L31.1667 31.1666M12.8334 31.1666L31.1667 12.8333"
@@ -243,7 +247,7 @@ const DiaryDetail: React.FC = () => {
           <RNPickerSelect
             onValueChange={value => setSelectedChild(value)}
             items={childrenOptions}
-            placeholder={{ label: '자식 선택', value: null }}
+            placeholder={{label: '자식 선택', value: null}}
             style={{
               inputIOS: styles.picker,
               inputAndroid: styles.picker,
@@ -252,7 +256,12 @@ const DiaryDetail: React.FC = () => {
             value={selectedChild}
             Icon={() => (
               <Svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                <Path d="M11 1L6 7L1 1" stroke="#CCCCCC" strokeLinecap="round" strokeLinejoin="round" />
+                <Path
+                  d="M11 1L6 7L1 1"
+                  stroke="#CCCCCC"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </Svg>
             )}
           />
@@ -260,9 +269,14 @@ const DiaryDetail: React.FC = () => {
 
         {isEditMode ? (
           <>
-            <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
+            <TouchableOpacity
+              style={styles.imagePicker}
+              onPress={handleImagePicker}>
               {selectedDiary?.image ? (
-                <Image source={{ uri: selectedDiary.image }} style={styles.diaryImage} />
+                <Image
+                  source={{uri: selectedDiary.image}}
+                  style={styles.diaryImage}
+                />
               ) : (
                 <Image source={photoIcon} style={styles.photoIcon} />
               )}
@@ -276,12 +290,16 @@ const DiaryDetail: React.FC = () => {
                 placeholder="내용을 입력하세요"
                 multiline
               />
-              <TouchableOpacity style={styles.recordIconContainer} onPress={toggleRecording}>
+              <TouchableOpacity
+                style={styles.recordIconContainer}
+                onPress={toggleRecording}>
                 <Image source={recordIcon} style={styles.recordIcon} />
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.saveButton} onPress={handleUpdateDiary}>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleUpdateDiary}>
               <Text style={styles.saveButtonText}>저장하기</Text>
             </TouchableOpacity>
           </>
@@ -289,13 +307,18 @@ const DiaryDetail: React.FC = () => {
           selectedDiary && (
             <View style={styles.diaryContentContainer}>
               {selectedDiary.image ? (
-                <Image source={{ uri: selectedDiary.image }} style={styles.diaryImage} />
+                <Image
+                  source={{uri: selectedDiary.image}}
+                  style={styles.diaryImage}
+                />
               ) : (
                 <Text style={styles.noImageText}>이미지가 없습니다.</Text>
               )}
               <Text style={styles.content}>{selectedDiary.content}</Text>
               <View style={styles.editButtonContainer}>
-                <TouchableOpacity style={styles.editButton} onPress={() => setIsEditMode(true)}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => setIsEditMode(true)}>
                   <Text style={styles.editButtonText}>수정하기</Text>
                 </TouchableOpacity>
               </View>
@@ -366,7 +389,6 @@ const styles = StyleSheet.create({
   editModeMargin: {
     marginLeft: 28,
   },
-
   input: {
     height: 50,
     width: 330,

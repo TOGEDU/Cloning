@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import BASE_URL from '../api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Audio, Recording } from 'expo-av';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 const img = require('../../assets/todayquestionimg.png');
 const recordIcon = require('../../assets/recordicon2.png');
@@ -26,8 +26,9 @@ const TodayQuestion: React.FC = () => {
   const [question, setQuestion] = useState<string>('');
   const [questionId, setQuestionId] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [recording, setRecording] = useState<Recording | null>(null);
+  const [recording, setRecording] = useState<boolean>(false); // 녹음 중 상태
   const navigation = useNavigation();
+  const audioRecorderPlayer = new AudioRecorderPlayer(); // AudioRecorderPlayer 인스턴스
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -59,10 +60,11 @@ const TodayQuestion: React.FC = () => {
             setIsEditing(true);
           }
         }
-      } catch (error) {
-        console.error('Error fetching question:', error);
+      } catch (error: any) {
         if (error.response) {
-          console.error('Error response data:', error.response.data);
+          console.error('Error fetching question:', error.response.data);
+        } else {
+          console.error('Unknown error occurred:', error.message);
         }
       }
     };
@@ -113,38 +115,20 @@ const TodayQuestion: React.FC = () => {
       } else {
         console.error('Error during response:', response.data);
       }
-    } catch (error) {
-      console.error('Error during request:', error);
+    } catch (error: any) {
       if (error.response) {
-        console.error('Error response data:', error.response.data);
+        console.error('Error fetching question:', error.response.data);
+      } else {
+        console.error('Unknown error occurred:', error.message);
       }
     }
   };
 
   const startRecording = async () => {
     try {
-      console.log('Requesting permissions..');
-      const permission = await Audio.requestPermissionsAsync();
-
-      if (permission.status === 'granted') {
-        console.log('Starting recording..');
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-        });
-
-        const { recording } = await Audio.Recording.createAsync(
-          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY,
-        );
-        setRecording(recording);
-        console.log('Recording started');
-      } else {
-        console.error('Permission to access microphone is required!');
-        Alert.alert(
-          'Permission Denied',
-          'Permission to access microphone is required!',
-        );
-      }
+      const result = await audioRecorderPlayer.startRecorder();
+      setRecording(true);
+      console.log('Recording started', result);
     } catch (err) {
       console.error('Failed to start recording', err);
     }
@@ -152,19 +136,16 @@ const TodayQuestion: React.FC = () => {
 
   const stopRecording = async () => {
     try {
-      console.log('Stopping recording...');
+      const result = await audioRecorderPlayer.stopRecorder();
+      setRecording(false);
+      console.log('Recording stopped', result);
 
-      await recording?.stopAndUnloadAsync();
-      const uri = recording?.getURI();
-      setRecording(null);
-      console.log('Recording stopped and stored at', uri);
-
-      // 서버로 녹음 파일 전송
+      // 녹음 파일을 서버로 전송
       const formData = new FormData();
       formData.append('file', {
-        uri: Platform.OS === 'ios' ? uri!.replace('file://', '') : uri!, // iOS와 Android의 파일 경로 처리
-        type: 'audio/m4a', // 파일 유형
-        name: 'recording.m4a', // 파일 이름
+        uri: Platform.OS === 'ios' ? result.replace('file://', '') : result,
+        type: 'audio/m4a',
+        name: 'recording.m4a',
       });
 
       const token = await AsyncStorage.getItem('authToken');

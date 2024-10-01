@@ -17,7 +17,10 @@ import chevronUp from '../../assets/chevron-up.png';
 import BASE_URL from '../api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
+import {
+  launchImageLibrary,
+  ImageLibraryOptions,
+} from 'react-native-image-picker';
 
 // 프로필 데이터 타입 정의
 interface Profile {
@@ -76,7 +79,12 @@ const MyPage: React.FC = () => {
 
       setIsEnabled(data.pushStatus);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      // error 처리 추가
+      if (error instanceof Error) {
+        console.error('Error fetching data:', error.message);
+      } else {
+        console.error('Unknown error:', error);
+      }
     }
   };
 
@@ -117,7 +125,7 @@ const MyPage: React.FC = () => {
       );
 
       const newChildren = children.filter(
-        (childName) => childName.trim() && !existingChildren.includes(childName),
+        childName => childName.trim() && !existingChildren.includes(childName),
       );
 
       for (const childName of newChildren) {
@@ -135,17 +143,11 @@ const MyPage: React.FC = () => {
       Alert.alert('알림', '자녀가 추가되었습니다!');
       setDropdownOpen(false);
     } catch (error) {
-      if (error.response) {
-        console.error('응답 오류:', error.response);
-        Alert.alert(
-          '오류',
-          `자녀 이름 변경 중 오류 발생: ${error.response.data}`,
-        );
-      } else if (error.request) {
-        console.error('응답 없음:', error.request);
-        Alert.alert('오류', '서버에 연결할 수 없습니다.');
+      if (error instanceof Error) {
+        console.error('응답 오류:', error.message);
+        Alert.alert('오류', `자녀 이름 변경 중 오류 발생: ${error.message}`);
       } else {
-        console.error('요청 설정 오류:', error.message);
+        console.error('Unknown error:', error);
         Alert.alert('오류', '알 수 없는 오류가 발생했습니다.');
       }
     }
@@ -163,33 +165,26 @@ const MyPage: React.FC = () => {
       const newPushStatus = !isEnabled;
       setIsEnabled(newPushStatus);
 
-      await axios.put(
-        `${BASE_URL}/api/mypage/push-status`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          params: {
-            pushStatus: newPushStatus,
-          },
+      await axios.put(`${BASE_URL}/api/mypage/push-status`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-      );
+        params: {
+          pushStatus: newPushStatus,
+        },
+      });
 
       Alert.alert('알림', '푸시 알림 상태 변경 완료');
     } catch (error) {
-      if (error.response) {
-        console.error('응답 오류:', error.response);
+      if (error instanceof Error) {
+        console.error('응답 오류:', error.message);
         Alert.alert(
           '오류',
-          `푸시 알림 상태 변경 중 오류 발생: ${error.response.data}`,
+          `푸시 알림 상태 변경 중 오류 발생: ${error.message}`,
         );
-      } else if (error.request) {
-        console.error('응답 없음:', error.request);
-        Alert.alert('오류', '서버에 연결할 수 없습니다.');
       } else {
-        console.error('요청 설정 오류:', error.message);
+        console.error('Unknown error:', error);
         Alert.alert('오류', '알 수 없는 오류가 발생했습니다.');
       }
     }
@@ -221,37 +216,27 @@ const MyPage: React.FC = () => {
       }
       const formattedTime = `${hours}:${minutes}:00`;
 
-      await axios.put(
-        `${BASE_URL}/api/mypage/push-time`,
-        null,
-        {
-          params: {pushNotificationTime: formattedTime},
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+      await axios.put(`${BASE_URL}/api/mypage/push-time`, null, {
+        params: {pushNotificationTime: formattedTime},
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-      );
+      });
 
       Alert.alert('알림', '알림 시간이 변경되었습니다.');
     } catch (error) {
-      if (error.response) {
-        console.error('응답 오류:', error.response);
-        Alert.alert(
-          '오류',
-          `알림 시간 변경 중 오류 발생: ${error.response.data}`,
-        );
-      } else if (error.request) {
-        console.error('응답 없음:', error.request);
-        Alert.alert('오류', '서버에 연결할 수 없습니다.');
+      if (error instanceof Error) {
+        console.error('응답 오류:', error.message);
+        Alert.alert('오류', `알림 시간 변경 중 오류 발생: ${error.message}`);
       } else {
-        console.error('요청 설정 오류:', error.message);
+        console.error('Unknown error:', error);
         Alert.alert('오류', '알 수 없는 오류가 발생했습니다.');
       }
     }
   };
 
-  const updateProfileImage = async (image: ImagePicker.ImageInfo) => {
+  const updateProfileImage = async (image: any) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
       if (!token) {
@@ -279,22 +264,16 @@ const MyPage: React.FC = () => {
       );
 
       if (response.status === 200) {
-        setRefresh((prev) => !prev); // refresh 상태를 변경하여 마이페이지 리렌더링
+        setRefresh(prev => !prev); // refresh 상태를 변경하여 마이페이지 리렌더링
       } else {
         Alert.alert('오류', '프로필 사진 변경에 실패했습니다.');
       }
     } catch (error) {
-      if (error.response) {
-        console.error('응답 오류:', error.response);
-        Alert.alert(
-          '오류',
-          `프로필 사진 변경 중 오류 발생: ${error.response.data}`,
-        );
-      } else if (error.request) {
-        console.error('응답 없음:', error.request);
-        Alert.alert('오류', '서버에 연결할 수 없습니다.');
+      if (error instanceof Error) {
+        console.error('응답 오류:', error.message);
+        Alert.alert('오류', `프로필 사진 변경 중 오류 발생: ${error.message}`);
       } else {
-        console.error('요청 설정 오류:', error.message);
+        console.error('Unknown error:', error);
         Alert.alert('오류', '알 수 없는 오류가 발생했습니다.');
       }
     }
@@ -326,17 +305,11 @@ const MyPage: React.FC = () => {
         Alert.alert('오류', response.data.msg || '로그아웃에 실패했습니다.');
       }
     } catch (error) {
-      if (error.response) {
-        console.error('응답 오류:', error.response);
-        Alert.alert(
-          '오류',
-          `로그아웃 중 오류 발생: ${error.response.data.msg}`,
-        );
-      } else if (error.request) {
-        console.error('응답 없음:', error.request);
-        Alert.alert('오류', '서버에 연결할 수 없습니다.');
+      if (error instanceof Error) {
+        console.error('응답 오류:', error.message);
+        Alert.alert('오류', `로그아웃 중 오류 발생: ${error.message}`);
       } else {
-        console.error('요청 설정 오류:', error.message);
+        console.error('Unknown error:', error);
         Alert.alert('오류', '알 수 없는 오류가 발생했습니다.');
       }
     }
@@ -360,22 +333,22 @@ const MyPage: React.FC = () => {
   ];
 
   const handleImageSelect = async () => {
-    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('권한 오류', '사진첩 접근 권한이 필요합니다.');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo', // MediaType 값으로 'photo' 또는 'video' 사용
+      selectionLimit: 1, // allowsEditing 대신 사용
       quality: 1,
-      allowsEditing: true,
-    });
+    };
 
-    if (!result.canceled) {
-      const selectedImage = result.assets[0];
-      updateProfileImage(selectedImage);
-    }
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.error('ImagePicker Error: ', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        const selectedImage = response.assets[0];
+        updateProfileImage(selectedImage);
+      }
+    });
   };
 
   return (
@@ -401,10 +374,7 @@ const MyPage: React.FC = () => {
               onPress={toggleDropdown}
               style={styles.dropdownHeader}>
               <Text style={styles.dropdownHeaderText}>자녀 정보 수정</Text>
-              <Image
-                source={dropdownOpen ? chevronUp : chevronDown}
-                style={styles.chevronIcon}
-              />
+              <Image source={dropdownOpen ? chevronUp : chevronDown} />
             </TouchableOpacity>
             {dropdownOpen && (
               <ScrollView contentContainerStyle={styles.dropdownContent}>
@@ -413,7 +383,7 @@ const MyPage: React.FC = () => {
                     key={index}
                     style={styles.input}
                     value={child}
-                    onChangeText={(text) => handleChildNameChange(text, index)}
+                    onChangeText={text => handleChildNameChange(text, index)}
                     placeholder="자녀 이름"
                   />
                 ))}
@@ -449,10 +419,7 @@ const MyPage: React.FC = () => {
               onPress={toggleTimeDropdown}
               style={styles.dropdownHeader}>
               <Text style={styles.dropdownHeaderText}>{selectedTime}</Text>
-              <Image
-                source={timeDropdownOpen ? chevronUp : chevronDown}
-                style={styles.chevronIcon}
-              />
+              <Image source={timeDropdownOpen ? chevronUp : chevronDown} />
             </TouchableOpacity>
             {timeDropdownOpen && (
               <View style={styles.timeDropdownContent}>

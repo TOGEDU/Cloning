@@ -13,7 +13,7 @@ type ParentChildInfoScreenNavigationProp = StackNavigationProp<
   'Login'
 >;
 
-const img = require('../../assets/signupfinish.png');
+const img = require('../../../assets/signupfinish.png');
 
 const ParentChildInfo: React.FC = () => {
   const navigation = useNavigation<ParentChildInfoScreenNavigationProp>();

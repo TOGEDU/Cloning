@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Alert,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer, NavigationState } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+
+import React, {useState, useEffect} from 'react';
+import {Alert, SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {NavigationContainer, NavigationState} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 import messaging from '@react-native-firebase/messaging';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -42,12 +37,45 @@ import ChildMyPage from './pages/ChildMyPage';
 import Album from './pages/Album';
 import ImageView from './pages/ImageView';
 import ChatRoomScreen from './pages/ChatRoomScreen';
-import { AuthProvider } from './AuthContext';
+import {AuthProvider} from './AuthContext';
 
-const Stack = createStackNavigator();
+export type RootStackParamList = {
+  Splash: undefined;
+  Login: undefined;
+  ChatRoomScreen: { chatroomId: string; initialMessage: { text: string } | null };
+  ChildChat: undefined;
+  SignupStart: undefined;
+  ParentSignup: undefined;
+  ParentSearchCode: undefined;
+  ParentIdPw: undefined;
+  ParentPush: undefined;
+  ParentChildInfo: undefined;
+  ChildSignup: undefined;
+  ChildSearchCode: undefined;
+  ChildIdPw: undefined;
+  ChildInfo: undefined;
+  SignupFinish: undefined;
+  Achieve: undefined;
+  Home: undefined;
+  Record: undefined;
+  TodayQuestion: undefined;
+  TodayQuestionList: undefined;
+  MyPage: undefined;
+  DiaryList: undefined;
+  DiaryDetail: undefined;
+  Diary: undefined;
+  RecordingScreen: undefined;
+  WriteFinish: undefined;
+  ChatList: undefined;
+  ChildMyPage: undefined;
+  Album: undefined;
+  ImageView: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
 
 // FCM 백그라운드 메시지 핸들러 설정
-messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
 });
 
@@ -91,7 +119,6 @@ const footerlessRoutes = [
 ];
 
 const App = () => {
-  // const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
   const [currentRoute, setCurrentRoute] = useState<string>('Splash');
 
   // FCM 관련 useEffect
@@ -100,8 +127,6 @@ const App = () => {
       try {
         const token = await messaging().getToken();
         console.log('FCM Token:', token);
-        // 필요하면 FCM 토큰을 화면에 표시하는 로직을 추가할 수 있습니다.
-        // Alert.alert("FCM Token", token);
       } catch (error) {
         console.error('Failed to get FCM token:', error);
       }
@@ -121,46 +146,22 @@ const App = () => {
 
     requestPermission();
 
-    // 포그라운드 메시지 처리
-    const unsubscribeMessage = messaging().onMessage(async (remoteMessage) => {
+    const unsubscribeMessage = messaging().onMessage(async remoteMessage => {
       if (remoteMessage.notification) {
-        const { title, body } = remoteMessage.notification;
+        const {title, body} = remoteMessage.notification;
         Alert.alert(title || 'No Title', body || 'No Body');
       }
     });
 
-    // 토큰 갱신 시 처리
-    const unsubscribeTokenRefresh = messaging().onTokenRefresh((token) => {
+    const unsubscribeTokenRefresh = messaging().onTokenRefresh(token => {
       console.log('New FCM Token:', token);
     });
 
     return () => {
-      unsubscribeMessage(); // 메시지 리스너 해제
-      unsubscribeTokenRefresh(); // 토큰 갱신 리스너 해제
+      unsubscribeMessage();
+      unsubscribeTokenRefresh();
     };
   }, []);
-
-  // 폰트 로딩
-  // useEffect(() => {
-  //   const loadFonts = async () => {
-  //     await Font.loadAsync({
-  //       'LuckiestGuy-Regular': require('./assets/fonts/LuckiestGuy-Regular.ttf'),
-  //       NotoSans: require('./assets/fonts/NotoSans-VariableFont_wdth,wght.ttf'),
-  //       NotoSans500: require('./assets/fonts/NotoSans_Condensed-Medium.ttf'),
-  //       NotoSans600: require('./assets/fonts/NotoSans_Condensed-SemiBold.ttf'),
-  //       NotoSans700: require('./assets/fonts/NotoSans_Condensed-Bold.ttf'),
-  //       NotoSans800: require('./assets/fonts/NotoSans_Condensed-ExtraBold.ttf'),
-  //       NotoSans900: require('./assets/fonts/NotoSans_ExtraCondensed-Black.ttf'),
-  //     });
-  //     setFontsLoaded(true);
-  //   };
-
-  //   loadFonts();
-  // }, []);
-
-  // if (!fontsLoaded) {
-  //   return null; // 로딩 중일 때 스플래시 화면이나 로딩 컴포넌트를 표시 가능
-  // }
 
   return (
     <AuthProvider>
@@ -171,8 +172,7 @@ const App = () => {
               const route = state.routes[state.index];
               setCurrentRoute(route.name);
             }
-          }}
-        >
+          }}>
           {headerlessRoutes.includes(currentRoute) ? (
             <View style={styles.container}>
               <StatusBar barStyle="dark-content" />
@@ -198,7 +198,9 @@ const App = () => {
 };
 
 const AppNavigator: React.FC = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
+  <Stack.Navigator
+    screenOptions={{headerShown: false}}
+    initialRouteName="Splash">
     <Stack.Screen name="Splash" component={Splash} />
     <Stack.Screen name="Login" component={Login} />
     <Stack.Screen name="ChildChat" component={ChildChat} />
@@ -228,36 +230,41 @@ const AppNavigator: React.FC = () => (
     <Stack.Screen name="ChildMyPage" component={ChildMyPage} />
     <Stack.Screen name="Album" component={Album} />
     <Stack.Screen name="ImageView" component={ImageView} />
-    <Stack.Screen
-      name="ChatRoomScreen"
-      component={ChatRoomScreen}
-      options={{ animationEnabled: false }}
-    />
+    <Stack.Screen name="ChatRoomScreen" component={ChatRoomScreen} />
   </Stack.Navigator>
 );
 
-const ContentWrapper: React.FC<{ children: React.ReactNode; currentRoute: string }> = ({ children, currentRoute }) => {
+const ContentWrapper: React.FC<{
+  children: React.ReactNode;
+  currentRoute: string;
+}> = ({children, currentRoute}) => {
   let backgroundColor = '#fff';
   if (currentRoute === 'TodayQuestion' || currentRoute === 'SignupFinish') {
     backgroundColor = '#ABB0FE';
   } else if (currentRoute === 'DiaryList') {
     backgroundColor = '#858AE8';
-  } else if (currentRoute === 'TodayQuestionList' || currentRoute === 'Record') {
+  } else if (
+    currentRoute === 'TodayQuestionList' ||
+    currentRoute === 'Record'
+  ) {
     backgroundColor = '#F7F8FF';
   } else if (currentRoute === 'SignupStart' || currentRoute === 'ChildMyPage') {
     backgroundColor = '#6B73FF';
   }
 
-  return <View style={[styles.content, { backgroundColor }]}>{children}</View>;
+  return <View style={[styles.content, {backgroundColor}]}>{children}</View>;
 };
 
-const HeaderWrapper: React.FC<{ currentRoute: string }> = ({ currentRoute }) => {
+const HeaderWrapper: React.FC<{currentRoute: string}> = ({currentRoute}) => {
   let backgroundColor = '#fff';
   if (currentRoute === 'TodayQuestion' || currentRoute === 'SignupFinish') {
     backgroundColor = '#ABB0FE';
   } else if (currentRoute === 'DiaryList') {
     backgroundColor = '#858AE8';
-  } else if (currentRoute === 'TodayQuestionList' || currentRoute === 'Record') {
+  } else if (
+    currentRoute === 'TodayQuestionList' ||
+    currentRoute === 'Record'
+  ) {
     backgroundColor = '#F7F8FF';
   } else if (currentRoute === 'SignupStart' || currentRoute === 'ChildMyPage') {
     backgroundColor = '#6B73FF';

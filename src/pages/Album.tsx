@@ -1,4 +1,3 @@
-/* eslint-disable quotes */
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -10,10 +9,11 @@ import {
   SafeAreaView,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack'; // @react-navigation/stack에서 StackNavigationProp 가져오기
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import smallLogo from '../../fonts';
+import smallLogo from '../../assets/smallLogo.png';
 import logotext from '../../assets/logotext.png';
 import BASE_URL from '../api';
 
@@ -23,7 +23,7 @@ type RootStackParamList = {
   ImageView: {imageSource: string; date: string};
 };
 
-type AlbumNavigationProp = ReturnType<typeof useNavigation>;
+type AlbumNavigationProp = StackNavigationProp<RootStackParamList, 'Album'>; // StackNavigationProp을 명시적으로 지정
 
 interface ImageData {
   imgUrl: string;
@@ -31,7 +31,7 @@ interface ImageData {
 }
 
 const Album: React.FC = () => {
-  const navigation = useNavigation<AlbumNavigationProp>();
+  const navigation = useNavigation<AlbumNavigationProp>(); // useNavigation에 타입 적용
   const [images, setImages] = useState<ImageData[]>([]);
 
   useEffect(() => {
@@ -72,10 +72,10 @@ const Album: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.headerContainer} edges={['top']}>
+      <SafeAreaView>
         <View style={styles.header}>
-          <Image source={smallLogo} style={styles.smallLogo} />
-          <Image source={logotext} style={styles.logotext} />
+          <Image source={smallLogo} />
+          <Image source={logotext} />
         </View>
       </SafeAreaView>
 

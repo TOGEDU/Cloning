@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,13 +7,18 @@ import {
   Alert,
   LogBox,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { GiftedChat, Bubble, Send, InputToolbar } from 'react-native-gifted-chat';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {
+  GiftedChat,
+  Bubble,
+  InputToolbar,
+  IMessage,
+} from 'react-native-gifted-chat';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Audio } from 'expo-av'; // expo-av 추가
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp, useNavigation } from '@react-navigation/native';
+import Sound from 'react-native-sound'; // react-native-sound로 대체
+import {StackNavigationProp} from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
 
 import BASE_URL from '../api';
 
@@ -28,31 +33,21 @@ LogBox.ignoreLogs([
   'Warning: Avatar: Support for defaultProps will be removed from function components in a future major release.',
 ]);
 
-// 네비게이션 스택의 타입 정의
 type RootStackParamList = {
   ChatList: undefined;
-  ChatRoomScreen: { chatroomId: string };
+  ChatRoomScreen: {chatroomId: string};
   ChildMyPage: undefined;
 };
 
-// 네비게이션 타입 정의
-type ChildChatNavigationProp = StackNavigationProp<RootStackParamList, 'ChatList'>;
-
-type Message = {
-  _id: string | number;
-  text: string;
-  createdAt: Date;
-  user: {
-    _id: number;
-    name: string;
-    avatar?: string;
-  };
-};
+type ChildChatNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'ChatList'
+>;
 
 const ChildChat: React.FC = () => {
   const navigation = useNavigation<ChildChatNavigationProp>();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [sound, setSound] = useState<Audio.Sound | null>(null); // 사운드 상태 추가
+  const [messages, setMessages] = useState<IMessage[]>([]); // IMessage로 통일
+  const [sound, setSound] = useState<Sound | null>(null); // 사운드 상태 추가
 
   useEffect(() => {
     setMessages([
@@ -72,42 +67,47 @@ const ChildChat: React.FC = () => {
   useEffect(() => {
     return sound
       ? () => {
-          sound.unloadAsync(); // 컴포넌트가 언마운트될 때 사운드를 정리
+          sound.release(); // 컴포넌트가 언마운트될 때 사운드를 정리
         }
       : undefined;
   }, [sound]);
 
   const playSound = async (audioUri: string) => {
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: audioUri },
-        { shouldPlay: true },
-      );
-      setSound(sound);
-      await sound.playAsync();
+      const soundInstance = new Sound(audioUri, Sound.MAIN_BUNDLE, error => {
+        if (error) {
+          console.error('오디오 로딩 실패:', error);
+          Alert.alert(
+            'Failed to play sound',
+            'An error occurred while playing the sound.',
+          );
+          return;
+        }
+        soundInstance.play();
+      });
+      setSound(soundInstance);
     } catch (error) {
-      console.error('오디오 재생 실패:', error);
-      Alert.alert(
-        'Failed to play sound',
-        'An error occurred while playing the sound.',
-      );
+      if (error instanceof Error) {
+        console.error('오디오 재생 실패:', error.message);
+        Alert.alert(
+          'Failed to play sound',
+          'An error occurred while playing the sound.',
+        );
+      }
     }
   };
 
-  const onBubbleLongPress = async (_context: any, message: Message) => {
+  const onBubbleLongPress = async (_context: any, message: IMessage) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
       if (!token) {
-        console.error('Auth token is missing or invalid');
         Alert.alert('Authentication error', 'Please log in again.');
         return;
       }
 
-      console.log('길게 클릭된 메시지:', message.text);
-
       const response = await axios.post(
-        'http://192.168.35.231:8000/synthesize',
-        { text: message.text },
+        `${BASE_URL}/synthesize`, // API 엔드포인트로 변경
+        {text: message.text},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -117,41 +117,28 @@ const ChildChat: React.FC = () => {
         },
       );
 
-      console.log('API 응답 성공:', response);
-
-      const fileReader = new FileReader();
-      fileReader.onload = async () => {
-        const audioUri = fileReader.result as string;
-        await playSound(audioUri);
-      };
-      fileReader.onerror = (error) => {
-        console.error('FileReader 오류:', error);
-        Alert.alert(
-          'Failed to play sound',
-          'An error occurred while processing the audio file.',
-        );
-      };
-      fileReader.readAsDataURL(response.data);
+      const audioUri = URL.createObjectURL(response.data);
+      await playSound(audioUri);
     } catch (error) {
-      console.error('API 요청 실패:', error);
-      Alert.alert(
-        'Failed to fetch the voice',
-        error.message || 'An error occurred while fetching the voice.',
-      );
+      if (error instanceof Error) {
+        console.error('API 요청 실패:', error.message);
+        Alert.alert(
+          'Failed to fetch the voice',
+          error.message || 'An error occurred while fetching the voice.',
+        );
+      }
     }
   };
 
-  const onSend = async (newMessages: Message[] = []) => {
+  const onSend = async (newMessages: IMessage[] = []) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
       if (!token) {
-        console.error('Auth token is missing or invalid');
         Alert.alert('Authentication error', 'Please log in again.');
         return;
       }
 
       const sentMessage = newMessages[0];
-      console.log('Sending message:', sentMessage.text);
 
       const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
         headers: {
@@ -168,11 +155,13 @@ const ChildChat: React.FC = () => {
         chatroomId: newChatroomId,
       });
     } catch (error) {
-      console.error('Failed to send the message', error);
-      Alert.alert(
-        'Failed to send the message',
-        error.message || 'An error occurred while sending the message.',
-      );
+      if (error instanceof Error) {
+        console.error('Failed to send the message', error.message);
+        Alert.alert(
+          'Failed to send the message',
+          error.message || 'An error occurred while sending the message.',
+        );
+      }
     }
   };
 
@@ -194,7 +183,7 @@ const ChildChat: React.FC = () => {
   const renderSend = (props: any) => (
     <TouchableOpacity
       style={styles.sendButtonContainer}
-      onPress={() => props.onSend({ text: props.text }, true)}>
+      onPress={() => props.onSend({text: props.text}, true)}>
       <Image source={sendIcon} style={styles.sendButton} />
     </TouchableOpacity>
   );
@@ -224,7 +213,7 @@ const ChildChat: React.FC = () => {
       <GiftedChat
         messages={messages}
         onSend={onSend}
-        user={{ _id: 1 }}
+        user={{_id: 1}}
         renderBubble={renderBubble}
         renderSend={renderSend}
         renderInputToolbar={renderInputToolbar}
@@ -250,6 +239,22 @@ const styles = StyleSheet.create({
   headerLogo: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  burger: {
+    width: 24,
+    height: 24,
+  },
+  smallLogo: {
+    width: 24,
+    height: 24,
+  },
+  logoText: {
+    width: 100,
+    height: 24,
+  },
+  myPage: {
+    width: 24,
+    height: 24,
   },
   sendButtonContainer: {
     paddingRight: 4,

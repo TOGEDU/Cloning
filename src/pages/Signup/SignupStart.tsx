@@ -16,7 +16,7 @@ type SignupStartScreenNavigationProp = StackNavigationProp<
   "ParentSignup"
 >;
 
-const happy = require("../../assets/happyparent.png");
+const happy = require("../../../assets/happyparent.png");
 
 const SignupStart: React.FC = () => {
   const navigation = useNavigation<SignupStartScreenNavigationProp>();
