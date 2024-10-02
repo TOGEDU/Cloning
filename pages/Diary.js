@@ -40,7 +40,7 @@ const Diary = () => {
     const fetchChildren = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        console.log(token);
+        // console.log(token);
         const today = new Date().toISOString().split("T")[0];
 
         const response = await axios.get(
@@ -80,7 +80,7 @@ const Diary = () => {
         Alert.alert("Error", "로그인이 필요합니다.");
         return;
       }
-      
+
       const today = new Date().toISOString().split("T")[0];
 
       const formData = new FormData();
@@ -154,11 +154,11 @@ const Diary = () => {
 
   const startRecording = async () => {
     try {
-      console.log("Requesting permissions..");
+      // console.log("Requesting permissions..");
       const permission = await Audio.requestPermissionsAsync();
 
       if (permission.status === "granted") {
-        console.log("Starting recording..");
+        // console.log("Starting recording..");
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
@@ -181,22 +181,24 @@ const Diary = () => {
     }
   };
 
+  const handleTextChange = (text) => {
+    setContent(text);
+  };
+
   const stopRecording = async () => {
     try {
-      console.log("Stopping recording...");
+      // console.log("Stopping recording...");
 
-      // 녹음 중지 및 파일 언로드
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecording(null);
-      console.log("Recording stopped and stored at", uri);
+      // console.log("Recording stopped and stored at", uri);
 
-      // 서버로 녹음 파일 전송
       const formData = new FormData();
       formData.append("file", {
         uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri, // iOS와 Android의 파일 경로 처리
-        type: "audio/m4a", // 파일 유형
-        name: "recording.m4a", // 파일 이름
+        type: "audio/m4a",
+        name: "recording.m4a",
       });
 
       const token = await AsyncStorage.getItem("authToken");
@@ -218,9 +220,8 @@ const Diary = () => {
 
       console.log("Transcription result:", response.data);
 
-      // 서버로부터 받은 텍스트를 TextInput에 설정
       if (response.data.text) {
-        setContent(response.data.text);
+        setContent((prevContent) => prevContent + " " + response.data.text);
       } else {
         console.warn("No text received from the server.");
       }
@@ -306,7 +307,7 @@ const Diary = () => {
             placeholder="일기의 내용을 적어주세요"
             placeholderTextColor="#838383"
             value={content}
-            onChangeText={setContent}
+            onChangeText={handleTextChange}
             multiline
           />
           <TouchableOpacity
@@ -316,7 +317,7 @@ const Diary = () => {
             <Image
               source={
                 recording ? stopIcon : require("../assets/recordicon.png")
-              } 
+              }
               style={styles.recordIcon}
             />
           </TouchableOpacity>
