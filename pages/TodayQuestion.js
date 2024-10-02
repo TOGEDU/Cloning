@@ -190,7 +190,7 @@ const TodayQuestion = () => {
       console.log("Transcription result:", response.data);
 
       if (response.data.text) {
-        setText(response.data.text);
+        setText((prevText) => prevText + response.data.text);
       } else {
         console.warn("No text received from the server.");
       }
