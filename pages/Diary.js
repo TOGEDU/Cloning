@@ -40,7 +40,7 @@ const Diary = () => {
     const fetchChildren = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        // console.log(token);
+        console.log(token);
         const today = new Date().toISOString().split("T")[0];
 
         const response = await axios.get(
@@ -80,6 +80,8 @@ const Diary = () => {
         Alert.alert("Error", "로그인이 필요합니다.");
         return;
       }
+
+      console.log("Retrieved Token:", token);
 
       const today = new Date().toISOString().split("T")[0];
 

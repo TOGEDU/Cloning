@@ -10,17 +10,19 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
+  Platform,
 } from "react-native";
-import photoIcon from "../assets/photoicon.png";
 import RNPickerSelect from "react-native-picker-select";
-import * as ImagePicker from "expo-image-picker";
 import Svg, { Path } from "react-native-svg";
+import * as ImagePicker from "expo-image-picker";
+import { Audio } from "expo-av";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import BASE_URL from "../api";
 import recordIcon from "../assets/recordicon.png";
-import { Audio } from "expo-av";
+import stopIcon from "../assets/stopicon.png";
 
 const DiaryDetail = () => {
   const navigation = useNavigation();
@@ -33,6 +35,7 @@ const DiaryDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [content, setContent] = useState("");
+  const [image, setImage] = useState(null);
   const [recording, setRecording] = useState(null);
   const [recordedUri, setRecordedUri] = useState("");
   const [formattedDate, setFormattedDate] = useState("");
@@ -68,6 +71,7 @@ const DiaryDetail = () => {
           const firstDiary = response.data[0];
           setSelectedChild(firstDiary.diaryId);
           setContent(firstDiary.content);
+          setImage(firstDiary.image);
         }
       } catch (error) {
         console.error("Error occurred:", error);
@@ -88,6 +92,7 @@ const DiaryDetail = () => {
 
       if (selectedDiary) {
         setContent(selectedDiary.content);
+        setImage(selectedDiary.image);
       }
     }
   }, [selectedChild, diaryData]);
@@ -111,14 +116,7 @@ const DiaryDetail = () => {
 
     if (!result.canceled && result.assets.length > 0) {
       const selectedImage = result.assets[0].uri;
-
-      setDiaryData((prevDiaryData) =>
-        prevDiaryData.map((entry) =>
-          entry.diaryId === selectedChild
-            ? { ...entry, image: selectedImage }
-            : entry
-        )
-      );
+      setImage(selectedImage);
     }
   };
 
@@ -126,17 +124,13 @@ const DiaryDetail = () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
 
-      const selectedDiary = diaryData.find(
-        (entry) => entry.diaryId === selectedChild
-      );
-
       const formData = new FormData();
       formData.append("diaryId", selectedChild);
       formData.append("content", content);
 
-      if (selectedDiary.image) {
+      if (image) {
         formData.append("image", {
-          uri: selectedDiary.image,
+          uri: image,
           type: "image/jpeg",
           name: "updated_image.jpg",
         });
@@ -172,37 +166,66 @@ const DiaryDetail = () => {
 
   const startRecording = async () => {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission required", "Microphone access is required!");
-        return;
+      const permission = await Audio.requestPermissionsAsync();
+
+      if (permission.status === "granted") {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+        );
+        setRecording(recording);
+        console.log("Recording started");
+      } else {
+        console.error("Permission to access microphone is required!");
+        Alert.alert(
+          "Permission Denied",
+          "Permission to access microphone is required!"
+        );
       }
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-      console.log("Starting recording...");
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      setRecording(recording);
-      console.log("Recording started");
     } catch (err) {
-      console.error("Failed to start recording:", err);
+      console.error("Failed to start recording", err);
     }
   };
 
   const stopRecording = async () => {
-    console.log("Stopping recording...");
-    if (!recording) return;
     try {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
-      setRecordedUri(uri);
-      console.log("Recording stopped and stored at", uri);
       setRecording(null);
-    } catch (error) {
-      console.error("Failed to stop recording:", error);
+      setRecordedUri(uri);
+
+      const formData = new FormData();
+      formData.append("file", {
+        uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri,
+        type: "audio/m4a",
+        name: "recording.m4a",
+      });
+
+      const token = await AsyncStorage.getItem("authToken");
+
+      const response = await axios.post(
+        `${BASE_URL}/api/diary/transcribe`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.text) {
+        setContent((prevContent) => prevContent + " " + response.data.text);
+      } else {
+        Alert.alert("Error", "Failed to transcribe the audio.");
+      }
+    } catch (err) {
+      console.error("Failed to stop recording or transcribe audio", err);
+      Alert.alert("Error", "Failed to process the audio file.");
     }
   };
 
@@ -269,22 +292,36 @@ const DiaryDetail = () => {
           />
         </View>
 
-        {isEditMode ? (
+        {!isEditMode ? (
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            {selectedChild && (
+              <View style={styles.diaryContentContainer}>
+                {selectedDiary?.image ? (
+                  <Image
+                    source={{ uri: selectedDiary?.image }}
+                    style={styles.diaryImageViewMode}
+                    resizeMode="contain"
+                    onError={(error) => console.log("이미지 로드 실패:", error)}
+                  />
+                ) : (
+                  <Text style={styles.noImageText}>이미지가 없습니다.</Text>
+                )}
+                <Text style={styles.content}>{selectedDiary?.content}</Text>
+              </View>
+            )}
+          </ScrollView>
+        ) : (
           <>
             <TouchableOpacity
               style={styles.imagePicker}
               onPress={handleImagePicker}
             >
-              {selectedChild &&
-              diaryData.find((entry) => entry.diaryId === selectedChild)
-                ?.image ? (
+              {image ? (
                 <Image
-                  source={{
-                    uri: diaryData.find(
-                      (entry) => entry.diaryId === selectedChild
-                    )?.image,
-                  }}
-                  style={styles.diaryImage}
+                  source={{ uri: image }}
+                  style={styles.diaryImageEditMode}
+                  resizeMode="cover"
+                  onError={(error) => console.log("이미지 로드 실패:", error)}
                 />
               ) : (
                 <Image source={photoIcon} style={styles.photoIcon} />
@@ -303,47 +340,32 @@ const DiaryDetail = () => {
                 style={styles.recordIconContainer}
                 onPress={toggleRecording}
               >
-                <Image source={recordIcon} style={styles.recordIcon} />
+                <Image
+                  source={recording ? stopIcon : recordIcon}
+                  style={styles.recordIcon}
+                />
               </TouchableOpacity>
             </View>
+          </>
+        )}
 
+        <View style={styles.editButtonContainer}>
+          {isEditMode ? (
             <TouchableOpacity
               style={styles.saveButton}
               onPress={handleUpdateDiary}
             >
               <Text style={styles.saveButtonText}>저장하기</Text>
             </TouchableOpacity>
-          </>
-        ) : (
-          selectedChild && (
-            <View style={styles.diaryContentContainer}>
-              {selectedDiary?.image ? (
-                <Image
-                  source={{ uri: selectedDiary.image }}
-                  style={styles.diaryImage}
-                  resizeMode="contain"
-                />
-              ) : (
-                <Text style={styles.noImageText}>이미지가 없습니다.</Text>
-              )}
-
-              <Text style={styles.content}>
-                {
-                  diaryData.find((entry) => entry.diaryId === selectedChild)
-                    ?.content
-                }
-              </Text>
-              <View style={styles.editButtonContainer}>
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() => setIsEditMode(true)}
-                >
-                  <Text style={styles.editButtonText}>수정하기</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )
-        )}
+          ) : (
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => setIsEditMode(true)}
+            >
+              <Text style={styles.editButtonText}>수정하기</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -359,6 +381,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flex: 1,
   },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 36,
+  },
   closeButton: {
     alignSelf: "flex-end",
     padding: 10,
@@ -368,9 +394,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Noto Sans",
     fontSize: 16,
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: 19.36,
     marginBottom: 10,
   },
   pickerContainer: {
@@ -392,8 +415,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Noto Sans",
     fontSize: 13,
-    fontWeight: "400",
-    lineHeight: 19.36,
     paddingRight: 20,
   },
   iconContainer: {
@@ -403,12 +424,43 @@ const styles = StyleSheet.create({
   diaryContentContainer: {
     alignItems: "flex-start",
     width: "100%",
-    paddingHorizontal: 36,
+    gap: 10,
   },
-  editModeMargin: {
-    marginLeft: 28,
+  imagePicker: {
+    width: 330,
+    height: 200,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#6369D4",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
   },
-
+  diaryImageEditMode: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 20,
+  },
+  diaryImageViewMode: {
+    width: 330,
+    height: null,
+    aspectRatio: 1,
+    borderRadius: 20,
+  },
+  photoIcon: {
+    width: 52,
+    height: 52,
+  },
+  textAreaContainer: {
+    width: 330,
+    height: 250,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#6369D4",
+    justifyContent: "center",
+    marginBottom: 20,
+    position: "relative",
+  },
   input: {
     height: 50,
     width: 330,
@@ -416,26 +468,10 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
   },
-  textAreaContainer: {
-    width: 330,
-    height: 299,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#6369D4",
-    marginTop: 28,
-    position: "relative",
-    justifyContent: "center",
-  },
   textArea: {
     flex: 1,
     padding: 15,
-    paddingRight: 50,
     textAlignVertical: "top",
-  },
-  content: {
-    height: 195,
-    width: 324,
-    marginTop: 28,
   },
   recordIconContainer: {
     position: "absolute",
@@ -446,44 +482,29 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
   },
-  imagePicker: {
-    width: 330,
-    height: 128,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#6369D4",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  photoIcon: {
-    width: 52,
-    height: 52,
-  },
-  imagePickerText: {
-    color: "#838383",
-    fontSize: 12,
-  },
-  diaryImage: {
-    width: 330,
-    height: null,
-    borderRadius: 20,
-  },
-  noImageText: {
-    color: "#838383",
-    fontSize: 16,
-  },
-  editButtonContainer: {
-    marginTop: 130,
-    alignItems: "center",
-    width: "100%",
-  },
-  editButton: {
+  saveButton: {
     display: "flex",
     width: 143,
     padding: 16,
     flexDirection: "column",
     alignItems: "center",
-    gap: 12,
+    borderRadius: 100,
+    backgroundColor: "#6369D4",
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontFamily: "NotoSans600",
+    fontSize: 16,
+  },
+  editButtonContainer: {
+    position: "absolute",
+    bottom: 5,
+    alignItems: "center",
+    width: "100%",
+  },
+  editButton: {
+    width: 143,
+    padding: 16,
     borderRadius: 100,
     backgroundColor: "#6369D4",
   },
@@ -491,21 +512,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontFamily: "NotoSans600",
     fontSize: 16,
+    textAlign: "center",
   },
-  saveButton: {
-    marginTop: 28,
-    display: "flex",
-    width: 143,
-    padding: 16,
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 12,
-    borderRadius: 100,
-    backgroundColor: "#6369D4",
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontFamily: "NotoSans600",
+  noImageText: {
+    color: "#838383",
     fontSize: 16,
   },
 });
