@@ -91,10 +91,11 @@ const Diary = () => {
       formData.append("content", content);
 
       if (image) {
+        const uniqueName = `photo_${Date.now()}.jpg`;
         formData.append("image", {
           uri: image.uri,
           type: "image/jpeg",
-          name: "사진.jpg",
+          name: uniqueName,
         });
       } else {
         formData.append("image", null);
