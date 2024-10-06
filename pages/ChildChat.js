@@ -177,22 +177,19 @@ const ChildChat = ({ navigation }) => {
       const sentMessage = newMessages[0];
       console.log("Sending message:", sentMessage.text);
 
-      // 메시지 전송 시 즉시 화면 전환
-      navigation.navigate("ChatRoomScreen", {
-        chatroomId: "temp-id", // 실제 chatroomId는 나중에 API 응답 후 설정
-        initialMessage: sentMessage, // 초기 메시지를 넘겨주기
-      });
-
-      // 메시지 전송 중일 때 로딩 스피너 시작
-      setLoadingSend(true);
-
       const token = await AsyncStorage.getItem("authToken");
       if (!token) {
         console.error("Auth token is missing or invalid");
         Alert.alert("Authentication error", "Please log in again.");
-        setLoadingSend(false); // 에러 발생 시 로딩 종료
         return;
       }
+
+      // 화면 전환 시 로딩 상태를 함께 넘김
+      navigation.navigate("ChatRoomScreen", {
+        chatroomId: "temp-id", // 실제 chatroomId는 나중에 설정
+        initialMessage: sentMessage,
+        loading: true, // 로딩 상태를 함께 넘김
+      });
 
       const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
         headers: {
@@ -203,14 +200,12 @@ const ChildChat = ({ navigation }) => {
         },
       });
 
-      console.log("API response:", response.data);
-
-      // 실제 chatroomId를 받아서 화면에서 처리
       const newChatroomId = response.data.chatroomId;
 
-      // 새로운 chatroomId로 화면을 업데이트
+      // 새로운 chatroomId로 화면을 업데이트 (API 완료 후)
       navigation.navigate("ChatRoomScreen", {
         chatroomId: newChatroomId,
+        loading: false, // 로딩 완료
       });
     } catch (error) {
       console.error("Failed to send the message", error);
@@ -218,8 +213,6 @@ const ChildChat = ({ navigation }) => {
         "Failed to send the message",
         error.message || "An error occurred while sending the message."
       );
-    } finally {
-      setLoadingSend(false); // API 응답을 받거나 에러가 발생해도 로딩 종료
     }
   };
 

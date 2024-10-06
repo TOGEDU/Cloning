@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,16 +29,20 @@ import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
 
 const ChatRoomScreen = ({ navigation, route }) => {
-  const { chatroomId, initialMessage } = route.params;
+  const { chatroomId, initialMessage, loading: initialLoading } = route.params;
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true); // 로딩 스피너를 화면 전환 직후 보여주기 위해 초기값을 true로 설정
+  const [loading, setLoading] = useState(initialLoading || true); // 초기 로딩 상태 설정
   const [sound, setSound] = useState(null);
   const [loadingVoice, setLoadingVoice] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false); // 메시지 전송 로딩 상태
 
+  // 의존성 배열에 chatroomId 추가
   useEffect(() => {
-    fetchMessages(); // useEffect 안에서 바로 호출
-  }, [chatroomId, initialMessage]);
+    // 새로운 채팅방으로 이동할 때 상태 초기화
+    setMessages([]);
+    setLoading(true); // 새 채팅방을 로드할 때 로딩 상태로 설정
+    fetchMessages();
+  }, [chatroomId]); // chatroomId가 변경될 때마다 실행
 
   useEffect(() => {
     return sound
@@ -52,9 +55,10 @@ const ChatRoomScreen = ({ navigation, route }) => {
   const getAuthToken = async () => {
     const token = await AsyncStorage.getItem("authToken");
     if (!token) {
-      Alert.alert("Authentication error", "Please log in again.");
+      console.error("Auth token is missing or invalid");
       throw new Error("No auth token found");
     }
+    console.log("Auth token retrieved:", token); // 토큰이 올바르게 받아오는지 확인
     return token;
   };
 
@@ -76,24 +80,24 @@ const ChatRoomScreen = ({ navigation, route }) => {
 
   const fetchMessages = async () => {
     try {
-      setLoading(true); // API 호출 전에 로딩 상태 true로 설정
-
       const token = await getAuthToken();
-      if (!token) {
-        throw new Error("No auth token found");
+      console.log("ChatroomId is:", chatroomId); // chatroomId가 undefined인지 확인
+      if (!chatroomId || chatroomId === "temp-id" || !token) {
+        console.error("Invalid chatroomId or token");
+        return; // chatroomId가 없거나 'temp-id'일 때 API 요청을 하지 않음
       }
 
+      // API 요청 로그 추가
       console.log(
-        `API 요청이 서버로 전달됨: ${BASE_URL}/api/chat/chats, roomid: ${chatroomId}`
-      ); // API 요청 로그
+        `Making API request to fetch chats for room ID: ${chatroomId}`
+      );
 
-      // API 요청 실행
       const response = await axios.get(`${BASE_URL}/api/chat/chats`, {
         headers: { Authorization: `Bearer ${token}` },
         params: { roomid: chatroomId },
       });
 
-      console.log("API response:", response.data); // API 응답 로그
+      console.log("API Response: ", response.data); // 응답 데이터 확인
 
       const chatMessages = processMessages(
         response.data.messageList,
@@ -101,7 +105,6 @@ const ChatRoomScreen = ({ navigation, route }) => {
         response.data.date
       );
 
-      // 만약 초기 메시지가 있다면 추가
       if (initialMessage) {
         chatMessages.push({
           _id: "initial",
@@ -111,11 +114,10 @@ const ChatRoomScreen = ({ navigation, route }) => {
         });
       }
 
-      setMessages(chatMessages); // 메시지 상태 업데이트
+      setMessages(chatMessages); // 메시지 업데이트
+      setLoading(false); // 메시지 로드 완료 후 로딩 상태 해제
     } catch (error) {
       console.error("Failed to fetch messages:", error);
-    } finally {
-      setLoading(false); // API 응답 후 로딩 상태 false로 변경
     }
   };
 
@@ -130,11 +132,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
       await sound.playAsync();
     } catch (error) {
       console.error("오디오 재생 실패:", error);
-      Alert.alert(
-        "Failed to play sound",
-        "An error occurred while playing the sound."
-      );
-      setLoadingVoice(false);
+      setLoadingVoice(false); // 에러가 나도 로딩 스피너 종료
     }
   };
 
@@ -163,28 +161,19 @@ const ChatRoomScreen = ({ navigation, route }) => {
         };
         fileReader.onerror = (error) => {
           console.error("FileReader 오류:", error);
-          Alert.alert(
-            "Failed to play sound",
-            "An error occurred while processing the audio file."
-          );
-          setLoadingVoice(false);
+          setLoadingVoice(false); // 에러가 나도 로딩 스피너 종료
         };
         fileReader.readAsDataURL(response.data);
       }
     } catch (error) {
       console.error("API 요청 실패:", error);
-      Alert.alert(
-        "Failed to fetch the voice",
-        error.message || "An error occurred while fetching the voice."
-      );
-      setLoadingVoice(false);
+      setLoadingVoice(false); // 에러가 나도 로딩 스피너 종료
     }
   };
 
   const onSend = async (newMessages = []) => {
     try {
       const token = await getAuthToken();
-
       setSendingMessage(true); // 메시지 전송 시작 시 로딩 스피너 표시
 
       setMessages((previousMessages) =>
@@ -215,10 +204,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         GiftedChat.append(previousMessages, serverResponseMessage)
       );
     } catch (error) {
-      Alert.alert(
-        "Failed to send the message",
-        error.message || "An error occurred while sending the message."
-      );
+      console.error("Failed to send the message:", error); // 에러는 콘솔에만 표시
     } finally {
       setSendingMessage(false); // 메시지 전송 완료 후 로딩 스피너 숨김
     }
@@ -284,7 +270,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
           <ActivityIndicator size="large" color="#586EE3" />
         </View>
       )}
-      {(loading || sendingMessage) && ( // 메시지 전송 중일 때도 로딩 스피너 표시
+      {(loading || sendingMessage) && ( // 메시지 로딩 중일 때 로딩 스피너 표시
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#586EE3" />
         </View>
@@ -301,11 +287,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
           <Image source={mypage} style={styles.myPage} />
         </TouchableOpacity>
       </View>
-      {loading ? ( // 메시지 로딩 중에는 채팅 화면 대신 로딩 스피너를 표시
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#586EE3" />
-        </View>
-      ) : (
+      {!loading ? ( // 메시지 로딩 중에는 스피너를 표시하고, 완료되면 채팅 화면 표시
         <GiftedChat
           onSend={onSend}
           user={{ _id: 0 }}
@@ -314,9 +296,13 @@ const ChatRoomScreen = ({ navigation, route }) => {
           renderAvatar={renderAvatar}
           messages={messages}
           renderInputToolbar={renderInputToolbar}
-          renderDay={renderDay} // 날짜 렌더링
-          renderTime={renderTime} // 시간 렌더링
+          renderDay={renderDay}
+          renderTime={renderTime}
         />
+      ) : (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#586EE3" />
+        </View>
       )}
     </SafeAreaView>
   );
