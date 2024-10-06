@@ -141,7 +141,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         setLoadingVoice(true);
 
         const response = await axios.post(
-          "http://192.168.0.189:8000/synthesize", // ChildChat과 동일한 URL 사용
+          "http://13.113.253.45:8000/synthesize", // ChildChat과 동일한 URL 사용
           { text: message.text },
           {
             headers: {
