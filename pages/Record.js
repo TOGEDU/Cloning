@@ -88,7 +88,7 @@ const Record = () => {
                 <View style={styles.progressTextContainer}>
                   <Text style={styles.progressText}>{progress}%</Text>
                   <Text style={styles.progressSubText}>
-                    {progress === 0 ? "시작해봐요!" : "잘하고 계세요"}
+                    {progress === 0 ? "시작해봐요!" : "잘하고 계세요!"}
                   </Text>
                 </View>
               )}

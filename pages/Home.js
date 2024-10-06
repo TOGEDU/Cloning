@@ -29,6 +29,10 @@ const Home = () => {
     navigation.navigate("DiaryList");
   };
 
+  const handleWhyRecordPress = () => {
+    navigation.navigate("Introduce");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.todayQbox}>
@@ -62,13 +66,18 @@ const Home = () => {
         </TouchableOpacity>
       </View>
       <View style={styles.whyRecord}>
-        <Image style={styles.whyRecordImg} source={homebellImage} />
-        <View>
-          <Text style={styles.whyRecordText1}>녹음을 왜 해야 하나요?</Text>
-          <Text style={styles.whyRecordText2}>
-            녹음한 기록들을 바탕으로 TTS 모델을 구현하게 됩니다
-          </Text>
-        </View>
+        <TouchableOpacity
+          onPress={handleWhyRecordPress}
+          style={styles.whyRecordContainer}
+        >
+          <Image style={styles.whyRecordImg} source={homebellImage} />
+          <View>
+            <Text style={styles.whyRecordText1}>녹음을 왜 해야 하나요?</Text>
+            <Text style={styles.whyRecordText2}>
+              녹음한 기록들을 바탕으로 TTS 모델을 구현하게 됩니다
+            </Text>
+          </View>
+        </TouchableOpacity>
       </View>
       <View style={styles.confirmBox}>
         <View style={styles.confirmBoxTop}>
@@ -101,10 +110,10 @@ const Home = () => {
               viewBox="0 0 18 20"
               fill="none"
             >
-              <G clip-path="url(#clip0_719_7077)">
+              <G clipPath="url(#clip0_719_7077)">
                 <Path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
+                  fillRule="evenodd"
+                  clipRule="evenodd"
                   d="M13.4992 1.66602C13.8776 1.66588 14.2421 1.82469 14.5196 2.1106C14.7971 2.39651 14.967 2.78839 14.9954 3.20768L14.9992 3.33268V16.666C14.9993 17.0865 14.8564 17.4915 14.599 17.7998C14.3417 18.1081 13.989 18.297 13.6117 18.3285L13.4992 18.3327H4.49917C4.12074 18.3328 3.75624 18.174 3.47876 17.8881C3.20127 17.6022 3.0313 17.2103 3.00292 16.791L2.99917 16.666V15.8327C2.80801 15.8324 2.62414 15.7511 2.48514 15.6053C2.34614 15.4595 2.26249 15.2602 2.25129 15.0482C2.24009 14.8362 2.30218 14.6274 2.42487 14.4645C2.54756 14.3016 2.7216 14.1969 2.91142 14.1718L2.99917 14.166V12.4993C2.80801 12.4991 2.62414 12.4178 2.48514 12.272C2.34614 12.1262 2.26249 11.9269 2.25129 11.7149C2.24009 11.5028 2.30218 11.294 2.42487 11.1312C2.54756 10.9683 2.7216 10.8636 2.91142 10.8385L2.99917 10.8327V9.16602C2.80801 9.16578 2.62414 9.08445 2.48514 8.93864C2.34614 8.79283 2.26249 8.59355 2.25129 8.38152C2.24009 8.16949 2.30218 7.9607 2.42487 7.79782C2.54756 7.63494 2.7216 7.53027 2.91142 7.50518L2.99917 7.49935V5.83268C2.80801 5.83245 2.62414 5.75112 2.48514 5.60531C2.34614 5.4595 2.26249 5.26022 2.25129 5.04819C2.24009 4.83615 2.30218 4.62737 2.42487 4.46449C2.54756 4.30161 2.7216 4.19694 2.91142 4.17185L2.99917 4.16602V3.33268C2.99905 2.9122 3.14197 2.50721 3.39929 2.19889C3.65661 1.89057 4.0093 1.70172 4.38667 1.67018L4.49917 1.66602H13.4992ZM13.4992 3.33268H4.49917V16.666H13.4992V3.33268ZM11.6242 4.99935C11.9038 4.99936 12.1735 5.11512 12.3805 5.32403C12.5875 5.53295 12.7171 5.82005 12.7439 6.12935L12.7492 6.24935V7.91602C12.7492 8.22675 12.645 8.52634 12.457 8.75636C12.2689 8.98639 12.0105 9.13035 11.7322 9.16018L11.6242 9.16602H6.37417C6.09451 9.166 5.82488 9.05025 5.61786 8.84133C5.41083 8.63242 5.28127 8.34532 5.25442 8.03602L5.24917 7.91602V6.24935C5.24918 5.93861 5.35336 5.63902 5.54138 5.409C5.72941 5.17898 5.9878 5.03501 6.26617 5.00518L6.37417 4.99935H11.6242ZM11.2492 6.66602H6.74917V7.49935H11.2492V6.66602Z"
                   fill="#545454"
                 />
@@ -211,7 +220,6 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "13.355deg" }],
     flexShrink: 0,
     resizeMode: "contain",
-    position: "absolute",
   },
   BoxText1: {
     fontFamily: "NotoSans700",
@@ -250,7 +258,6 @@ const styles = StyleSheet.create({
     height: 70.426,
     flexShrink: 0,
     resizeMode: "contain",
-    position: "absolute",
   },
   whyRecord: {
     borderRadius: 30,
@@ -270,6 +277,10 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  whyRecordContainer: {
+    flexDirection: "row",
     alignItems: "center",
   },
   whyRecordImg: {

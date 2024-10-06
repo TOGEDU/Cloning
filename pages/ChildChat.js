@@ -64,6 +64,7 @@ const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [sound, setSound] = useState(null); // 사운드 상태 추가
   const [loadingVoice, setLoadingVoice] = useState(false); // 음성 로딩 상태 추가
+  const [loadingSend, setLoadingSend] = useState(false); // 메시지 전송 로딩 상태 추가
 
   useEffect(() => {
     setMessages([
@@ -170,10 +171,13 @@ const ChildChat = ({ navigation }) => {
 
   const onSend = async (newMessages = []) => {
     try {
+      setLoadingSend(true); // 메시지 전송 중일 때 로딩 시작
+
       const token = await AsyncStorage.getItem("authToken");
       if (!token) {
         console.error("Auth token is missing or invalid");
         Alert.alert("Authentication error", "Please log in again.");
+        setLoadingSend(false); // 에러 발생 시 로딩 종료
         return;
       }
 
@@ -197,18 +201,13 @@ const ChildChat = ({ navigation }) => {
         chatroomId: newChatroomId,
       });
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        Alert.alert(
-          "Authentication error",
-          "Your session has expired. Please log in again."
-        );
-      } else {
-        console.error("Failed to send the message", error);
-        Alert.alert(
-          "Failed to send the message",
-          error.message || "An error occurred while sending the message."
-        );
-      }
+      console.error("Failed to send the message", error);
+      Alert.alert(
+        "Failed to send the message",
+        error.message || "An error occurred while sending the message."
+      );
+    } finally {
+      setLoadingSend(false); // API 응답을 받거나 에러가 발생해도 로딩 종료
     }
   };
 
@@ -246,7 +245,12 @@ const ChildChat = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      {loadingVoice && ( // 로딩 상태가 true일 때 로딩 스피너 표시
+      {loadingVoice && ( // 음성 재생 로딩 상태일 때 로딩 스피너 표시
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#586EE3" />
+        </View>
+      )}
+      {loadingSend && ( // 메시지 전송 로딩 상태일 때 로딩 스피너 표시
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#586EE3" />
         </View>
