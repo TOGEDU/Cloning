@@ -293,23 +293,25 @@ const DiaryDetail = () => {
         </View>
 
         {!isEditMode ? (
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.diaryContentWrapper}>
             {selectedChild && (
-              <View style={styles.diaryContentContainer}>
+              <ScrollView contentContainerStyle={styles.diaryContentContainer}>
                 {selectedDiary?.image ? (
                   <Image
                     source={{ uri: selectedDiary?.image }}
                     style={styles.diaryImageViewMode}
                     resizeMode="contain"
-                    onError={(error) => console.log("이미지 로드 실패:", error)}
+                    onError={(error) =>
+                      console.log("이미지 로드 실패:", error)
+                    }
                   />
                 ) : (
                   <Text style={styles.noImageText}>이미지가 없습니다.</Text>
                 )}
                 <Text style={styles.content}>{selectedDiary?.content}</Text>
-              </View>
+              </ScrollView>
             )}
-          </ScrollView>
+          </View>
         ) : (
           <>
             <TouchableOpacity
@@ -381,10 +383,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flex: 1,
   },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 36,
-  },
   closeButton: {
     alignSelf: "flex-end",
     padding: 10,
@@ -421,10 +419,30 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
+  diaryContentWrapper: {
+    flex: 1,
+    width: "100%",
+    maxHeight: 350,
+  },
   diaryContentContainer: {
     alignItems: "flex-start",
     width: "100%",
-    gap: 10,
+    paddingHorizontal: 36,
+  },
+  diaryImageViewMode: {
+    width: 330,
+    height: 250,
+    borderRadius: 20,
+  },
+  content: {
+    color: "#000",
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 10,
+  },
+  noImageText: {
+    color: "#838383",
+    fontSize: 16,
   },
   imagePicker: {
     width: 330,
@@ -439,12 +457,6 @@ const styles = StyleSheet.create({
   diaryImageEditMode: {
     width: "100%",
     height: "100%",
-    borderRadius: 20,
-  },
-  diaryImageViewMode: {
-    width: 330,
-    height: null,
-    aspectRatio: 1,
     borderRadius: 20,
   },
   photoIcon: {
@@ -498,7 +510,7 @@ const styles = StyleSheet.create({
   },
   editButtonContainer: {
     position: "absolute",
-    bottom: 5,
+    bottom: 10,
     alignItems: "center",
     width: "100%",
   },
@@ -513,9 +525,5 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSans600",
     fontSize: 16,
     textAlign: "center",
-  },
-  noImageText: {
-    color: "#838383",
-    fontSize: 16,
   },
 });
