@@ -109,7 +109,7 @@ const ChildChat = ({ navigation }) => {
       console.log("API 요청 시작:", message.text);
 
       const response = await axios.post(
-        "http://192.168.0.189:8000/synthesize",
+        "http://13.113.253.45:8000/synthesize",
         { text: message.text },
         {
           headers: {
