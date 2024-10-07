@@ -293,25 +293,27 @@ const DiaryDetail = () => {
         </View>
 
         {!isEditMode ? (
-          <View style={styles.diaryContentWrapper}>
+          <ScrollView 
+            style={styles.diaryContentWrapper}
+            contentContainerStyle={styles.scrollContentContainer}
+          >
             {selectedChild && (
-              <ScrollView contentContainerStyle={styles.diaryContentContainer}>
+              <>
                 {selectedDiary?.image ? (
                   <Image
                     source={{ uri: selectedDiary?.image }}
                     style={styles.diaryImageViewMode}
                     resizeMode="contain"
-                    onError={(error) =>
-                      console.log("이미지 로드 실패:", error)
-                    }
+                    onError={(error) => console.log("이미지 로드 실패:", error)}
                   />
                 ) : (
                   <Text style={styles.noImageText}>이미지가 없습니다.</Text>
                 )}
+
                 <Text style={styles.content}>{selectedDiary?.content}</Text>
-              </ScrollView>
+              </>
             )}
-          </View>
+          </ScrollView>
         ) : (
           <>
             <TouchableOpacity
@@ -377,11 +379,11 @@ export default DiaryDetail;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     paddingTop: 10,
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "#fff",
-    flex: 1,
   },
   closeButton: {
     alignSelf: "flex-end",
@@ -422,23 +424,23 @@ const styles = StyleSheet.create({
   diaryContentWrapper: {
     flex: 1,
     width: "100%",
-    maxHeight: 350,
-  },
-  diaryContentContainer: {
-    alignItems: "flex-start",
-    width: "100%",
     paddingHorizontal: 36,
+  },
+  scrollContentContainer: {
+    paddingBottom: 20,
+    flexGrow: 1,
   },
   diaryImageViewMode: {
     width: 330,
     height: 250,
     borderRadius: 20,
+    alignSelf: "center",
+    marginBottom: 20,
   },
   content: {
     color: "#000",
     fontSize: 16,
     lineHeight: 24,
-    marginTop: 10,
   },
   noImageText: {
     color: "#838383",
@@ -509,10 +511,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   editButtonContainer: {
-    position: "absolute",
-    bottom: 10,
+    padding: 16,
     alignItems: "center",
     width: "100%",
+    backgroundColor: "#fff",
   },
   editButton: {
     width: 143,
