@@ -5,7 +5,6 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  ActivityIndicator, // 로딩스피너 추가
   LogBox,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,7 +16,7 @@ import {
 } from "react-native-gifted-chat";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Audio } from "expo-av"; // expo-av 추가
+import { Audio } from "expo-av";
 
 import BASE_URL from "../api";
 
@@ -28,15 +27,10 @@ import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
 
-// 특정 경고 메시지를 무시하고 숨기기
 LogBox.ignoreLogs([
   "Warning: Avatar: Support for defaultProps will be removed from function components in a future major release.",
 ]);
 
-// 또는 모든 경고를 무시하기
-// LogBox.ignoreAllLogs();
-
-// Axios request interceptor to log requests
 axios.interceptors.request.use(
   function (config) {
     console.log("API 요청이 서버로 전달됨:", config.url, config.data);
@@ -48,10 +42,8 @@ axios.interceptors.request.use(
   }
 );
 
-// Axios response interceptor to log responses
 axios.interceptors.response.use(
   function (response) {
-    // console.log("서버로부터 응답을 받음:", response);
     return response;
   },
   function (error) {
@@ -62,9 +54,7 @@ axios.interceptors.response.use(
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
-  const [sound, setSound] = useState(null); // 사운드 상태 추가
-  const [loadingVoice, setLoadingVoice] = useState(false); // 음성 로딩 상태 추가
-  const [loadingSend, setLoadingSend] = useState(false); // 메시지 전송 로딩 상태 추가
+  const [sound, setSound] = useState(null);
 
   useEffect(() => {
     setMessages([
@@ -84,7 +74,7 @@ const ChildChat = ({ navigation }) => {
   useEffect(() => {
     return sound
       ? () => {
-          sound.unloadAsync(); // 컴포넌트가 언마운트될 때 사운드를 정리
+          sound.unloadAsync();
         }
       : undefined;
   }, [sound]);
@@ -96,10 +86,6 @@ const ChildChat = ({ navigation }) => {
         { shouldPlay: true }
       );
       setSound(sound);
-
-      // 음성 재생이 시작되면 로딩 스피너를 종료
-      setLoadingVoice(false);
-
       await sound.playAsync();
     } catch (error) {
       console.error("오디오 재생 실패:", error);
@@ -107,7 +93,6 @@ const ChildChat = ({ navigation }) => {
         "Failed to play sound",
         "An error occurred while playing the sound."
       );
-      setLoadingVoice(false); // 실패 시에도 로딩 스피너 끄기
     }
   };
 
@@ -121,11 +106,7 @@ const ChildChat = ({ navigation }) => {
       }
 
       console.log("길게 클릭된 메시지:", message.text);
-
       console.log("API 요청 시작:", message.text);
-
-      // API 요청 시 로딩 스피너를 활성화
-      setLoadingVoice(true);
 
       const response = await axios.post(
         "http://192.168.0.189:8000/synthesize",
@@ -144,7 +125,7 @@ const ChildChat = ({ navigation }) => {
       const fileReader = new FileReader();
       fileReader.onload = async () => {
         const audioUri = fileReader.result;
-        await playSound(audioUri); // 음성 재생 시작
+        await playSound(audioUri);
       };
       fileReader.onerror = (error) => {
         console.error("FileReader 오류:", error);
@@ -152,7 +133,6 @@ const ChildChat = ({ navigation }) => {
           "Failed to play sound",
           "An error occurred while processing the audio file."
         );
-        setLoadingVoice(false); // 오류 발생 시 로딩 스피너 종료
       };
       fileReader.readAsDataURL(response.data);
     } catch (error) {
@@ -165,19 +145,15 @@ const ChildChat = ({ navigation }) => {
         "Failed to fetch the voice",
         error.message || "An error occurred while fetching the voice."
       );
-      setLoadingVoice(false); // 오류 발생 시 로딩 스피너 종료
     }
   };
 
   const onSend = async (newMessages = []) => {
     try {
-      setLoadingSend(true); // 메시지 전송 중일 때 로딩 시작
-
       const token = await AsyncStorage.getItem("authToken");
       if (!token) {
         console.error("Auth token is missing or invalid");
         Alert.alert("Authentication error", "Please log in again.");
-        setLoadingSend(false); // 에러 발생 시 로딩 종료
         return;
       }
 
@@ -206,8 +182,6 @@ const ChildChat = ({ navigation }) => {
         "Failed to send the message",
         error.message || "An error occurred while sending the message."
       );
-    } finally {
-      setLoadingSend(false); // API 응답을 받거나 에러가 발생해도 로딩 종료
     }
   };
 
@@ -245,16 +219,6 @@ const ChildChat = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      {loadingVoice && ( // 음성 재생 로딩 상태일 때 로딩 스피너 표시
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#586EE3" />
-        </View>
-      )}
-      {loadingSend && ( // 메시지 전송 로딩 상태일 때 로딩 스피너 표시
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#586EE3" />
-        </View>
-      )}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Image source={burger} style={styles.burger} />
@@ -283,17 +247,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
-  },
-  loadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)", // 약간의 투명도 추가
-    zIndex: 1,
   },
   header: {
     flexDirection: "row",
