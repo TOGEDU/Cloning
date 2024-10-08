@@ -13,10 +13,13 @@ import {
   Bubble,
   Send,
   InputToolbar,
+  Day,
+  Time,
 } from "react-native-gifted-chat";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Audio } from "expo-av";
+import { Audio } from "expo-av"; // expo-av 추가
+import moment from "moment"; // moment.js 추가
 
 import BASE_URL from "../api";
 
@@ -31,6 +34,10 @@ LogBox.ignoreLogs([
   "Warning: Avatar: Support for defaultProps will be removed from function components in a future major release.",
 ]);
 
+// 또는 모든 경고를 무시하기
+LogBox.ignoreAllLogs();
+
+// Axios request interceptor to log requests
 axios.interceptors.request.use(
   function (config) {
     console.log("API 요청이 서버로 전달됨:", config.url, config.data);
@@ -150,6 +157,9 @@ const ChildChat = ({ navigation }) => {
 
   const onSend = async (newMessages = []) => {
     try {
+      const sentMessage = newMessages[0];
+      console.log("Sending message:", sentMessage.text);
+
       const token = await AsyncStorage.getItem("authToken");
       if (!token) {
         console.error("Auth token is missing or invalid");
@@ -157,8 +167,12 @@ const ChildChat = ({ navigation }) => {
         return;
       }
 
-      const sentMessage = newMessages[0];
-      console.log("Sending message:", sentMessage.text);
+      // 화면 전환 시 로딩 상태를 함께 넘김
+      navigation.navigate("ChatRoomScreen", {
+        chatroomId: "temp-id", // 실제 chatroomId는 나중에 설정
+        initialMessage: sentMessage,
+        loading: true, // 로딩 상태를 함께 넘김
+      });
 
       const response = await axios.get(`${BASE_URL}/api/chat/chatroom`, {
         headers: {
@@ -169,12 +183,12 @@ const ChildChat = ({ navigation }) => {
         },
       });
 
-      console.log("API response:", response.data);
-
       const newChatroomId = response.data.chatroomId;
 
+      // 새로운 chatroomId로 화면을 업데이트 (API 완료 후)
       navigation.navigate("ChatRoomScreen", {
         chatroomId: newChatroomId,
+        loading: false, // 로딩 완료
       });
     } catch (error) {
       console.error("Failed to send the message", error);
@@ -217,6 +231,24 @@ const ChildChat = ({ navigation }) => {
     />
   );
 
+  // 날짜 표시 형식 수정
+  const renderDay = (props) => (
+    <Day
+      {...props}
+      dateFormat="YYYY년 MM월 DD일" // 날짜 형식을 'YYYY년 MM월 DD일'로 변경
+      textStyle={{ color: "#A7A7A7", fontSize: 12 }}
+    />
+  );
+
+  // 시간 표시 형식 수정
+  const renderTime = (props) => (
+    <Time
+      {...props}
+      timeFormat="HH:mm" // 시간 형식을 'HH:mm'으로 유지
+      textStyle={{ color: "#A7A7A7", fontSize: 10 }}
+    />
+  );
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.header}>
@@ -238,6 +270,8 @@ const ChildChat = ({ navigation }) => {
         renderBubble={renderBubble}
         renderSend={renderSend}
         renderInputToolbar={renderInputToolbar}
+        renderDay={renderDay} // 날짜 렌더링
+        renderTime={renderTime} // 시간 렌더링
       />
     </SafeAreaView>
   );
