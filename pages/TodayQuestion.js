@@ -25,7 +25,8 @@ const TodayQuestion = () => {
   const [text, setText] = useState("");
   const [question, setQuestion] = useState("");
   const [questionId, setQuestionId] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); 
+  const [isEditMode, setIsEditMode] = useState(false);
   const [recording, setRecording] = useState(null);
   const navigation = useNavigation();
 
@@ -42,14 +43,11 @@ const TodayQuestion = () => {
           return;
         }
 
-        const response = await axios.get(
-          `${BASE_URL}/api/dailyquestion/today`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`${BASE_URL}/api/dailyquestion/today`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         const todayQuestion = response.data;
 
@@ -124,6 +122,10 @@ const TodayQuestion = () => {
     }
   };
 
+  const toggleEditMode = () => {
+    setIsEditMode(true);
+  };
+
   const startRecording = async () => {
     try {
       console.log("Requesting permissions..");
@@ -162,12 +164,11 @@ const TodayQuestion = () => {
       setRecording(null);
       console.log("Recording stopped and stored at", uri);
 
-      // 서버로 녹음 파일 전송
       const formData = new FormData();
       formData.append("file", {
         uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri, // iOS와 Android의 파일 경로 처리
-        type: "audio/m4a", // 파일 유형
-        name: "recording.m4a", // 파일 이름
+        type: "audio/m4a",
+        name: "recording.m4a",
       });
 
       const token = await AsyncStorage.getItem("authToken");
@@ -231,6 +232,7 @@ const TodayQuestion = () => {
             multiline
             value={text}
             onChangeText={setText}
+            editable={isEditMode}
           />
           <TouchableOpacity
             style={styles.recordIconContainer}
@@ -243,11 +245,17 @@ const TodayQuestion = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
-          <Text style={styles.btnText}>
-            {isEditing ? "수정하기" : "기록하기"}
-          </Text>
-        </TouchableOpacity>
+        {isEditing && !isEditMode ? (
+          <TouchableOpacity style={styles.btn} onPress={toggleEditMode}>
+            <Text style={styles.btnText}>수정하기</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
+            <Text style={styles.btnText}>
+              {isEditing ? "수정 완료" : "기록하기"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
