@@ -25,7 +25,7 @@ import burger from "../assets/burger.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
-import profileimg from "../assets/profileimg.png";
+import profileimg from "../assets/suk.png";
 import sendIcon from "../assets/send.png";
 
 const ChatRoomScreen = ({ navigation, route }) => {
