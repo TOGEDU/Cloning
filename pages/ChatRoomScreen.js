@@ -25,7 +25,7 @@ import burger from "../assets/burger.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
-import profileimg from "../assets/suk.png";
+import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
 
 const ChatRoomScreen = ({ navigation, route }) => {
@@ -62,7 +62,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
     return token;
   };
 
-  const processMessages = (messageList, chatroomId, date) => {
+  const processMessages = (messageList, chatroomId, date, profileImage) => {
     return messageList.map((msg, index) => {
       const dateTime = moment(`${date} ${msg.time}`, "YYYY-MM-DD HH:mm");
       return {
@@ -72,7 +72,8 @@ const ChatRoomScreen = ({ navigation, route }) => {
         user: {
           _id: msg.role === 0 ? 0 : 1,
           name: msg.role === 0 ? "You" : "Parent AI",
-          avatar: msg.role === 1 ? profileimg : null,
+          avatar:
+            msg.role === 1 && profileImage ? { uri: profileImage } : profileimg, // profileImage를 할당
         },
       };
     });
@@ -99,10 +100,13 @@ const ChatRoomScreen = ({ navigation, route }) => {
 
       console.log("API Response: ", response.data); // 응답 데이터 확인
 
+      const profileImage = response.data.profileImage;
+3
       const chatMessages = processMessages(
         response.data.messageList,
         response.data.chatroomId,
-        response.data.date
+        response.data.date,
+        profileImage
       );
 
       if (initialMessage) {
@@ -224,7 +228,10 @@ const ChatRoomScreen = ({ navigation, route }) => {
       return null;
     }
     return (
-      <Image source={props.currentMessage.user.avatar} style={styles.avatar} />
+      <Image
+        source={props.currentMessage.user.avatar || profileimg}
+        style={styles.avatar}
+      />
     );
   };
 
