@@ -5,8 +5,8 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  ActivityIndicator, // 로딩스피너 추가
   LogBox,
+  Text, // Text 추가
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -19,17 +19,17 @@ import {
 } from "react-native-gifted-chat";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Audio } from "expo-av"; // expo-av 추가
-import moment from "moment"; // moment.js 추가
+import { Audio } from "expo-av";
+import moment from "moment";
 
 import BASE_URL from "../api";
-
 import burger from "../assets/burger.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
+import loadingGif from "../assets/loading.gif"; // loading.gif 추가
 
 // 특정 경고 메시지를 무시하고 숨기기
 LogBox.ignoreLogs([
@@ -54,7 +54,6 @@ axios.interceptors.request.use(
 // Axios response interceptor to log responses
 axios.interceptors.response.use(
   function (response) {
-    // console.log("서버로부터 응답을 받음:", response);
     return response;
   },
   function (error) {
@@ -99,10 +98,7 @@ const ChildChat = ({ navigation }) => {
         { shouldPlay: true }
       );
       setSound(sound);
-
-      // 음성 재생이 시작되면 로딩 스피너를 종료
       setLoadingVoice(false);
-
       await sound.playAsync();
     } catch (error) {
       console.error("오디오 재생 실패:", error);
@@ -269,13 +265,15 @@ const ChildChat = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {loadingVoice && ( // 음성 재생 로딩 상태일 때 로딩 스피너 표시
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#586EE3" />
+        <View style={styles.loadingGifContainer}>
+          <Image source={loadingGif} style={styles.loadingGif} />
+          <Text style={styles.loadingText}>목소리 생성중</Text>
         </View>
       )}
       {loadingSend && ( // 메시지 전송 로딩 상태일 때 로딩 스피너 표시
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#586EE3" />
+        <View style={styles.loadingGifContainer}>
+          <Image source={loadingGif} style={styles.loadingGif} />
+          <Text style={styles.loadingText}>메시지 전송중</Text>
         </View>
       )}
       <View style={styles.header}>
@@ -309,16 +307,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
   },
-  loadingOverlay: {
+  loadingGifContainer: {
     position: "absolute",
     top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)", // 약간의 투명도 추가
     zIndex: 1,
+  },
+  loadingGif: {
+    width: 100,
+    height: 100, // 원하는 크기로 GIF 조정
+  },
+  loadingText: {
+    marginTop: -20,
+    fontSize: 16,
+    color: "#586EE3",
   },
   header: {
     flexDirection: "row",
