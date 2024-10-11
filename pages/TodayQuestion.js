@@ -25,8 +25,8 @@ const TodayQuestion = () => {
   const [text, setText] = useState("");
   const [question, setQuestion] = useState("");
   const [questionId, setQuestionId] = useState(null);
-  const [isEditing, setIsEditing] = useState(false); 
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // 수정 모드 여부
+  const [hasRecordedText, setHasRecordedText] = useState(false); // 기록이 있는지 여부
   const [recording, setRecording] = useState(null);
   const navigation = useNavigation();
 
@@ -43,11 +43,14 @@ const TodayQuestion = () => {
           return;
         }
 
-        const response = await axios.get(`${BASE_URL}/api/dailyquestion/today`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          `${BASE_URL}/api/dailyquestion/today`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const todayQuestion = response.data;
 
@@ -57,7 +60,8 @@ const TodayQuestion = () => {
 
           if (todayQuestion.text) {
             setText(todayQuestion.text);
-            setIsEditing(true);
+            setIsEditing(false); // 처음엔 수정 모드가 아님
+            setHasRecordedText(true); // 이미 기록이 있음
           }
         }
       } catch (error) {
@@ -74,12 +78,19 @@ const TodayQuestion = () => {
   const handleWriteFinish = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
+      console.log("Token:", token);
+
       if (!token) {
         console.error("Token doesn't exist");
         return;
       }
 
-      const response = isEditing
+      console.log("Sending Request:", {
+        questionId: questionId,
+        text: text,
+      });
+
+      const response = hasRecordedText
         ? await axios.put(
             `${BASE_URL}/api/dailyquestion`,
             {
@@ -105,11 +116,15 @@ const TodayQuestion = () => {
             }
           );
 
-      const successMessage = isEditing
+      console.log("Response from server:", response.data);
+
+      const successMessage = hasRecordedText
         ? "질문 답변 변경 완료"
         : "질문 답변 추가 완료";
 
       if (response.data === successMessage) {
+        setHasRecordedText(true);
+        setIsEditing(false);
         navigation.replace("WriteFinish");
       } else {
         console.error("Error during response:", response.data);
@@ -123,16 +138,14 @@ const TodayQuestion = () => {
   };
 
   const toggleEditMode = () => {
-    setIsEditMode(true);
+    setIsEditing(true);
   };
 
   const startRecording = async () => {
     try {
-      console.log("Requesting permissions..");
       const permission = await Audio.requestPermissionsAsync();
 
       if (permission.status === "granted") {
-        console.log("Starting recording..");
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
@@ -142,9 +155,7 @@ const TodayQuestion = () => {
           Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
         );
         setRecording(recording);
-        console.log("Recording started");
       } else {
-        console.error("Permission to access microphone is required!");
         Alert.alert(
           "Permission Denied",
           "Permission to access microphone is required!"
@@ -157,16 +168,13 @@ const TodayQuestion = () => {
 
   const stopRecording = async () => {
     try {
-      console.log("Stopping recording...");
-
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecording(null);
-      console.log("Recording stopped and stored at", uri);
 
       const formData = new FormData();
       formData.append("file", {
-        uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri, // iOS와 Android의 파일 경로 처리
+        uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri,
         type: "audio/m4a",
         name: "recording.m4a",
       });
@@ -188,12 +196,8 @@ const TodayQuestion = () => {
         }
       );
 
-      console.log("Transcription result:", response.data);
-
       if (response.data.text) {
         setText((prevText) => prevText + response.data.text);
-      } else {
-        console.warn("No text received from the server.");
       }
     } catch (err) {
       console.error("Failed to stop recording or send audio file", err);
@@ -232,7 +236,7 @@ const TodayQuestion = () => {
             multiline
             value={text}
             onChangeText={setText}
-            editable={isEditMode}
+            editable={!hasRecordedText || isEditing}
           />
           <TouchableOpacity
             style={styles.recordIconContainer}
@@ -245,15 +249,19 @@ const TodayQuestion = () => {
           </TouchableOpacity>
         </View>
 
-        {isEditing && !isEditMode ? (
-          <TouchableOpacity style={styles.btn} onPress={toggleEditMode}>
-            <Text style={styles.btnText}>수정하기</Text>
-          </TouchableOpacity>
+        {hasRecordedText ? (
+          isEditing ? (
+            <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
+              <Text style={styles.btnText}>수정 완료</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.btn} onPress={toggleEditMode}>
+              <Text style={styles.btnText}>수정하기</Text>
+            </TouchableOpacity>
+          )
         ) : (
           <TouchableOpacity style={styles.btn} onPress={handleWriteFinish}>
-            <Text style={styles.btnText}>
-              {isEditing ? "수정 완료" : "기록하기"}
-            </Text>
+            <Text style={styles.btnText}>기록하기</Text>
           </TouchableOpacity>
         )}
       </View>

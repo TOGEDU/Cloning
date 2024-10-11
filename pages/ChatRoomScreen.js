@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  ActivityIndicator,
+  Text, // Text 컴포넌트 추가
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -27,6 +27,7 @@ import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
+import loadingGif from "../assets/loading.gif"; // loading.gif 추가
 
 const ChatRoomScreen = ({ navigation, route }) => {
   const { chatroomId, initialMessage, loading: initialLoading } = route.params;
@@ -62,7 +63,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
     return token;
   };
 
-  const processMessages = (messageList, chatroomId, date, profileImage) => {
+  const processMessages = (messageList, chatroomId, date) => {
     return messageList.map((msg, index) => {
       const dateTime = moment(`${date} ${msg.time}`, "YYYY-MM-DD HH:mm");
       return {
@@ -72,8 +73,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         user: {
           _id: msg.role === 0 ? 0 : 1,
           name: msg.role === 0 ? "You" : "Parent AI",
-          avatar:
-            msg.role === 1 && profileImage ? { uri: profileImage } : profileimg, // profileImage를 할당
+          avatar: msg.role === 1 ? profileimg : null,
         },
       };
     });
@@ -100,13 +100,10 @@ const ChatRoomScreen = ({ navigation, route }) => {
 
       console.log("API Response: ", response.data); // 응답 데이터 확인
 
-      const profileImage = response.data.profileImage;
-3
       const chatMessages = processMessages(
         response.data.messageList,
         response.data.chatroomId,
-        response.data.date,
-        profileImage
+        response.data.date
       );
 
       if (initialMessage) {
@@ -147,7 +144,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
         setLoadingVoice(true);
 
         const response = await axios.post(
-          "http://13.113.253.45:8000/synthesize", // ChildChat과 동일한 URL 사용
+          "http://192.168.0.189:8000/synthesize",
           { text: message.text },
           {
             headers: {
@@ -228,10 +225,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
       return null;
     }
     return (
-      <Image
-        source={props.currentMessage.user.avatar || profileimg}
-        style={styles.avatar}
-      />
+      <Image source={props.currentMessage.user.avatar} style={styles.avatar} />
     );
   };
 
@@ -273,13 +267,9 @@ const ChatRoomScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.container}>
       {loadingVoice && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#586EE3" />
-        </View>
-      )}
-      {(loading || sendingMessage) && ( // 메시지 로딩 중일 때 로딩 스피너 표시
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#586EE3" />
+        <View style={styles.loadingGifContainer}>
+          <Image source={loadingGif} style={styles.loadingGif} />
+          <Text style={styles.loadingText}>목소리 생성중</Text>
         </View>
       )}
       <View style={styles.header}>
@@ -294,23 +284,17 @@ const ChatRoomScreen = ({ navigation, route }) => {
           <Image source={mypage} style={styles.myPage} />
         </TouchableOpacity>
       </View>
-      {!loading ? ( // 메시지 로딩 중에는 스피너를 표시하고, 완료되면 채팅 화면 표시
-        <GiftedChat
-          onSend={onSend}
-          user={{ _id: 0 }}
-          renderSend={renderSend}
-          renderBubble={renderBubble}
-          renderAvatar={renderAvatar}
-          messages={messages}
-          renderInputToolbar={renderInputToolbar}
-          renderDay={renderDay}
-          renderTime={renderTime}
-        />
-      ) : (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#586EE3" />
-        </View>
-      )}
+      <GiftedChat
+        onSend={onSend}
+        user={{ _id: 0 }}
+        renderSend={renderSend}
+        renderBubble={renderBubble}
+        renderAvatar={renderAvatar}
+        messages={messages}
+        renderInputToolbar={renderInputToolbar}
+        renderDay={renderDay}
+        renderTime={renderTime}
+      />
     </SafeAreaView>
   );
 };
@@ -320,16 +304,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
   },
-  loadingOverlay: {
+  loadingGifContainer: {
     position: "absolute",
     top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
     zIndex: 1,
+  },
+  loadingGif: {
+    width: 100,
+    height: 100, // 원하는 크기로 GIF 조정
+  },
+  loadingText: {
+    marginTop: -20,
+    fontSize: 16,
+    color: "#586EE3",
   },
   header: {
     flexDirection: "row",

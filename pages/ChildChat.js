@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   LogBox,
+  Text, // Text 추가
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -18,18 +19,19 @@ import {
 } from "react-native-gifted-chat";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Audio } from "expo-av"; // expo-av 추가
-import moment from "moment"; // moment.js 추가
+import { Audio } from "expo-av";
+import moment from "moment";
 
 import BASE_URL from "../api";
-
 import burger from "../assets/burger.png";
 import smallLogo from "../assets/smallLogo.png";
 import logotext from "../assets/logotext.png";
 import mypage from "../assets/mypage.png";
 import profileimg from "../assets/profileimg.png";
 import sendIcon from "../assets/send.png";
+import loadingGif from "../assets/loading.gif"; // loading.gif 추가
 
+// 특정 경고 메시지를 무시하고 숨기기
 LogBox.ignoreLogs([
   "Warning: Avatar: Support for defaultProps will be removed from function components in a future major release.",
 ]);
@@ -49,6 +51,7 @@ axios.interceptors.request.use(
   }
 );
 
+// Axios response interceptor to log responses
 axios.interceptors.response.use(
   function (response) {
     return response;
@@ -61,7 +64,9 @@ axios.interceptors.response.use(
 
 const ChildChat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
-  const [sound, setSound] = useState(null);
+  const [sound, setSound] = useState(null); // 사운드 상태 추가
+  const [loadingVoice, setLoadingVoice] = useState(false); // 음성 로딩 상태 추가
+  const [loadingSend, setLoadingSend] = useState(false); // 메시지 전송 로딩 상태 추가
 
   useEffect(() => {
     setMessages([
@@ -81,7 +86,7 @@ const ChildChat = ({ navigation }) => {
   useEffect(() => {
     return sound
       ? () => {
-          sound.unloadAsync();
+          sound.unloadAsync(); // 컴포넌트가 언마운트될 때 사운드를 정리
         }
       : undefined;
   }, [sound]);
@@ -93,6 +98,7 @@ const ChildChat = ({ navigation }) => {
         { shouldPlay: true }
       );
       setSound(sound);
+      setLoadingVoice(false);
       await sound.playAsync();
     } catch (error) {
       console.error("오디오 재생 실패:", error);
@@ -100,6 +106,7 @@ const ChildChat = ({ navigation }) => {
         "Failed to play sound",
         "An error occurred while playing the sound."
       );
+      setLoadingVoice(false); // 실패 시에도 로딩 스피너 끄기
     }
   };
 
@@ -113,10 +120,14 @@ const ChildChat = ({ navigation }) => {
       }
 
       console.log("길게 클릭된 메시지:", message.text);
+
       console.log("API 요청 시작:", message.text);
 
+      // API 요청 시 로딩 스피너를 활성화
+      setLoadingVoice(true);
+
       const response = await axios.post(
-        "http://13.113.253.45:8000/synthesize",
+        "http://192.168.0.189:8000/synthesize",
         { text: message.text },
         {
           headers: {
@@ -132,7 +143,7 @@ const ChildChat = ({ navigation }) => {
       const fileReader = new FileReader();
       fileReader.onload = async () => {
         const audioUri = fileReader.result;
-        await playSound(audioUri);
+        await playSound(audioUri); // 음성 재생 시작
       };
       fileReader.onerror = (error) => {
         console.error("FileReader 오류:", error);
@@ -140,6 +151,7 @@ const ChildChat = ({ navigation }) => {
           "Failed to play sound",
           "An error occurred while processing the audio file."
         );
+        setLoadingVoice(false); // 오류 발생 시 로딩 스피너 종료
       };
       fileReader.readAsDataURL(response.data);
     } catch (error) {
@@ -152,6 +164,7 @@ const ChildChat = ({ navigation }) => {
         "Failed to fetch the voice",
         error.message || "An error occurred while fetching the voice."
       );
+      setLoadingVoice(false); // 오류 발생 시 로딩 스피너 종료
     }
   };
 
@@ -251,6 +264,18 @@ const ChildChat = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      {loadingVoice && ( // 음성 재생 로딩 상태일 때 로딩 스피너 표시
+        <View style={styles.loadingGifContainer}>
+          <Image source={loadingGif} style={styles.loadingGif} />
+          <Text style={styles.loadingText}>목소리 생성중</Text>
+        </View>
+      )}
+      {loadingSend && ( // 메시지 전송 로딩 상태일 때 로딩 스피너 표시
+        <View style={styles.loadingGifContainer}>
+          <Image source={loadingGif} style={styles.loadingGif} />
+          <Text style={styles.loadingText}>메시지 전송중</Text>
+        </View>
+      )}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate("ChatList")}>
           <Image source={burger} style={styles.burger} />
@@ -281,6 +306,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+  },
+  loadingGifContainer: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  loadingGif: {
+    width: 100,
+    height: 100, // 원하는 크기로 GIF 조정
+  },
+  loadingText: {
+    marginTop: -20,
+    fontSize: 16,
+    color: "#586EE3",
   },
   header: {
     flexDirection: "row",
