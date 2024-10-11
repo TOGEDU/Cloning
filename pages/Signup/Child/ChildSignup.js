@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 
@@ -45,6 +45,48 @@ const ChildSignup = () => {
 
   const handleCloseModal = () => {
     setIsVisible(false);
+  };
+
+  
+  const getModalContent = () => {
+    switch (modalTitle) {
+      case "CLONING 이용 약관":
+        return (
+          <Text style={styles.modalBodyText}>
+            CLONING 서비스 이용 약관은 여러분의 서비스 이용과 관련한
+            기본적인 권리 및 의무를 규정합니다.{"\n\n"}
+            서비스 제공자는 이용자의 데이터를 안전하게 관리하고, 불법
+            행위를 방지하며, 이용자는 이를 준수하여
+            정당한 사용을 보장받습니다.{"\n\n"}
+            구체적인 조항은 회사의 정책에 따라 수정될 수 있습니다.
+          </Text>
+        );
+      case "개인정보 수집 및 이용 동의":
+        return (
+          <Text style={styles.modalBodyText}>
+      TOGEDU는 서비스 제공을 위해 필요한 최소한의 개인정보를
+      수집하며, 이를 이용하여 맞춤형 서비스를 제공합니다.{"\n\n"}
+      수집되는 정보는 이름, 이메일 주소, 전화번호 등이 포함되며,
+      이 정보는 안전하게 보호되며 필요시 마케팅 목적으로도
+      활용될 수 있습니다.{"\n\n"}
+      또한, 부모님이 남긴 데이터를 바탕으로 TTS(Text-to-Speech)
+      모델과 챗봇을 학습시켜, 보다 개인화된 음성 서비스와 상담
+      기능을 제공할 수 있습니다. 이 과정에서 수집된 데이터는
+      철저히 익명화 처리되며, 외부로 유출되지 않습니다.
+    </Text>
+        );
+      case "광고성 정보 수신 동의":
+        return (
+          <Text style={styles.modalBodyText}>
+          광고성 정보 수신 동의에 따라, 여러분은 TOGEDU의 다양한{"\n"}
+          혜택 및 이벤트, 새로운 서비스에 대한 광고를 이메일{"\n"}또는 문자
+          메시지로 받을 수 있습니다.{"\n\n"}
+          이 동의는 선택 사항이며, 언제든지 철회할 수 있습니다.
+        </Text>
+        );
+      default:
+        return <Text>이용 약관 내용을 확인할 수 없습니다.</Text>;
+    }
   };
 
   return (
@@ -146,32 +188,6 @@ const ChildSignup = () => {
           <Text style={styles.text}>[선택] 광고성 정보 수신 동의</Text>
         </View>
       </View>
-      <View style={styles.textContainer}>
-        <TouchableOpacity onPress={() => handleTermsClick("serviceTerms")}>
-          <Svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill={termsChecked.serviceTerms ? "#6369D4" : "#7D7C7C"}
-          >
-            <Path
-              d="M9.948 18.75L4.0105 12.8125L5.49487 11.3281L9.948 15.7812L19.5053 6.22394L20.9897 7.70831L9.948 18.75Z"
-              fill={termsChecked.serviceTerms ? "#6369D4" : "#7D7C7C"}
-            />
-          </Svg>
-        </TouchableOpacity>
-        <View style={styles.detailContainer}>
-          <Text style={styles.text}>
-            [선택] 개인정보 수집 및 이용 동의
-          </Text>
-          <TouchableOpacity
-            onPress={() => handleDetailPress("개인정보 수집 및 이용 동의")}
-          >
-            <Text style={styles.detailText}>자세히</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
       <TouchableOpacity
         onPress={() => {
           if (allTermsAgreed) {
@@ -215,6 +231,9 @@ const ChildSignup = () => {
                 </Svg>
               </TouchableOpacity>
             </View>
+            <ScrollView style={styles.modalBody}>
+              {getModalContent()}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -342,5 +361,14 @@ const styles = StyleSheet.create({
   modalIcon: {
     position: "absolute",
     right: 24,
+  },
+  modalBody: {
+    padding: 20,
+
+  },
+  modalBodyText: {
+    fontSize: 16,
+    lineHeight: 26,
+    marginBottom: 15,
   },
 });
