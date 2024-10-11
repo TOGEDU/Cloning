@@ -235,9 +235,10 @@ const TodayQuestion = () => {
             placeholderTextColor="#AEAEAE"
             multiline
             value={text}
-            onChangeText={setText}
+            onChangeText={(value) => setText(value)}
             editable={!hasRecordedText || isEditing}
           />
+
           <TouchableOpacity
             style={styles.recordIconContainer}
             onPress={toggleRecording}
@@ -342,10 +343,11 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   answerInput: {
-    color: "#AEAEAE",
+    color: "#000000",
     fontSize: 16,
     fontFamily: "NotoSans600",
   },
+  
   recordIconContainer: {
     position: "absolute",
     right: 15,
